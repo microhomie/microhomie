@@ -40,6 +40,9 @@ class HomieDevice:
     """ MicroPython implementation of the homie v2 convention. """
 
     def __init__(self, cfg=None):
+        #internal error counter
+        self.errors = 0
+
         self.nodes = []
         self.topic_callbacks = {}
 
@@ -82,6 +85,8 @@ class HomieDevice:
         self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
         self.mqtt.subscribe(self.topic + b'/$broadcast/#')
 
+
+
     def add_node(self, node):
         """add a node class of HomieNode to this device"""
         self.nodes.append(node)
@@ -106,10 +111,15 @@ class HomieDevice:
                 self.topic_callbacks[topic](topic, message)
 
     def publish(self, topic, payload, retain=True, qos=1):
-        if not isinstance(payload, bytes):
-            payload = bytes(str(payload), 'utf-8')
-        t = b'/'.join((self.topic, topic))
-        self.mqtt.publish(t, payload, retain=retain, qos=qos)
+        try:
+            if not isinstance(payload, bytes):
+                payload = bytes(str(payload), 'utf-8')
+            t = b'/'.join((self.topic, topic))
+            self.mqtt.publish(t, payload, retain=retain, qos=qos)
+        except Exception as e:
+            logging.error("Problem publishing ")
+            logging.error(e)
+            self.errors += 1
 
     def publish_properties(self):
         """publish device and node properties"""
@@ -139,9 +149,13 @@ class HomieDevice:
         self.publish_device_stats()
         # node data
         for node in self.nodes:
-            if node.has_update():
-                for prop in node.get_data():
-                    self.publish(*prop)
+            try:
+                if node.has_update():
+                    for prop in node.get_data():
+                        self.publish(*prop)
+            except Exception as e:
+                logging.error("Problem updating node.")
+                self.errors += 1
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:

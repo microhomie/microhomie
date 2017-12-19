@@ -4,6 +4,9 @@ MicroPython implementation of the [Homie v2](https://github.com/marvinroger/homi
 
 This project is in alpha stage.
 
+## Examples
+
+Please find multiple examples in the `examples` folder.
 
 ## Device setup
 
