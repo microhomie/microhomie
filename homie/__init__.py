@@ -1,13 +1,33 @@
 import sys
 import utime
-import machine
-import network
-import ubinascii
-
+import logging
+logger = logging.getLogger('device')
 from umqtt.robust import MQTTClient
 
 
 __version__ = b'0.1.0'
+
+def get_unique_id():
+    try:
+        import machine
+        return ubinascii.hexlify(machine.unique_id())
+    except:
+        return "set-a-unique-device-id"
+
+def get_local_ip():
+    try:
+        import network
+        return bytes(network.WLAN(0).ifconfig()[0], 'utf-8')
+    except:
+        return "127.0.0.1"
+
+def get_local_mac():
+    try:
+        import network
+        return ubinascii.hexlify(network.WLAN(0).config('mac'), ':')
+    except:
+        return "cannotgetlocalmac"
+
 
 
 # Default config
@@ -23,12 +43,12 @@ CONFIG = {
         'base_topic': b'homie'
     },
     'device': {
-        'id': ubinascii.hexlify(machine.unique_id()),
+        'id': get_unique_id(),
         'name': b'mydevice',
         'fwname': b'uhomie',
         'fwversion': __version__,
-        'localip': bytes(network.WLAN(0).ifconfig()[0], 'utf-8'),
-        'mac': ubinascii.hexlify(network.WLAN(0).config('mac'), ':'),
+        'localip': get_local_ip(),
+        'mac': get_local_mac(),
         'platform': bytes(sys.platform, 'utf-8'),
         'stats_interval': 60
     }
@@ -79,12 +99,15 @@ class HomieDevice:
         self.mqtt.set_last_will(self.topic + b'/$online', b'false',
                                 retain=True, qos=1)
 
-        self.mqtt.connect()
+        try:
+            self.mqtt.connect()
 
-        # subscribe to device topics
-        self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
-        self.mqtt.subscribe(self.topic + b'/$broadcast/#')
-
+            # subscribe to device topics
+            self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
+            self.mqtt.subscribe(self.topic + b'/$broadcast/#')
+        except:
+            logger.error("Error connecting to MQTT")
+            self.mqtt.publish = lambda topic, payload, retain, qos: None
 
 
     def add_node(self, node):
@@ -117,8 +140,8 @@ class HomieDevice:
             t = b'/'.join((self.topic, topic))
             self.mqtt.publish(t, payload, retain=retain, qos=qos)
         except Exception as e:
-            logging.error("Problem publishing ")
-            logging.error(e)
+            logger.error("Problem publishing ")
+            logger.error(str(e))
             self.errors += 1
 
     def publish_properties(self):
@@ -134,6 +157,7 @@ class HomieDevice:
             (b'$mac', CONFIG['device']['mac'], True),
             (b'$stats/interval', self.stats_interval, True),
         )
+
 
         # publish all properties
         for prop in properties:
@@ -154,7 +178,7 @@ class HomieDevice:
                     for prop in node.get_data():
                         self.publish(*prop)
             except Exception as e:
-                logging.error("Problem updating node.")
+                logger.error("Problem updating node.")
                 self.errors += 1
 
     def publish_device_stats(self):

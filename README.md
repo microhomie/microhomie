@@ -77,6 +77,18 @@ We provide some example nodes in the `homie/node` directory. Most of these nodes
 You have to setup/configure the network by yourself.
 
 
+### Local Development setup
+You have to compile micropython with this guide https://github.com/micropython/micropython/wiki/Getting-Started
+
+After that, you can install the required libraries.
+```
+micropython -m upip install micropython-umqtt.simple
+micropython -m upip install micropython-umqtt.robust
+micropython -m upip install micropython-logging
+
+```
+
+
 ### Simple node
 
 In most cases you write your own node classes. But if you just want to test publishing or have a simple use case, you can use the `SimpleHomieNode` class. The `SimpleHomieNode` does not provide all homie properties, but can be used as a fast start, when you don't want to write anything in a class:
