@@ -35,6 +35,7 @@ class SimpleHomieNode(HomieNode):
         self.type = node_type
         self.property = node_property
         self.value = None
+        self.node_ids = [self.type]
 
     def __str__(self):
         return "{}/{}: {}".format(self.type.decode(),

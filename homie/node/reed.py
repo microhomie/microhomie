@@ -13,6 +13,7 @@ class Reed(HomieNode):
         super().__init__(interval=interval)
         self.switch = Pin(pin, Pin.IN, Pin.PULL_UP)
         self.last_status = None
+        self.node_ids = [b'door']
 
     def __str__(self):
         status = 'open' if self.is_open() else 'closed'

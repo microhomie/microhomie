@@ -41,6 +41,7 @@ class HomieDevice:
 
     def __init__(self, cfg=None):
         self.nodes = []
+        self.node_ids = []
         self.topic_callbacks = {}
 
         # update config
@@ -85,6 +86,10 @@ class HomieDevice:
     def add_node(self, node):
         """add a node class of HomieNode to this device"""
         self.nodes.append(node)
+
+        # add node_ids
+        self.node_ids.extend(node.node_ids)
+
         # subscribe node topics
         for topic in node.subscribe:
             topic = b'/'.join((self.topic, topic))
@@ -123,6 +128,7 @@ class HomieDevice:
             (b'$localip', CONFIG['device']['localip'], True),
             (b'$mac', CONFIG['device']['mac'], True),
             (b'$stats/interval', self.stats_interval, True),
+            (b'$nodes', b','.join(self.node_ids), True)
         )
 
         # publish all properties
