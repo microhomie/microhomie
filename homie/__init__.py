@@ -101,7 +101,7 @@ class HomieDevice:
             for node in self.nodes:
                 node.broadcast(topic, message)
         else:
-            # process node callbacks
+            # node property callbacks
             if topic in self.topic_callbacks:
                 self.topic_callbacks[topic](topic, message)
 
