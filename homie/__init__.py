@@ -88,7 +88,7 @@ class HomieDevice:
         self.nodes.append(node)
 
         # add node_ids
-        self.node_ids.extend(node.node_ids)
+        self.node_ids.extend(node.get_node_id())
 
         # subscribe node topics
         for topic in node.subscribe:

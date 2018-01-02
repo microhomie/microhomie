@@ -9,10 +9,12 @@ class PIR(HomieNode):
         super().__init__(interval=interval)
         self.pir = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.last_pir_state = 0
-        self.node_ids = [b'pir']
 
     def __str__(self):
         return 'Last PIR State = {}'.format(self.last_pir_state)
+
+    def get_node_id(self):
+        return [b'pir']
 
     def get_properties(self):
         return (

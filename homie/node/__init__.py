@@ -4,7 +4,6 @@ import utime
 class HomieNode:
 
     def __init__(self, interval=60):
-        self.node_ids = []
         self.update_interval = interval
         self.next_update = utime.time()
         self.subscribe = []
@@ -23,6 +22,10 @@ class HomieNode:
 
     def __str__(self):
         """Print nice information about the object"""
+        raise Exception('not implemented')
+
+    def get_node_id(self):
+        """Return one ore more node ids as list"""
         raise Exception('not implemented')
 
     def get_properties(self):

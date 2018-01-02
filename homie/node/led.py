@@ -13,10 +13,12 @@ class LED(HomieNode):
         self.led = Pin(pin, Pin.OUT, value=0)
         self.subscribe = [b'led/power/set']
         self.has_new_update = True
-        self.node_ids = [b'led']
 
     def __str__(self):
         return 'LED status = {}'.format(ONOFF[self.led.value()])
+
+    def get_node_id(self):
+        return [b'led']
 
     def get_properties(self):
         return (
