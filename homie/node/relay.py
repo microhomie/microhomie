@@ -78,8 +78,7 @@ class Relay(HomieNode):
             self.subscribe.append('relay/relay_{}/set'.format(relay).encode())
 
     def callback(self, topic, message):
-        topic = topic.decode()
-        relay = int('/'.join(topic.split('/')[2:-1]).split('_')[1]) - 1
+        relay = self.get_property_id_from_topic(topic) - 1
         self.relais[relay].value(self.onoff[message])
         self.has_new_update = True
 

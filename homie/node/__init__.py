@@ -47,3 +47,8 @@ class HomieNode:
     def broadcast_callback(self, payload):
         """Gets called when the broadcast topic receives a message"""
         pass
+
+    def get_property_id_from_topic(self, topic):
+        """Return the property id from topic as integer"""
+        topic = topic.decode()
+        return int(topic.split('/')[-2].split('_')[-1])
