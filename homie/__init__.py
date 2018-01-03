@@ -4,7 +4,7 @@ import machine
 import network
 import ubinascii
 
-from umqtt.robust import MQTTClient
+from umqtt.simple import MQTTClient
 
 
 __version__ = b'0.1.0'
@@ -59,6 +59,10 @@ class HomieDevice:
         self.topic = b'/'.join((CONFIG['mqtt']['base_topic'],
                                CONFIG['device']['id']))
 
+        self._umqtt_connect()
+
+
+    def _umqtt_connect(self):
         # mqtt client
         self.mqtt = MQTTClient(
             CONFIG['device']['id'],
@@ -114,7 +118,27 @@ class HomieDevice:
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), 'utf-8')
         t = b'/'.join((self.topic, topic))
-        self.mqtt.publish(t, payload, retain=retain, qos=qos)
+        done = False
+        while not done:
+            try:
+                self.mqtt.publish(t, payload, retain=retain, qos=qos)
+                done = True
+            except Exception as e:
+                #some error during publishing
+                done = False
+                done_reconnect = False
+
+                #tries to reconnect
+                while not done_reconnect:
+                    try:
+                        self._umqtt_connect()
+                        done_reconnect = True
+                    except Exception as e:
+                        done_reconnect = False
+                        print(str(e))
+                        utime.sleep(2)
+
+
 
     def publish_properties(self):
         """publish device and node properties"""
