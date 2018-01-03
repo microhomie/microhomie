@@ -3,7 +3,7 @@ This node implements all required functions of a node but it will also always ra
 """
 
 import utime
-
+from . import HomieNode
 
 class Error(HomieNode):
 

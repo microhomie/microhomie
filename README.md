@@ -85,6 +85,7 @@ After that, you can install the required libraries.
 micropython -m upip install micropython-umqtt.simple
 micropython -m upip install micropython-umqtt.robust
 micropython -m upip install micropython-logging
+micropython -m upip install micropython-machine
 
 ```
 

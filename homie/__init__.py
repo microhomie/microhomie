@@ -1,18 +1,13 @@
 import sys
 import utime
-import logging
-logger = logging.getLogger('device')
+#import logging
+import ubinascii
+import machine
+#logger = logging.getLogger('device')
+#logger.level = logging.ERROR
 from umqtt.robust import MQTTClient
 
-
 __version__ = b'0.1.0'
-
-def get_unique_id():
-    try:
-        import machine
-        return ubinascii.hexlify(machine.unique_id())
-    except:
-        return "set-a-unique-device-id"
 
 def get_local_ip():
     try:
@@ -43,7 +38,7 @@ CONFIG = {
         'base_topic': b'homie'
     },
     'device': {
-        'id': get_unique_id(),
+        'id': ubinascii.hexlify(machine.unique_id()),
         'name': b'mydevice',
         'fwname': b'uhomie',
         'fwversion': __version__,
@@ -92,6 +87,8 @@ class HomieDevice:
             ssl=CONFIG['mqtt']['ssl'],
             ssl_params=CONFIG['mqtt']['ssl_params'])
 
+        self.mqtt.DEBUG = True
+
         # set callback
         self.mqtt.set_callback(self.sub_cb)
 
@@ -107,7 +104,7 @@ class HomieDevice:
             self.mqtt.subscribe(self.topic + b'/$broadcast/#')
         except:
             logger.error("Error connecting to MQTT")
-            self.mqtt.publish = lambda topic, payload, retain, qos: None
+            #self.mqtt.publish = lambda topic, payload, retain, qos: None
 
 
     def add_node(self, node):
@@ -135,13 +132,18 @@ class HomieDevice:
 
     def publish(self, topic, payload, retain=True, qos=1):
         try:
+            print("start publish")
             if not isinstance(payload, bytes):
                 payload = bytes(str(payload), 'utf-8')
             t = b'/'.join((self.topic, topic))
-            self.mqtt.publish(t, payload, retain=retain, qos=qos)
+            print(str(t))
+            ret = self.mqtt.publish(t, payload, retain=retain, qos=qos)
+            print(ret)
+            print("publish done")
         except Exception as e:
-            logger.error("Problem publishing ")
-            logger.error(str(e))
+            #logger.error("Problem publishing ")
+            #logger.error(str(e))
+            print(str(e))
             self.errors += 1
 
     def publish_properties(self):
@@ -165,8 +167,11 @@ class HomieDevice:
 
         # device properties
         for node in self.nodes:
-            for prop in node.get_properties():
-                self.publish(*prop)
+            try:
+                for prop in node.get_properties():
+                    self.publish(*prop)
+            except Exception as e:
+                print("error")
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -176,9 +181,10 @@ class HomieDevice:
             try:
                 if node.has_update():
                     for prop in node.get_data():
+                        #logger.debug(str(prop))
                         self.publish(*prop)
             except Exception as e:
-                logger.error("Problem updating node.")
+                #logger.error(str(e))
                 self.errors += 1
 
     def publish_device_stats(self):
