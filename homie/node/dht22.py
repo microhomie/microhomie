@@ -39,6 +39,9 @@ class DHT22(HomieNode):
         return 'DHT22: Temperature = {}, Humidity = {}'.format(
             self.temperature, self.humidity)
 
+    def get_node_id(self):
+        return [b'temperature', b'humidity']
+
     def get_properties(self):
         return (
             # temperature

@@ -24,6 +24,10 @@ class HomieNode:
         """Print nice information about the object"""
         raise Exception('not implemented')
 
+    def get_node_id(self):
+        """Return one ore more node ids as list"""
+        raise Exception('not implemented')
+
     def get_properties(self):
         """General properties of this node"""
         raise Exception('not implemented')

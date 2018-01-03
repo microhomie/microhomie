@@ -41,6 +41,9 @@ class SimpleHomieNode(HomieNode):
                                   self.property.decode(),
                                   self.value)
 
+    def get_node_id(self):
+        return [self.type]
+
     def broadcast_callback(self, payload):
         """nothing happens on a broadcast"""
         pass
