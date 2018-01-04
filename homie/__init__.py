@@ -61,7 +61,6 @@ class HomieDevice:
 
         self._umqtt_connect()
 
-
     def _umqtt_connect(self):
         # mqtt client
         self.mqtt = MQTTClient(
@@ -124,11 +123,11 @@ class HomieDevice:
                 self.mqtt.publish(t, payload, retain=retain, qos=qos)
                 done = True
             except Exception as e:
-                #some error during publishing
+                # some error during publishing
                 done = False
                 done_reconnect = False
 
-                #tries to reconnect
+                # tries to reconnect
                 while not done_reconnect:
                     try:
                         self._umqtt_connect()
@@ -137,8 +136,6 @@ class HomieDevice:
                         done_reconnect = False
                         print(str(e))
                         utime.sleep(2)
-
-
 
     def publish_properties(self):
         """publish device and node properties"""
