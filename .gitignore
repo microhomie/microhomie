@@ -1,2 +1,5 @@
+*.py[cod]
+*~
 /main.py
 /settings.py
+/boot.py

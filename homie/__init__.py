@@ -1,11 +1,11 @@
 import utime
-
 from collections import namedtuple
-
 from umqtt.simple import MQTTClient
 
 
 __version__ = b'0.1.0'
+
+
 
 
 Property = namedtuple('Property', (
@@ -20,6 +20,7 @@ class HomieDevice:
     """ MicroPython implementation of the homie v2 convention. """
 
     def __init__(self, settings):
+        self.errors = 0
         self.settings = settings
 
         self.nodes = []
@@ -48,6 +49,8 @@ class HomieDevice:
             ssl=self.settings.MQTT_SSL,
             ssl_params=self.settings.MQTT_SSL_PARAMS)
 
+        self.mqtt.DEBUG = True
+
         # set callback
         self.mqtt.set_callback(self.sub_cb)
 
@@ -55,11 +58,16 @@ class HomieDevice:
         self.mqtt.set_last_will(self.topic + b'/$online', b'false',
                                 retain=True, qos=1)
 
-        self.mqtt.connect()
+        try:
+            self.mqtt.connect()
 
-        # subscribe to device topics
-        self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
-        self.mqtt.subscribe(self.topic + b'/$broadcast/#')
+            # subscribe to device topics
+            self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
+            self.mqtt.subscribe(self.topic + b'/$broadcast/#')
+        except:
+            print("Error connecting to MQTT")
+            #self.mqtt.publish = lambda topic, payload, retain, qos: None
+
 
     def add_node(self, node):
         """add a node class of HomieNode to this device"""
@@ -89,6 +97,7 @@ class HomieDevice:
                 self.topic_callbacks[topic](topic, message)
 
     def publish(self, topic, payload, retain=True, qos=1):
+
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), 'utf-8')
         t = b'/'.join((self.topic, topic))
@@ -112,6 +121,7 @@ class HomieDevice:
                         print(str(e))
                         utime.sleep(2)
 
+
     def publish_properties(self):
         """publish device and node properties"""
         # node properties
@@ -128,23 +138,32 @@ class HomieDevice:
             Property(b'$nodes', b','.join(self.node_ids), True)
         )
 
+
         # publish all properties
         for prop in properties:
             self.publish(*prop)
 
         # device properties
         for node in self.nodes:
-            for prop in node.get_properties():
-                self.publish(*prop)
+            try:
+                for prop in node.get_properties():
+                    self.publish(*prop)
+            except Exception as e:
+                self.errors += 1
+                print("ERROR during publish_properties")
 
     def publish_data(self):
         """publish node data if node has updates"""
         self.publish_device_stats()
         # node data
         for node in self.nodes:
-            if node.has_update():
-                for prop in node.get_data():
-                    self.publish(*prop)
+            try:
+                if node.has_update():
+                    for prop in node.get_data():
+                        self.publish(*prop)
+            except Exception as e:
+                self.errors += 1
+                print("ERROR during publish_data")
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:

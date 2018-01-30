@@ -4,6 +4,9 @@ MicroPython implementation of the [Homie v2](https://github.com/marvinroger/homi
 
 This project is in alpha stage.
 
+## Examples
+
+Please find multiple examples in the `examples` folder.
 
 ## Install
 
@@ -56,6 +59,19 @@ We provide some example nodes in the `homie/node` directory. Most of these nodes
 You have to setup/configure the network by yourself.
 
 
+### Local Development setup
+You have to compile micropython with this guide https://github.com/micropython/micropython/wiki/Getting-Started
+
+After that, you can install the required libraries.
+```
+micropython -m upip install micropython-umqtt.simple
+micropython -m upip install micropython-umqtt.robust
+micropython -m upip install micropython-logging
+micropython -m upip install micropython-machine
+
+```
+
+
 ### Simple node
 
 In most cases you write your own node classes. But if you just want to test publishing or have a simple use case, you can use the `SimpleHomieNode` class. The `SimpleHomieNode` does not provide all homie properties, but can be used as a fast start, when you don't want to write anything in a class:
@@ -68,16 +84,16 @@ from homie.node.simple import SimpleHomieNode
 from homie import HomieDevice
 
 
-homie = HomieDevice(settings)
+homie_device = HomieDevice(settings)
 
 n = SimpleHomieNode(node_type=b'dummy', node_property=b'value', interval=5)
 n.value = 17
 
-homie.add_node(n)
-homie.publish_properties()
+homie_device.add_node(n)
+homie_device.publish_properties()
 
 while True:
-    homie.publish_data()
+    homie_device.publish_data()
     n.value = utime.time()
     print(n)
     utime.sleep(1)
