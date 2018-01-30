@@ -1,16 +1,9 @@
 import utime
-
 from homie.node.simple import SimpleHomieNode
-
-#from homie.node.error import Error
-
-
 from homie.node.mem import Mem
 
 from homie import HomieDevice
 
-import logging
-logger = logging.getLogger('main')
 
 CONFIG = {
     'mqtt': {
@@ -24,9 +17,9 @@ CONFIG = {
 
 
 homie = HomieDevice(CONFIG)
-node = SimpleHomieNode(b"nodetype", b"node_property")
-homie.add_node(node)
-#homie.add_node(Error())
+
+simple_node = SimpleHomieNode(b"nodetype", b"node_property")
+homie.add_node(simple_node)
 homie.add_node(Mem())
 
 
@@ -37,7 +30,7 @@ while True:
     # publish device data
     homie.publish_data()
 
-    node.value = utime.time()
-    logger.info(str(node.value))
+    simple_node.value = utime.time()
+    print(simple_node.value)
 
     utime.sleep(1)
