@@ -1,9 +1,18 @@
 import utime
 
+from collections import namedtuple
+
 from umqtt.simple import MQTTClient
 
 
 __version__ = b'0.1.0'
+
+
+Property = namedtuple('Property', (
+    'topic',
+    'payload',
+    'retain',
+))
 
 
 class HomieDevice:
@@ -107,16 +116,16 @@ class HomieDevice:
         """publish device and node properties"""
         # node properties
         properties = (
-            (b'$homie', b'2.1.0', True),
-            (b'$online', b'true', True),
-            (b'$name', self.settings.DEVICE_NAME, True),
-            (b'$fw/name', self.settings.DEVICE_FW_NAME, True),
-            (b'$fw/version', __version__, True),
-            (b'$implementation', self.settings.DEVICE_PLATFORM, True),
-            (b'$localip', self.settings.DEVICE_LOCALIP, True),
-            (b'$mac', self.settings.DEVICE_MAC, True),
-            (b'$stats/interval', self.stats_interval, True),
-            (b'$nodes', b','.join(self.node_ids), True)
+            Property(b'$homie', b'2.1.0', True),
+            Property(b'$online', b'true', True),
+            Property(b'$name', self.settings.DEVICE_NAME, True),
+            Property(b'$fw/name', self.settings.DEVICE_FW_NAME, True),
+            Property(b'$fw/version', __version__, True),
+            Property(b'$implementation', self.settings.DEVICE_PLATFORM, True),
+            Property(b'$localip', self.settings.DEVICE_LOCALIP, True),
+            Property(b'$mac', self.settings.DEVICE_MAC, True),
+            Property(b'$stats/interval', self.stats_interval, True),
+            Property(b'$nodes', b','.join(self.node_ids), True)
         )
 
         # publish all properties

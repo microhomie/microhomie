@@ -30,6 +30,7 @@ Your file system structure should now look similar like this:
 
 MicroHomie use a `settings.py` file to configure the device. See `settings.example.py` as an example. Modify this file for your needs and copy it to your device root directory as `settings.py`.
 
+
 ## ESP8266 example device
 
 In this example we use the on-board LED from the ESP8266. Copy the `example-led.py` file from the `examples` diretory to your device and rename it to `main.py`.
