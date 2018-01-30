@@ -13,6 +13,9 @@ class PIR(HomieNode):
     def __str__(self):
         return 'Last PIR State = {}'.format(self.last_pir_state)
 
+    def get_node_id(self):
+        return [b'pir']
+
     def get_properties(self):
         return (
             (b'pir/$type', b'pir'),

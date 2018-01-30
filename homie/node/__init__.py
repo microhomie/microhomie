@@ -1,7 +1,7 @@
 import utime
 
 
-class HomieNode:
+class HomieNode(object):
 
     def __init__(self, interval=60):
         self.update_interval = interval
@@ -24,6 +24,10 @@ class HomieNode:
         """Print nice information about the object"""
         raise Exception('not implemented')
 
+    def get_node_id(self):
+        """Return one ore more node ids as list"""
+        raise Exception('not implemented')
+
     def get_properties(self):
         """General properties of this node"""
         raise Exception('not implemented')
@@ -43,3 +47,8 @@ class HomieNode:
     def broadcast_callback(self, payload):
         """Gets called when the broadcast topic receives a message"""
         pass
+
+    def get_property_id_from_topic(self, topic):
+        """Return the property id from topic as integer"""
+        topic = topic.decode()
+        return int(topic.split('/')[-2].split('_')[-1])

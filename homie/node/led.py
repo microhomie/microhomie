@@ -17,6 +17,9 @@ class LED(HomieNode):
     def __str__(self):
         return 'LED status = {}'.format(ONOFF[self.led.value()])
 
+    def get_node_id(self):
+        return [b'led']
+
     def get_properties(self):
         return (
             (b'led/$type', b'led'),

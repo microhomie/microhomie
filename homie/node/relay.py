@@ -37,6 +37,8 @@ class Relay(HomieNode):
         self.subscribe = []
         self.relais = []
         self.onoff = ONOFF
+
+        # acivate pins
         for p in pin:
             p = Pin(p, Pin.OUT, value=0)
             self.relais.append(p)
@@ -45,6 +47,9 @@ class Relay(HomieNode):
 
     def __str__(self):
         pass
+
+    def get_node_id(self):
+        return [b'relay[1-{}]'.format(len(self.relais))]
 
     def get_properties(self):
         relais = len(self.relais)
@@ -73,8 +78,7 @@ class Relay(HomieNode):
             self.subscribe.append('relay/relay_{}/set'.format(relay).encode())
 
     def callback(self, topic, message):
-        topic = topic.decode()
-        relay = int('/'.join(topic.split('/')[2:-1]).split('_')[1]) - 1
+        relay = self.get_property_id_from_topic(topic) - 1
         self.relais[relay].value(self.onoff[message])
         self.has_new_update = True
 

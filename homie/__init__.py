@@ -1,13 +1,18 @@
 import sys
 import utime
-#import logging
 import ubinascii
-import machine
-#logger = logging.getLogger('device')
-#logger.level = logging.ERROR
-from umqtt.robust import MQTTClient
+
+
+from umqtt.simple import MQTTClient
 
 __version__ = b'0.1.0'
+
+def get_unique_id():
+    try:
+        import machine
+        return ubinascii.hexlify(machine.unique_id())
+    except:
+        return "set-a-unique-device-id"
 
 def get_local_ip():
     try:
@@ -38,7 +43,7 @@ CONFIG = {
         'base_topic': b'homie'
     },
     'device': {
-        'id': ubinascii.hexlify(machine.unique_id()),
+        'id': get_unique_id,
         'name': b'mydevice',
         'fwname': b'uhomie',
         'fwversion': __version__,
@@ -59,6 +64,7 @@ class HomieDevice:
         self.errors = 0
 
         self.nodes = []
+        self.node_ids = []
         self.topic_callbacks = {}
 
         # update config
@@ -76,6 +82,9 @@ class HomieDevice:
         self.topic = b'/'.join((CONFIG['mqtt']['base_topic'],
                                CONFIG['device']['id']))
 
+        self._umqtt_connect()
+
+    def _umqtt_connect(self):
         # mqtt client
         self.mqtt = MQTTClient(
             CONFIG['device']['id'],
@@ -103,13 +112,17 @@ class HomieDevice:
             self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
             self.mqtt.subscribe(self.topic + b'/$broadcast/#')
         except:
-            logger.error("Error connecting to MQTT")
+            print("Error connecting to MQTT")
             #self.mqtt.publish = lambda topic, payload, retain, qos: None
 
 
     def add_node(self, node):
         """add a node class of HomieNode to this device"""
         self.nodes.append(node)
+
+        # add node_ids
+        self.node_ids.extend(node.get_node_id())
+
         # subscribe node topics
         for topic in node.subscribe:
             topic = b'/'.join((self.topic, topic))
@@ -126,25 +139,35 @@ class HomieDevice:
             for node in self.nodes:
                 node.broadcast(topic, message)
         else:
-            # process node callbacks
+            # node property callbacks
             if topic in self.topic_callbacks:
                 self.topic_callbacks[topic](topic, message)
 
     def publish(self, topic, payload, retain=True, qos=1):
-        try:
-            print("start publish")
-            if not isinstance(payload, bytes):
-                payload = bytes(str(payload), 'utf-8')
-            t = b'/'.join((self.topic, topic))
-            print(str(t))
-            ret = self.mqtt.publish(t, payload, retain=retain, qos=qos)
-            print(ret)
-            print("publish done")
-        except Exception as e:
-            #logger.error("Problem publishing ")
-            #logger.error(str(e))
-            print(str(e))
-            self.errors += 1
+
+        if not isinstance(payload, bytes):
+            payload = bytes(str(payload), 'utf-8')
+        t = b'/'.join((self.topic, topic))
+        done = False
+        while not done:
+            try:
+                self.mqtt.publish(t, payload, retain=retain, qos=qos)
+                done = True
+            except Exception as e:
+                # some error during publishing
+                done = False
+                done_reconnect = False
+
+                # tries to reconnect
+                while not done_reconnect:
+                    try:
+                        self._umqtt_connect()
+                        done_reconnect = True
+                    except Exception as e:
+                        done_reconnect = False
+                        print(str(e))
+                        utime.sleep(2)
+
 
     def publish_properties(self):
         """publish device and node properties"""
@@ -158,6 +181,7 @@ class HomieDevice:
             (b'$localip', CONFIG['device']['localip'], True),
             (b'$mac', CONFIG['device']['mac'], True),
             (b'$stats/interval', self.stats_interval, True),
+            (b'$nodes', b','.join(self.node_ids), True)
         )
 
 
@@ -171,7 +195,8 @@ class HomieDevice:
                 for prop in node.get_properties():
                     self.publish(*prop)
             except Exception as e:
-                print("error")
+                self.errors += 1
+                print("ERROR during publish_properties")
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -181,11 +206,10 @@ class HomieDevice:
             try:
                 if node.has_update():
                     for prop in node.get_data():
-                        #logger.debug(str(prop))
                         self.publish(*prop)
             except Exception as e:
-                #logger.error(str(e))
                 self.errors += 1
+                print("ERROR during publish_data")
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:

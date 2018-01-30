@@ -18,6 +18,9 @@ class Reed(HomieNode):
         status = 'open' if self.is_open() else 'closed'
         return 'Door is {}'.format(status)
 
+    def get_node_id(self):
+        return [b'door']
+
     def is_open(self, as_str=False):
         return True if self.switch.value() else False
 
