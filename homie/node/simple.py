@@ -1,16 +1,12 @@
 """
 import utime
+import settings
 
 from homie.node.simple import SimpleHomieNode
 from homie import HomieDevice
 
-CONFIG = {
-    'mqtt': {
-        'broker': 'localhost',
-    },
-}
 
-homie = HomieDevice(CONFIG)
+homie = HomieDevice(settings)
 
 n = SimpleHomieNode(node_type=b'dummy', node_property=b'value', interval=5)
 n.value = 17
@@ -25,7 +21,7 @@ while True:
     utime.sleep(1)
 """
 
-from . import HomieNode
+from . import HomieNode, Property
 
 
 class SimpleHomieNode(HomieNode):
@@ -50,7 +46,9 @@ class SimpleHomieNode(HomieNode):
 
     def get_data(self):
         """returns the data value"""
-        return [(b'/'.join([self.type, self.property]), self.value)]
+        return [
+            Property(b'/'.join([self.type, self.property]), self.value, True)
+        ]
 
     def update_data(self):
         """nothing happens on update data"""
@@ -59,6 +57,6 @@ class SimpleHomieNode(HomieNode):
     def get_properties(self):
         """no special properties"""
         return (
-            (self.type + b'/$type', self.type),
-            (self.type + b'/$properties', self.property),
+            Property(self.type + b'/$type', self.type, True),
+            Property(self.type + b'/$properties', self.property, True),
         )
