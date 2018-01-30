@@ -1,8 +1,5 @@
 import sys
-import machine
-import network
-import ubinascii
-
+from homie import utils
 
 ###
 # MQTT settings
@@ -39,7 +36,7 @@ MQTT_BASE_TOPIC = b'homie'
 
 # The device ID for registration at the broker. The device id is also the
 # base topic of a device and must be unique
-DEVICE_ID = ubinascii.hexlify(machine.unique_id())
+DEVICE_ID = utils.get_unique_id()
 
 # Friendly name of the device
 DEVICE_NAME = b'mydevice'
@@ -48,10 +45,10 @@ DEVICE_NAME = b'mydevice'
 DEVICE_FW_NAME = b'uhomie'
 
 # IP of the device on the local network
-DEVICE_LOCALIP = bytes(network.WLAN(0).ifconfig()[0], 'utf-8')
+DEVICE_LOCALIP = utils.get_local_ip()
 
 # Device MAC address
-DEVICE_MAC = ubinascii.hexlify(network.WLAN(0).config('mac'), ':')
+DEVICE_MAC = utils.get_local_mac()
 
 # Device platform
 DEVICE_PLATFORM = bytes(sys.platform, 'utf-8')
