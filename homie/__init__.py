@@ -1,100 +1,53 @@
-import sys
 import utime
-import ubinascii
-
-
+from collections import namedtuple
 from umqtt.simple import MQTTClient
+
 
 __version__ = b'0.1.0'
 
-def get_unique_id():
-    try:
-        import machine
-        return ubinascii.hexlify(machine.unique_id())
-    except:
-        return "set-a-unique-device-id"
-
-def get_local_ip():
-    try:
-        import network
-        return bytes(network.WLAN(0).ifconfig()[0], 'utf-8')
-    except:
-        return "127.0.0.1"
-
-def get_local_mac():
-    try:
-        import network
-        return ubinascii.hexlify(network.WLAN(0).config('mac'), ':')
-    except:
-        return "cannotgetlocalmac"
 
 
 
-# Default config
-CONFIG = {
-    'mqtt': {
-        'broker': '127.0.0.1',
-        'port': 0,
-        'user': None,
-        'pass': None,
-        'keepalive': 60,
-        'ssl': False,
-        'ssl_params': {},
-        'base_topic': b'homie'
-    },
-    'device': {
-        'id': get_unique_id,
-        'name': b'mydevice',
-        'fwname': b'uhomie',
-        'fwversion': __version__,
-        'localip': get_local_ip(),
-        'mac': get_local_mac(),
-        'platform': bytes(sys.platform, 'utf-8'),
-        'stats_interval': 60
-    }
-}
+Property = namedtuple('Property', (
+    'topic',
+    'payload',
+    'retain',
+))
 
 
 class HomieDevice:
 
     """ MicroPython implementation of the homie v2 convention. """
 
-    def __init__(self, cfg=None):
-        #internal error counter
+    def __init__(self, settings):
         self.errors = 0
+        self.settings = settings
 
         self.nodes = []
         self.node_ids = []
         self.topic_callbacks = {}
 
-        # update config
-        if cfg is not None:
-            if 'mqtt' in cfg:
-                CONFIG['mqtt'].update(cfg['mqtt'])
-            if 'device' in cfg:
-                CONFIG['device'].update(cfg['device'])
-
         self.start_time = utime.time()
         self.next_update = utime.time()
-        self.stats_interval = CONFIG['device']['stats_interval']
+        self.stats_interval = self.settings.DEVICE_STATS_INTERVAL
 
         # base topic
-        self.topic = b'/'.join((CONFIG['mqtt']['base_topic'],
-                               CONFIG['device']['id']))
+        self.topic = b'/'.join((self.settings.MQTT_BASE_TOPIC,
+                                self.settings.DEVICE_ID))
 
         self._umqtt_connect()
 
     def _umqtt_connect(self):
         # mqtt client
         self.mqtt = MQTTClient(
-            CONFIG['device']['id'],
-            CONFIG['mqtt']['broker'],
-            port=CONFIG['mqtt']['port'],
-            user=CONFIG['mqtt']['user'],
-            password=CONFIG['mqtt']['pass'],
-            keepalive=CONFIG['mqtt']['keepalive'],
-            ssl=CONFIG['mqtt']['ssl'],
-            ssl_params=CONFIG['mqtt']['ssl_params'])
+            self.settings.DEVICE_ID,
+            self.settings.MQTT_BROKER,
+            port=self.settings.MQTT_PORT,
+            user=self.settings.MQTT_USERNAME,
+            password=self.settings.MQTT_PASSWORD,
+            keepalive=self.settings.MQTT_KEEPALIVE,
+            ssl=self.settings.MQTT_SSL,
+            ssl_params=self.settings.MQTT_SSL_PARAMS)
 
         self.mqtt.DEBUG = True
 
@@ -173,15 +126,16 @@ class HomieDevice:
         """publish device and node properties"""
         # node properties
         properties = (
-            (b'$homie', b'2.1.0', True),
-            (b'$online', b'true', True),
-            (b'$fw/name', CONFIG['device']['fwname'], True),
-            (b'$fw/version', CONFIG['device']['fwversion'], True),
-            (b'$implementation', CONFIG['device']['platform'], True),
-            (b'$localip', CONFIG['device']['localip'], True),
-            (b'$mac', CONFIG['device']['mac'], True),
-            (b'$stats/interval', self.stats_interval, True),
-            (b'$nodes', b','.join(self.node_ids), True)
+            Property(b'$homie', b'2.1.0', True),
+            Property(b'$online', b'true', True),
+            Property(b'$name', self.settings.DEVICE_NAME, True),
+            Property(b'$fw/name', self.settings.DEVICE_FW_NAME, True),
+            Property(b'$fw/version', __version__, True),
+            Property(b'$implementation', self.settings.DEVICE_PLATFORM, True),
+            Property(b'$localip', self.settings.DEVICE_LOCALIP, True),
+            Property(b'$mac', self.settings.DEVICE_MAC, True),
+            Property(b'$stats/interval', self.stats_interval, True),
+            Property(b'$nodes', b','.join(self.node_ids), True)
         )
 
 
