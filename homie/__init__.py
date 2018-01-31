@@ -6,6 +6,8 @@ from umqtt.simple import MQTTClient
 __version__ = b'0.1.0'
 
 
+RETRY_DELAY = 10
+
 
 
 Property = namedtuple('Property', (
@@ -35,7 +37,13 @@ class HomieDevice:
         self.topic = b'/'.join((self.settings.MQTT_BASE_TOPIC,
                                 self.settings.DEVICE_ID))
 
-        self._umqtt_connect()
+        try:
+            self._umqtt_connect()
+        except:
+             print("Error connecting to MQTT")
+            #self.mqtt.publish = lambda topic, payload, retain, qos: None
+
+
 
     def _umqtt_connect(self):
         # mqtt client
@@ -58,15 +66,11 @@ class HomieDevice:
         self.mqtt.set_last_will(self.topic + b'/$online', b'false',
                                 retain=True, qos=1)
 
-        try:
-            self.mqtt.connect()
+        self.mqtt.connect()
 
-            # subscribe to device topics
-            self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
-            self.mqtt.subscribe(self.topic + b'/$broadcast/#')
-        except:
-            print("Error connecting to MQTT")
-            #self.mqtt.publish = lambda topic, payload, retain, qos: None
+        # subscribe to device topics
+        self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
+        self.mqtt.subscribe(self.topic + b'/$broadcast/#')
 
 
     def add_node(self, node):
@@ -74,7 +78,10 @@ class HomieDevice:
         self.nodes.append(node)
 
         # add node_ids
-        self.node_ids.extend(node.get_node_id())
+        try:
+            self.node_ids.extend(node.get_node_id())
+        except:
+            pass
 
         # subscribe node topics
         for topic in node.subscribe:
@@ -113,7 +120,7 @@ class HomieDevice:
                 # some error during publishing
                 done = False
                 done_reconnect = False
-
+                utime.sleep(RETRY_DELAY)
                 # tries to reconnect
                 while not done_reconnect:
                     try:
@@ -122,7 +129,7 @@ class HomieDevice:
                     except Exception as e:
                         done_reconnect = False
                         print(str(e))
-                        utime.sleep(2)
+                        utime.sleep(RETRY_DELAY)
 
 
     def publish_properties(self):

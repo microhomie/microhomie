@@ -27,3 +27,6 @@ class Error(HomieNode):
 
     def broadcast_callback(self, payload):
         raise Exception('ErrorNode Test Exception - broadcast_callback')
+
+    def get_node_id(self):
+        raise Exception('ErrorNode Test Exception - get_node_id')
