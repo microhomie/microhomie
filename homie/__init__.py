@@ -84,6 +84,8 @@ class HomieDevice:
 
     def sub_cb(self, topic, message):
         # device callbacks
+        print("MQTT SUBSCRIBE: {} --> {}".format(topic, message))
+
         if b'$stats/interval/set' in topic:
             self.stats_interval = int(message.decode())
             self.publish(b'$stats/interval', self.stats_interval, True)
@@ -104,6 +106,7 @@ class HomieDevice:
         done = False
         while not done:
             try:
+                print("MQTT PUBLISH: {} --> {}".format(t, payload))
                 self.mqtt.publish(t, payload, retain=retain, qos=qos)
                 done = True
             except Exception as e:
