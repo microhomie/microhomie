@@ -14,9 +14,9 @@ from homie.node.error import Error
 from homie import HomieDevice
 
 
-print("PLEASE RUN THIS ONLY IN A MICROPYTHON ENVIRONMENT")
-print("SEE DOCUMENTATION FOR DETAILS:")
-print("...")
+print('PLEASE RUN THIS ONLY IN A MICROPYTHON ENVIRONMENT')
+print('SEE DOCUMENTATION FOR DETAILS:')
+print('...')
 utime.sleep(2)
 
 
@@ -32,5 +32,5 @@ homie_device.publish_properties()
 while True:
     homie_device.publish_data()
     n.value = utime.time()
-    print("INFO: {}".format(n))
+    print('INFO: {}'.format(n))
     utime.sleep(1)

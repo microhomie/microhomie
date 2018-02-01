@@ -40,7 +40,7 @@ class HomieDevice:
         try:
             self._umqtt_connect()
         except:
-            print("ERROR: can not connect to MQTT")
+            print('ERROR: can not connect to MQTT')
             #self.mqtt.publish = lambda topic, payload, retain, qos: None
 
 
@@ -83,7 +83,7 @@ class HomieDevice:
         except NotImplementedError:
             raise
         except Exception:
-            print("ERROR: getting Node")
+            print('ERROR: getting Node')
 
         # subscribe node topics
         for topic in node.subscribe:
@@ -93,7 +93,7 @@ class HomieDevice:
 
     def sub_cb(self, topic, message):
         # device callbacks
-        print("MQTT SUBSCRIBE: {} --> {}".format(topic, message))
+        print('MQTT SUBSCRIBE: {} --> {}'.format(topic, message))
 
         if b'$stats/interval/set' in topic:
             self.stats_interval = int(message.decode())
@@ -115,7 +115,7 @@ class HomieDevice:
         done = False
         while not done:
             try:
-                print("MQTT PUBLISH: {} --> {}".format(t, payload))
+                print('MQTT PUBLISH: {} --> {}'.format(t, payload))
                 self.mqtt.publish(t, payload, retain=retain, qos=qos)
                 done = True
             except Exception as e:
@@ -130,7 +130,7 @@ class HomieDevice:
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
-                        print("ERROR: cannot connect, {}".format(str(e)))
+                        print('ERROR: cannot connect, {}'.format(str(e)))
                         utime.sleep(RETRY_DELAY)
 
 
@@ -164,7 +164,7 @@ class HomieDevice:
                 raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR: during publish_properties for node: {}".format(node))
+                print('ERROR: during publish_properties for node: {}'.format(node))
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -179,7 +179,7 @@ class HomieDevice:
                 raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR: during publish_data for node: {}".format(node))
+                print('ERROR: during publish_data for node: {}'.format(node))
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:
