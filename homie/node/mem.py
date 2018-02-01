@@ -1,6 +1,7 @@
 import gc
 
-from . import HomieNode, Property
+from homie.node import HomieNode
+from homie import Property
 
 
 class Mem(HomieNode):

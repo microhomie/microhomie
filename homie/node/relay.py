@@ -19,7 +19,8 @@ while True:
 
 from machine import Pin
 
-from . import HomieNode, Property
+from homie.node import HomieNode
+from homie import Property
 
 
 ONOFF = {b'off': 0, b'on': 1, 0: b'off', 1: b'on'}

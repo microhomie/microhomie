@@ -4,7 +4,8 @@ Reed switch door example
 
 from machine import Pin
 
-from . import HomieNode, Property
+from homie.node import HomieNode
+from homie import Property
 
 
 class Reed(HomieNode):

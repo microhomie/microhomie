@@ -32,5 +32,5 @@ homie_device.publish_properties()
 while True:
     homie_device.publish_data()
     n.value = utime.time()
-    print(n)
+    print("INFO: {}".format(n))
     utime.sleep(1)

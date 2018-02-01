@@ -40,7 +40,7 @@ class HomieDevice:
         try:
             self._umqtt_connect()
         except:
-             print("Error connecting to MQTT")
+            print("ERROR: can not connect to MQTT")
             #self.mqtt.publish = lambda topic, payload, retain, qos: None
 
 
@@ -80,8 +80,10 @@ class HomieDevice:
         # add node_ids
         try:
             self.node_ids.extend(node.get_node_id())
-        except:
-            pass
+        except NotImplementedError:
+            raise
+        except Exception:
+            print("ERROR: getting Node")
 
         # subscribe node topics
         for topic in node.subscribe:
@@ -128,7 +130,7 @@ class HomieDevice:
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
-                        print(str(e))
+                        print("ERROR: cannot connect, {}".format(str(e)))
                         utime.sleep(RETRY_DELAY)
 
 
@@ -158,9 +160,11 @@ class HomieDevice:
             try:
                 for prop in node.get_properties():
                     self.publish(*prop)
+            except NotImplementedError:
+                raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR during publish_properties")
+                print("ERROR: during publish_properties for node: {}".format(node))
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -171,9 +175,11 @@ class HomieDevice:
                 if node.has_update():
                     for prop in node.get_data():
                         self.publish(*prop)
+            except NotImplementedError:
+                raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR during publish_data")
+                print("ERROR: during publish_data for node: {}".format(node))
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:
