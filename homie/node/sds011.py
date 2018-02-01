@@ -25,7 +25,8 @@ import machine
 import ustruct as struct
 import sys
 import utime as time
-from . import HomieNode, Property
+from homie.node import HomieNode
+from homie import Property
 
 
 CMDS = {'SET': b'\x01',
