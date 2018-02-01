@@ -1,6 +1,7 @@
 import utime
 
 
+
 class HomieNode(object):
 
     def __init__(self, interval=60):
@@ -22,27 +23,27 @@ class HomieNode(object):
 
     def __str__(self):
         """Print nice information about the object"""
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def get_node_id(self):
         """Return one ore more node ids as list"""
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def get_properties(self):
         """General properties of this node"""
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def get_data(self):
         """Return the current values"""
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def update_data(self):
         """Prepare new data. Measure nodes... """
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def callback(self, topic, payload):
         """Gets called when self.subscribe has topics"""
-        raise Exception('not implemented')
+        raise NotImplementedError('not implemented')
 
     def broadcast_callback(self, payload):
         """Gets called when the broadcast topic receives a message"""

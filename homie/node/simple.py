@@ -21,7 +21,8 @@ while True:
     utime.sleep(1)
 """
 
-from . import HomieNode, Property
+from homie.node import HomieNode
+from homie import Property
 
 
 class SimpleHomieNode(HomieNode):

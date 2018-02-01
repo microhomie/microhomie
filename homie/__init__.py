@@ -6,6 +6,8 @@ from umqtt.simple import MQTTClient
 __version__ = b'0.1.0'
 
 
+RETRY_DELAY = 10
+
 
 
 Property = namedtuple('Property', (
@@ -35,7 +37,13 @@ class HomieDevice:
         self.topic = b'/'.join((self.settings.MQTT_BASE_TOPIC,
                                 self.settings.DEVICE_ID))
 
-        self._umqtt_connect()
+        try:
+            self._umqtt_connect()
+        except:
+            print('ERROR: can not connect to MQTT')
+            #self.mqtt.publish = lambda topic, payload, retain, qos: None
+
+
 
     def _umqtt_connect(self):
         # mqtt client
@@ -58,15 +66,11 @@ class HomieDevice:
         self.mqtt.set_last_will(self.topic + b'/$online', b'false',
                                 retain=True, qos=1)
 
-        try:
-            self.mqtt.connect()
+        self.mqtt.connect()
 
-            # subscribe to device topics
-            self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
-            self.mqtt.subscribe(self.topic + b'/$broadcast/#')
-        except:
-            print("Error connecting to MQTT")
-            #self.mqtt.publish = lambda topic, payload, retain, qos: None
+        # subscribe to device topics
+        self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
+        self.mqtt.subscribe(self.topic + b'/$broadcast/#')
 
 
     def add_node(self, node):
@@ -74,7 +78,12 @@ class HomieDevice:
         self.nodes.append(node)
 
         # add node_ids
-        self.node_ids.extend(node.get_node_id())
+        try:
+            self.node_ids.extend(node.get_node_id())
+        except NotImplementedError:
+            raise
+        except Exception:
+            print('ERROR: getting Node')
 
         # subscribe node topics
         for topic in node.subscribe:
@@ -84,6 +93,8 @@ class HomieDevice:
 
     def sub_cb(self, topic, message):
         # device callbacks
+        print('MQTT SUBSCRIBE: {} --> {}'.format(topic, message))
+
         if b'$stats/interval/set' in topic:
             self.stats_interval = int(message.decode())
             self.publish(b'$stats/interval', self.stats_interval, True)
@@ -104,13 +115,14 @@ class HomieDevice:
         done = False
         while not done:
             try:
+                print('MQTT PUBLISH: {} --> {}'.format(t, payload))
                 self.mqtt.publish(t, payload, retain=retain, qos=qos)
                 done = True
             except Exception as e:
                 # some error during publishing
                 done = False
                 done_reconnect = False
-
+                utime.sleep(RETRY_DELAY)
                 # tries to reconnect
                 while not done_reconnect:
                     try:
@@ -118,8 +130,8 @@ class HomieDevice:
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
-                        print(str(e))
-                        utime.sleep(2)
+                        print('ERROR: cannot connect, {}'.format(str(e)))
+                        utime.sleep(RETRY_DELAY)
 
 
     def publish_properties(self):
@@ -148,9 +160,11 @@ class HomieDevice:
             try:
                 for prop in node.get_properties():
                     self.publish(*prop)
+            except NotImplementedError:
+                raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR during publish_properties")
+                print('ERROR: during publish_properties for node: {}'.format(node))
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -161,9 +175,11 @@ class HomieDevice:
                 if node.has_update():
                     for prop in node.get_data():
                         self.publish(*prop)
+            except NotImplementedError:
+                raise
             except Exception as e:
                 self.errors += 1
-                print("ERROR during publish_data")
+                print('ERROR: during publish_data for node: {}'.format(node))
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:
