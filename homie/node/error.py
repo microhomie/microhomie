@@ -1,8 +1,8 @@
 """
-This node implements all required functions of a node but it will also always raise Exceptions to test the devices
+This node implements all required functions of a node but it will also always
+raise Exceptions to test the devices
 """
 
-import utime
 from homie.node import HomieNode
 
 

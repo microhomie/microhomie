@@ -9,7 +9,6 @@ __version__ = b'0.1.0'
 RETRY_DELAY = 10
 
 
-
 Property = namedtuple('Property', (
     'topic',
     'payload',
@@ -41,9 +40,7 @@ class HomieDevice:
             self._umqtt_connect()
         except:
             print('ERROR: can not connect to MQTT')
-            #self.mqtt.publish = lambda topic, payload, retain, qos: None
-
-
+            # self.mqtt.publish = lambda topic, payload, retain, qos: None
 
     def _umqtt_connect(self):
         # mqtt client
@@ -71,7 +68,6 @@ class HomieDevice:
         # subscribe to device topics
         self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
         self.mqtt.subscribe(self.topic + b'/$broadcast/#')
-
 
     def add_node(self, node):
         """add a node class of HomieNode to this device"""
@@ -133,7 +129,6 @@ class HomieDevice:
                         print('ERROR: cannot connect, {}'.format(str(e)))
                         utime.sleep(RETRY_DELAY)
 
-
     def publish_properties(self):
         """publish device and node properties"""
         # node properties
@@ -150,7 +145,6 @@ class HomieDevice:
             Property(b'$nodes', b','.join(self.node_ids), True)
         )
 
-
         # publish all properties
         for prop in properties:
             self.publish(*prop)
@@ -162,7 +156,7 @@ class HomieDevice:
                     self.publish(*prop)
             except NotImplementedError:
                 raise
-            except Exception as e:
+            except Exception:
                 self.errors += 1
                 print('ERROR: during publish_properties for node: {}'.format(node))
 
@@ -177,7 +171,7 @@ class HomieDevice:
                         self.publish(*prop)
             except NotImplementedError:
                 raise
-            except Exception as e:
+            except Exception:
                 self.errors += 1
                 print('ERROR: during publish_data for node: {}'.format(node))
 

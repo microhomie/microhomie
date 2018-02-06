@@ -1,23 +1,14 @@
 import utime
+import settings
 
 from homie.node.error import Error
 from homie import HomieDevice
 from machine import WDT
 
-CONFIG = {
-    'mqtt': {
-        'broker': 'localhost',
-        'base_topic': b'uhomie'
-    },
-    'device': {
-        'id': b'esp8266',
-    }
-}
-
 
 wdt = WDT(timeout=3000)
 
-homie = HomieDevice(CONFIG)
+homie = HomieDevice(settings)
 
 homie.add_node(Error())
 
@@ -25,7 +16,7 @@ homie.add_node(Error())
 homie.publish_properties()
 
 while True:
-    #reset the errors
+    # reset the errors
     homie.errors = 0
 
     # publish device data

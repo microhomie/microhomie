@@ -1,7 +1,6 @@
 import utime
 
 
-
 class HomieNode(object):
 
     def __init__(self, interval=60):
