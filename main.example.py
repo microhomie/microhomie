@@ -1,9 +1,12 @@
 import utime
 import settings
-from homie import utils
 
 from homie.node.simple import SimpleHomieNode
-from homie import HomieDevice
+from homie import HomieDevice, utils
+
+# Network Setup
+utils.disable_ap()  # on esp devices
+utils.wifi_connect()
 
 # Homie device setup
 homie_device = HomieDevice(settings)
@@ -17,7 +20,8 @@ homie_device.publish_properties()
 
 while True:
     # try wifi reconnect in case it loses connection
-    utils.wifi_connect(settings.WIFI_SSID, settings.WIFI_PASSWORD)
+    if not utils.wlan.isconnected():
+        utils.wifi_connect()
 
     # Update the data of the simple note for demonstration purpose
     n.value = utime.time()
