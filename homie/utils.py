@@ -21,3 +21,26 @@ def get_local_mac():
         return ubinascii.hexlify(network.WLAN(0).config('mac'), ':')
     except:
         return b'cannotgetlocalmac'
+
+
+
+def wifi_connect(essid, secret):
+    """Connects to Wifi"""
+    import utime
+    import network
+    wlan = network.WLAN(network.STA_IF)
+    if not wlan.isconnected():
+        wlan.active(True)
+        print('NETWORK: connecting to network %s...' % essid)
+        wlan.connect(essid, secret)
+        while not wlan.isconnected():
+            print('NETWORK: waiting for connection...')
+            utime.sleep(1)
+        print('NETWORK: Connected, network config: %s' % repr(wlan.ifconfig()))
+
+def disable_ap():
+    """Disables any Accesspoint"""
+    import network
+    wlan = network.WLAN(network.AP_IF)
+    wlan.active(False)
+    print('NETWORK: Access Point disabled.')
