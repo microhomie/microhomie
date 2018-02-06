@@ -1,6 +1,18 @@
 import sys
 from homie import utils
 
+
+###
+# Wifi settings
+###
+
+# Name of Wifi
+WIFI_SSID = "YOUR_WIFI_SSID"
+
+# Password for the Wifi
+WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
+
+
 ###
 # MQTT settings
 ###
@@ -55,14 +67,3 @@ DEVICE_PLATFORM = bytes(sys.platform, 'utf-8')
 
 # Time in seconds the device updates device properties
 DEVICE_STATS_INTERVAL = 60
-
-
-###
-# Wifi settings
-###
-
-# Name of Wifi
-WIFI_SSID = "YOUR_WIFI_SSID"
-
-# Password for the Wifi
-WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
