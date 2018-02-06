@@ -46,4 +46,4 @@ class LED(HomieNode):
         return False
 
     def get_data(self):
-        return (Property(b'led/power', ONOFF[self.led.value()]),)
+        return (Property(b'led/power', ONOFF[self.led.value()], True),)
