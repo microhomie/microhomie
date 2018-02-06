@@ -6,18 +6,21 @@ micropython -m upip install micropython-collections
 
 """
 
-
+import sys
 import utime
 import settings
 from homie.node.simple import SimpleHomieNode
 from homie.node.error import Error
 from homie import HomieDevice
 
-
-print('PLEASE RUN THIS ONLY IN A MICROPYTHON ENVIRONMENT')
-print('SEE DOCUMENTATION FOR DETAILS:')
-print('...')
-utime.sleep(2)
+try:
+    if sys.implementation.name != 'micropython':
+        raise NotImplementedError
+except Exception:
+    print('PLEASE RUN THIS ONLY IN A MICROPYTHON ENVIRONMENT')
+    print('SEE DOCUMENTATION FOR DETAILS:')
+    print('...')
+    sys.exit()
 
 
 homie_device = HomieDevice(settings)
