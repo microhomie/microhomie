@@ -1,6 +1,18 @@
 import sys
 from homie import utils
 
+
+###
+# Wifi settings
+###
+
+# Name of Wifi
+WIFI_SSID = "YOUR_WIFI_SSID"
+
+# Password for the Wifi
+WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
+
+
 ###
 # MQTT settings
 ###
