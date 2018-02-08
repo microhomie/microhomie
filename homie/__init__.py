@@ -1,9 +1,9 @@
 import utime
-from collections import namedtuple
+from ucollections import namedtuple
 from umqtt.simple import MQTTClient
 
 
-__version__ = b'0.1.0'
+__version__ = b'0.1.1'
 
 
 RETRY_DELAY = 10
