@@ -2,7 +2,7 @@
 
 MicroPython implementation of the [Homie v2](https://github.com/marvinroger/homie) convention.
 
-Version: 0.1.1
+Version: `0.1.1`
 
 This project is in beta stage.
 
@@ -12,6 +12,22 @@ This project is in beta stage.
 Please find multiple examples in the `examples` folder.
 
 ## Install
+
+### Setup WIFI for installation
+
+Microhomie handles WIFI setup for you, but for installation from PyPi you have to manual setup WIFI once from REPL.
+
+```python
+>>> import network
+>>> wlan = network.WLAN(network.STA_IF)
+>>> wlan.active(True)
+>>> wlan.connect('wifi-name', 'wifi-secret')
+# wait a few seconds
+>>> wlan.isconnected()  # test if wlan is connected
+True
+>>> wlan.ifconfig()  # get wlan interface config
+('192.168.42.2', '255.255.255.0', '192.168.42.1', '192.168.42.1')
+```
 
 ### Install from PyPi
 
@@ -24,7 +40,7 @@ We provide PyPi packages for easier installation on your device. Open the REPL f
 
 ### Manual copy the files
 
-To copy MicroHomie to your device use your favorite MicroPython remote shell like [rshell](https://github.com/dhylands/rshell), [mpfshell](https://github.com/wendlers/mpfshell) or [ampy](https://github.com/adafruit/ampy).
+Use your favorite MicroPython remote shell like [rshell](https://github.com/dhylands/rshell), [mpfshell](https://github.com/wendlers/mpfshell) or [ampy](https://github.com/adafruit/ampy) to copy Microhomie to your device.
 
 Create a directory `homie` on your device `lib` directory and copy the file `__init__.py` from the `homie` directory. Then create a `node` directory in `homie` and copy `__init__.py`, `led.py`, `simple.py` from the `homie/node` directory to the device.
 
@@ -42,9 +58,19 @@ Your file system structure should now look similar like this:
 ├── main.py
 ```
 
+
+### Install with mpfshell
+
+With mpfshell you can execute our mpfshell-script `install.mpf` to install Microhomie on your device. Clone this repository and run:
+
+```shell
+mpfshell ttyUSB0 -s install.mpf
+```
+
+
 ## Configuration
 
-MicroHomie use a `settings.py` file to configure the device. See `settings.example.py` as an example. Modify this file for your needs and copy it to your device root directory as `settings.py`.
+Microhomie use a `settings.py` file to configure the device. See `settings.example.py` as an example. Modify this file for your needs and copy it to your device root directory as `settings.py`.
 
 
 ## ESP8266 example device
