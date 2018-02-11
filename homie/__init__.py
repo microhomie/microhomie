@@ -5,7 +5,7 @@ from umqtt.simple import MQTTClient
 
 from homie import utils
 
-__version__ = b'0.1.1'
+__version__ = b'0.1.2'
 
 
 RETRY_DELAY = 10

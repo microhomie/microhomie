@@ -2,7 +2,7 @@
 
 MicroPython implementation of the [Homie v2](https://github.com/marvinroger/homie) convention.
 
-Version: `0.1.1`
+Version: `0.1.2`
 
 This project is in beta stage.
 
