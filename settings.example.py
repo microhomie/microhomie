@@ -1,5 +1,4 @@
-import sys
-from homie import utils
+from homie.utils import get_unique_id
 
 
 ###
@@ -48,22 +47,13 @@ MQTT_BASE_TOPIC = b'homie'
 
 # The device ID for registration at the broker. The device id is also the
 # base topic of a device and must be unique
-DEVICE_ID = utils.get_unique_id()
+DEVICE_ID = get_unique_id()
 
 # Friendly name of the device
 DEVICE_NAME = b'mydevice'
 
 # Firmware name
 DEVICE_FW_NAME = b'uhomie'
-
-# IP of the device on the local network
-DEVICE_LOCALIP = utils.get_local_ip()
-
-# Device MAC address
-DEVICE_MAC = utils.get_local_mac()
-
-# Device platform
-DEVICE_PLATFORM = bytes(sys.platform, 'utf-8')
 
 # Time in seconds the device updates device properties
 DEVICE_STATS_INTERVAL = 60

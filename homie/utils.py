@@ -12,22 +12,27 @@ if sys.platform not in ('linux'):
 
 PYCOM = ('FiPy', 'WiPy', 'LoPy', 'SiPy', 'GPy')
 
-secret = None
 wlan = None
+secret = None
 
-# Platform specific network settings
-if sys.platform in PYCOM:
-    # Update secret as tuple with wlan mode for PyCom port.
-    wlan = network.WLAN(network.WLAN.STA)
-    secret = (network.WLAN.WPA2, secret)
-else:
-    # default micropython wlan settings
-    wlan = network.WLAN(network.STA_IF)
-    secret = settings.WIFI_PASSWORD
+
+def setup_network():
+    """Setup platform specific network settings"""
+    global wlan
+    global secret
+
+    if sys.platform in PYCOM:
+        # Update secret as tuple with wlan mode for PyCom port.
+        wlan = network.WLAN(network.WLAN.STA)
+        secret = (network.WLAN.WPA2, settings.WIFI_PASSWORD)
+    else:
+        # default micropython wlan settings
+        wlan = network.WLAN(network.STA_IF)
+        secret = settings.WIFI_PASSWORD
 
 
 def wifi_connect():
-    """Connects to Wifi"""
+    """Connects to WIFI"""
     if not wlan.isconnected():
         wlan.active(True)
         print('NETWORK: connecting to network %s...' % settings.WIFI_SSID)
