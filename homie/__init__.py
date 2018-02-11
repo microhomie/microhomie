@@ -1,6 +1,9 @@
+import sys
 import utime
 from ucollections import namedtuple
 from umqtt.simple import MQTTClient
+
+from homie import utils
 
 
 __version__ = b'0.1.1'
@@ -35,6 +38,10 @@ class HomieDevice:
         # base topic
         self.topic = b'/'.join((self.settings.MQTT_BASE_TOPIC,
                                 self.settings.DEVICE_ID))
+
+        # setup wifi
+        utils.setup_network()
+        utils.wifi_connect()
 
         try:
             self._umqtt_connect()
@@ -123,6 +130,7 @@ class HomieDevice:
                 while not done_reconnect:
                     try:
                         self._umqtt_connect()
+                        self.publish_properties()  # re-publish
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
@@ -138,9 +146,9 @@ class HomieDevice:
             Property(b'$name', self.settings.DEVICE_NAME, True),
             Property(b'$fw/name', self.settings.DEVICE_FW_NAME, True),
             Property(b'$fw/version', __version__, True),
-            Property(b'$implementation', self.settings.DEVICE_PLATFORM, True),
-            Property(b'$localip', self.settings.DEVICE_LOCALIP, True),
-            Property(b'$mac', self.settings.DEVICE_MAC, True),
+            Property(b'$implementation', bytes(sys.platform, 'utf-8'), True),
+            Property(b'$localip', utils.get_local_ip(), True),
+            Property(b'$mac', utils.get_local_mac(), True),
             Property(b'$stats/interval', self.stats_interval, True),
             Property(b'$nodes', b','.join(self.node_ids), True)
         )
@@ -162,6 +170,10 @@ class HomieDevice:
 
     def publish_data(self):
         """publish node data if node has updates"""
+
+        # try wifi reconnect in case it loses connection
+        utils.wifi_connect()
+
         self.publish_device_stats()
         # node data
         for node in self.nodes:
