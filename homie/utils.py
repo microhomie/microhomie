@@ -3,12 +3,6 @@ import utime
 import settings
 import ubinascii
 
-# Only import network and machine if we run on a device. Ports like
-# the linux port have no such libraries.
-if sys.platform not in ('linux'):
-    import machine
-    import network
-
 
 PYCOM = ('FiPy', 'WiPy', 'LoPy', 'SiPy', 'GPy')
 
@@ -16,7 +10,12 @@ wlan = None
 secret = None
 
 
-def setup_network():
+def _not_implemented():
+    """Generic function for missing network on linux (etc) port"""
+    return None
+
+
+def _setup_network():
     """Setup platform specific network settings"""
     global wlan
     global secret
@@ -31,7 +30,7 @@ def setup_network():
         secret = settings.WIFI_PASSWORD
 
 
-def wifi_connect():
+def _wifi_connect():
     """Connects to WIFI"""
     if not wlan.isconnected():
         wlan.active(True)
@@ -41,6 +40,18 @@ def wifi_connect():
             print('NETWORK: waiting for connection...')
             utime.sleep(1)
         print('NETWORK: Connected, network config: %s' % repr(wlan.ifconfig()))
+
+
+# Only import network and machine if we run on a device and map the
+# functions. Ports like the linux port have no such libraries.
+if sys.platform not in ('linux'):
+    import machine
+    import network
+    setup_network = _setup_network
+    wifi_connect = _wifi_connect
+else:
+    setup_network = _not_implemented
+    wifi_connect = _not_implemented
 
 
 def disable_ap():
