@@ -5,7 +5,6 @@ from umqtt.simple import MQTTClient
 
 from homie import utils
 
-
 __version__ = b'0.1.1'
 
 
@@ -111,6 +110,8 @@ class HomieDevice:
                 self.topic_callbacks[topic](topic, message)
 
     def publish(self, topic, payload, retain=True, qos=1):
+        # try wifi reconnect in case it lost connection
+        utils.wifi_connect()
 
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), 'utf-8')
@@ -170,10 +171,6 @@ class HomieDevice:
 
     def publish_data(self):
         """publish node data if node has updates"""
-
-        # try wifi reconnect in case it loses connection
-        utils.wifi_connect()
-
         self.publish_device_stats()
         # node data
         for node in self.nodes:
