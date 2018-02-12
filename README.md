@@ -1,11 +1,16 @@
 # Homie v2 MicroPython Framework
 
-MicroPython implementation of the [Homie v2](https://github.com/marvinroger/homie) convention.
+MicroPython implementation of the [Homie](https://github.com/marvinroger/homie) convention version `2.1.0`.
 
 Version: `0.1.2`
 
 This project is in beta stage.
 
+
+## Known issues
+
+* SSL connection problems at least with ESP8266
+* In lost of Wifi connection, there is a chance MQTT qos==1 will hang forever
 
 ## Examples
 
