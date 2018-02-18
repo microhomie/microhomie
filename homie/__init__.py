@@ -165,9 +165,8 @@ class HomieDevice:
                     self.publish(*prop)
             except NotImplementedError:
                 raise
-            except Exception:
-                self.errors += 1
-                print('ERROR: during publish_properties for node: {}'.format(node))
+            except Exception as error:
+                self.node_error(node, error)
 
     def publish_data(self):
         """publish node data if node has updates"""
@@ -180,9 +179,8 @@ class HomieDevice:
                         self.publish(*prop)
             except NotImplementedError:
                 raise
-            except Exception:
-                self.errors += 1
-                print('ERROR: during publish_data for node: {}'.format(node))
+            except Exception as error:
+                self.node_error(node, error)
 
     def publish_device_stats(self):
         if utime.time() > self.next_update:
@@ -191,3 +189,8 @@ class HomieDevice:
             self.publish(b'$stats/uptime', uptime, True)
             # set next update
             self.next_update = utime.time() + self.stats_interval
+
+    def node_error(self, node, error):
+        self.errors += 1
+        print('ERROR: during publish_data for node: {}'.format(node))
+        print(error)
