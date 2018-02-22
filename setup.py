@@ -3,8 +3,8 @@ import sdist_upip
 
 
 setup(
-    name='micropython-homie',
-    version='0.1.2',
+    name='microhomie',
+    version='0.2.0',
     description='MicroPython implementation of the Homie v2 convention.',
     long_description='More documentation is available at https://github.com/microhomie/micropython-homie',
     url='https://github.com/microhomie/micropython-homie',

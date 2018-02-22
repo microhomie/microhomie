@@ -36,11 +36,11 @@ True
 
 ### Install from PyPi
 
-We provide PyPi packages for easier installation on your device. Open the REPL from your device, make sure your device wlan is up and your device has access to the internet, import upip and install micropython-homie:
+We provide PyPi packages for easier installation on your device. Open the REPL from your device, make sure your device wlan is up and your device has access to the internet, import upip and install microhomie:
 
 ```python
 >>> import upip
->>> upip.install('micropython-homie')
+>>> upip.install('microhomie')
 ```
 
 ### Manual copy the files
@@ -98,15 +98,13 @@ $ mosquitto_pub -t 'homie/<DEVICEID>/led/power/set' -m toggle
 
 ## Add a node
 
-We provide some example nodes in the https://github.com/microhomie/micropython-homie-nodes repository. Most of these nodes can be used out of the box to publish data. If you want to use a DHT22 sensor in example, copy the files `__init__.py` and `dht22.py` from `homie/node` to the `lib/homie/node` directory on your device. In the `dht22.py` file you see an example `main.py` as docstring. Copy this example to `main.py` on your device and on next reset it starts publishing temperature and humidity. In this example the DHT22 sensor is wired to GPIO PIN 4, on ESP8266 this is PIN D2.
+We provide some example nodes in the https://github.com/microhomie/microhomie-nodes repository. Most of these nodes can be used out of the box to publish data. If you want to use a DHT22 sensor in example, copy the files `__init__.py` and `dht22.py` from `homie/node` to the `lib/homie/node` directory on your device. In the `dht22.py` file you see an example `main.py` as docstring. Copy this example to `main.py` on your device and on next reset it starts publishing temperature and humidity. In this example the DHT22 sensor is wired to GPIO PIN 4, on ESP8266 this is PIN D2.
 
-You have to setup/configure the network by yourself.
-
-You can also install the `micropython-homie-nodes` package from PyPi with all the nodes we have for you:
+You can also install nodes from PyPi:
 
 ```python
 >>> import upip
->>> upip.install('micropython-homie-nodes')
+>>> upip.install('microhomie-nodes-dht22')
 ```
 
 
