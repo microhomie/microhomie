@@ -1,8 +1,8 @@
 # Homie v2 MicroPython Framework
 
-MicroPython implementation of the [Homie](https://github.com/marvinroger/homie) convention version `2.1.0`.
+MicroPython implementation of the [Homie](https://github.com/marvinroger/homie) MQTT convention version `2.1.0`.
 
-Version: `0.1.2`
+Version: `0.2.0`
 
 This project is in beta stage.
 

@@ -9,7 +9,8 @@ from homie import HomieDevice
 homie_device = HomieDevice(settings)
 
 # Adds a simple test node
-n = SimpleHomieNode(node_type=b'dummy', node_property=b'value', interval=5)
+n = SimpleHomieNode(node_type=b'dummy', node_property=b'value',
+                    interval=5)
 homie_device.add_node(n)
 
 # Push information about the device to MQTT

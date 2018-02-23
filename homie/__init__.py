@@ -20,7 +20,7 @@ Property = namedtuple('Property', (
 
 class HomieDevice:
 
-    """ MicroPython implementation of the homie v2 convention. """
+    """MicroPython implementation of the Homie MQTT convention for IoT."""
 
     def __init__(self, settings):
         self.errors = 0
