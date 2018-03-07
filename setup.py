@@ -6,7 +6,7 @@ setup(
     name='microhomie',
     version='0.2.0',
     description='MicroPython implementation of the Homie MQTT convention for IoT.',
-    long_description='More documentation is available at https://github.com/microhomie/microhomie',
+    long_description=open('README.rst').read(),
     url='https://github.com/microhomie/microhomie',
     author='Microhomie Developers',
     author_email='contact@microhomie.com',
