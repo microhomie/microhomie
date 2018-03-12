@@ -30,23 +30,23 @@ Setup WIFI for installation
 
 Microhomie handles WIFI setup for you, but for installation from PyPi you have to manual setup WIFI once from REPL.
 
-    >>> import network
-    >>> wlan = network.WLAN(network.STA_IF)
-    >>> wlan.active(True)
-    >>> wlan.connect('wifi-name', 'wifi-secret')
-    # wait a few seconds
-    >>> wlan.isconnected()  # test if wlan is connected
-    True
-    >>> wlan.ifconfig()  # get wlan interface config
-    ('192.168.42.2', '255.255.255.0', '192.168.42.1', '192.168.42.1')
+>>> import network
+>>> wlan = network.WLAN(network.STA_IF)
+>>> wlan.active(True)
+>>> wlan.connect('wifi-name', 'wifi-secret')
+# wait a few seconds
+>>> wlan.isconnected()  # test if wlan is connected
+True
+>>> wlan.ifconfig()  # get wlan interface config
+('192.168.42.2', '255.255.255.0', '192.168.42.1', '192.168.42.1')
 
 Install from PyPi
 ~~~~~~~~~~~~~~~~~
 
 We provide PyPi packages for easier installation on your device. Open the REPL from your device, make sure your device wlan is up and your device has access to the internet, import upip and install microhomie:
 
-    >>> import upip
-    >>> upip.install('microhomie')
+>>> import upip
+>>> upip.install('microhomie')
 
 Manual copy the files
 ~~~~~~~~~~~~~~~~~~~~~
@@ -108,8 +108,8 @@ We provide some example nodes in the `microhomie-nodes <https://github.com/micro
 
 You can also install nodes from PyPi:
 
-    >>> import upip
-    >>> upip.install('microhomie-nodes-dht22')
+>>> import upip
+>>> upip.install('microhomie-nodes-dht22')
 
 
 Local Development setup
