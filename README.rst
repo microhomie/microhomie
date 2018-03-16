@@ -2,6 +2,15 @@
 Microhomie
 ==========
 
+.. image:: https://readthedocs.org/projects/microhomie/badge/?version=master
+:target: http://microhomie.readthedocs.io/en/master/?badge=master
+:alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/v/microhomie.svg
+:target: https://pypi.python.org/pypi/microhomie/
+:alt: PyPi Status
+
+
 A MicroPython implementation of the `Homie <https://github.com/marvinroger/homie>`_ MQTT convention version ``2.1.0``.
 
 Version: ``0.2.0``
