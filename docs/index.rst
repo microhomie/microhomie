@@ -1,9 +1,30 @@
-.. Microhomie documentation master file, created by
-   sphinx-quickstart on Fri Mar 16 11:42:09 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 .. include:: ../README.rst
 
 
+Base Installation
+------------
 
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   installation_base/*
+
+Node Installation
+------------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   installation_node/*
+
+Examples
+------------
+
+.. toctree::
+   :maxdepth: 2
+
+
+   examples
