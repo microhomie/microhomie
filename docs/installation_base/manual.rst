@@ -1,5 +1,5 @@
 Install manually
-~~~~~~~~~~~~~~~~~~~~~
+-----------------
 
 Use your favorite MicroPython remote shell like `rshell <https://github.com/dhylands/rshell>`_, `mpfshell <https://github.com/wendlers/mpfshell>`_ or `ampy <https://github.com/adafruit/ampy>`_ to copy Microhomie to your device.
 

@@ -1,6 +1,3 @@
-Prerequisite
-~~~~~~~~~~~~
-
 
 Setup WIFI for installation
 -----------------------------

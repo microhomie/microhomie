@@ -3,16 +3,17 @@
 
 
 Base Installation
-------------
+-----------------
 
 .. toctree::
    :maxdepth: 2
    :glob:
 
+   quickstart
    installation_base/*
 
 Node Installation
-------------
+-----------------
 
 .. toctree::
    :maxdepth: 2
