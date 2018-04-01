@@ -4,10 +4,13 @@ Microhomie
 
 |build-status| |pypi|
 
+A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
 
-A MicroPython implementation of the `Homie <https://github.com/marvinroger/homie>`_ MQTT convention version ``2.1.0``.
+Currently Microhomie implements `Homie v2.0.1 <https://github.com/homieiot/convention/releases/tag/v2.0.1>`_
 
-This project is in beta stage.
+Microhomie version: ``0.2.1``
+
+*This project is in beta stage.*
 
 
 Known issues
@@ -21,7 +24,6 @@ Install
 -------
 
 You can get the detailed installation instructions here: http://microhomie.readthedocs.io/
-
 
 
 Local Development setup

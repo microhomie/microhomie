@@ -142,7 +142,7 @@ class HomieDevice:
         """publish device and node properties"""
         # node properties
         properties = (
-            Property(b'$homie', b'2.1.0', True),
+            Property(b'$homie', b'2.0.1', True),
             Property(b'$online', b'true', True),
             Property(b'$name', self.settings.DEVICE_NAME, True),
             Property(b'$fw/name', self.settings.DEVICE_FW_NAME, True),
