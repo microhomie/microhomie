@@ -44,13 +44,13 @@ class HomieDevice:
 
         try:
             self._umqtt_connect()
-        except:
+        except Exception:
             print('ERROR: can not connect to MQTT')
             # self.mqtt.publish = lambda topic, payload, retain, qos: None
 
     def _umqtt_connect(self):
         # mqtt client
-        self.mqtt = MQTTClient(
+        mqtt = MQTTClient(
             self.settings.DEVICE_ID,
             self.settings.MQTT_BROKER,
             port=self.settings.MQTT_PORT,
@@ -60,20 +60,22 @@ class HomieDevice:
             ssl=self.settings.MQTT_SSL,
             ssl_params=self.settings.MQTT_SSL_PARAMS)
 
-        self.mqtt.DEBUG = True
+        mqtt.DEBUG = True
 
         # set callback
-        self.mqtt.set_callback(self.sub_cb)
+        mqtt.set_callback(self.sub_cb)
 
         # set last will testament
-        self.mqtt.set_last_will(self.topic + b'/$online', b'false',
-                                retain=True, qos=1)
+        mqtt.set_last_will(self.topic + b'/$online', b'false',
+                           retain=True, qos=1)
 
-        self.mqtt.connect()
+        mqtt.connect()
 
         # subscribe to device topics
-        self.mqtt.subscribe(self.topic + b'/$stats/interval/set')
-        self.mqtt.subscribe(self.topic + b'/$broadcast/#')
+        mqtt.subscribe(self.topic + b'/$stats/interval/set')
+        mqtt.subscribe(self.topic + b'/$broadcast/#')
+
+        self.mqtt = mqtt
 
     def add_node(self, node):
         """add a node class of HomieNode to this device"""

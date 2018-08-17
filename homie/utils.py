@@ -64,19 +64,19 @@ def disable_ap():
 def get_unique_id():
     try:
         return ubinascii.hexlify(machine.unique_id())
-    except:
+    except Exception:
         return b'set-a-unique-device-id'
 
 
 def get_local_ip():
     try:
         return bytes(network.WLAN(0).ifconfig()[0], 'utf-8')
-    except:
+    except Exception:
         return b'127.0.0.1'
 
 
 def get_local_mac():
     try:
         return ubinascii.hexlify(network.WLAN(0).config('mac'), ':')
-    except:
+    except Exception:
         return b'cannotgetlocalmac'
