@@ -1,5 +1,6 @@
 *.py[cod]
 *~
+*.mpy
 /main.py
 /settings.py
 /boot.py

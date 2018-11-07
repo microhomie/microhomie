@@ -26,9 +26,10 @@ class HomieDevice:
         self.next_update = time()
         self.stats_interval = self.settings.DEVICE_STATS_INTERVAL
 
-        # base topic
-        self.topic = b'/'.join((self.settings.MQTT_BASE_TOPIC,
-                                self.settings.DEVICE_ID))
+        # device base topic
+        self.topic = b'/'.join(
+            (self.settings.MQTT_BASE_TOPIC, self.settings.DEVICE_ID)
+        )
 
         # setup wifi
         utils.setup_network()
@@ -54,15 +55,10 @@ class HomieDevice:
         mqtt.DEBUG = True
 
         mqtt.set_callback(self.sub_cb)  # for all callbacks
-        mqtt.set_last_will(self.topic + b'/$online', b'false',
+        mqtt.set_last_will(b'/'.join((self.topic, b'$online')), b'false',
                            retain=True, qos=1)
 
         mqtt.connect()
-
-        # subscribe to device topics
-        mqtt.subscribe(self.topic + b'/$stats/interval/set')
-        mqtt.subscribe(self.topic + b'/$broadcast/#')
-
         self.mqtt = mqtt
 
     def add_node(self, node):
@@ -77,16 +73,26 @@ class HomieDevice:
         except Exception:
             print('ERROR: getting Node')
 
-        # subscribe node topics
+    def subscribe_topics(self):
+        """subscribe to all registered device and node topics"""
         base = self.topic
-        sub = self.mqtt.subscribe
-        for topic in node.subscribe:
-            sub('{}/{}'.format(base, topic))
-            self.topic_callbacks[topic] = node.callback
+        subscribe = self.mqtt.subscribe
+
+        # device topics
+        subscribe(b'/'.join((base, b'$stats/interval/set')))
+        subscribe(b'/'.join((base, b'$broadcast/#')))
+
+        # node topics
+        nodes = self.nodes
+        for node in nodes:
+            for topic in node.subscribe:
+                # print('MQTT SUBSCRIBE: {}'.format(b'/'.join((base, topic))))
+                subscribe(b'/'.join((base, topic)))
+                self.topic_callbacks[topic] = node.callback
 
     def sub_cb(self, topic, message):
         # device callbacks
-        # print('MQTT SUBSCRIBE: {} --> {}'.format(topic, message))
+        # print('MQTT MESSAGE: {} --> {}'.format(topic, message))
 
         if b'/$stats/interval/set' in topic:
             self.stats_interval = int(message.decode())
@@ -123,6 +129,7 @@ class HomieDevice:
                     try:
                         self._umqtt_connect()
                         self.publish_properties()  # re-publish
+                        self.subscribe_topics()  # re-subscribe
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
@@ -187,6 +194,7 @@ class HomieDevice:
     def start(self):
         """publish device and node properties, run forever"""
         self.publish_properties()
+        self.subscribe_topics()
         gc.collect()
 
         while True:
