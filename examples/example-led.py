@@ -9,7 +9,6 @@ $ mosquitto_pub -t 'uhomie/esp8266/led/power/set' -m off
 $ mosquitto_pub -t 'uhomie/esp8266/led/power/set' -m toggle
 """
 
-import utime
 import settings
 
 from homie.node.led import LED
@@ -22,18 +21,8 @@ def main():
     # Add LED node to device
     homie.add_node(LED(pin=2))
 
-    # publish device and node properties
-    homie.publish_properties()
-
-    while True:
-
-        # publish device data
-        homie.publish_data()
-
-        # check for new mqtt messages
-        homie.mqtt.check_msg()
-
-        utime.sleep(1)
+    # run forever
+    homie.start()
 
 
 main()

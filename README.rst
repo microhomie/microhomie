@@ -6,9 +6,9 @@ Microhomie
 
 A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
 
-Currently Microhomie implements `Homie v2.0.1 <https://github.com/homieiot/convention/releases/tag/v2.0.1>`_.
+Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
 
-Microhomie version: ``0.2.1``
+Latest release: `v0.2.1 <https://github.com/microhomie/microhomie/tree/v0.2.1>`_
 
 *This project is in beta stage.*
 

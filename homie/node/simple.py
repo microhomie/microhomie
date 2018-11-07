@@ -26,7 +26,7 @@ from homie.node import HomieNode
 
 class SimpleHomieNode(HomieNode):
     def __init__(self, type, property, interval=60):
-        super().__init__(interval=interval)
+        super().__init__(name=type, interval=interval)
         self.type = type
         self.property = property
         self.value = None
@@ -59,5 +59,6 @@ class SimpleHomieNode(HomieNode):
     def get_properties(self):
         """no special properties"""
         _type = self.type
+        yield (_type + b"/$name", self.name)
         yield (_type + b"/$type", _type)
         yield (_type + b"/$properties", self.property)

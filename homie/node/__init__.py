@@ -2,7 +2,8 @@ from utime import time
 
 
 class HomieNode(object):
-    def __init__(self, interval=60):
+    def __init__(self, name, interval=60):
+        self.name = name
         self.interval = interval
         self.next_update = time()
 

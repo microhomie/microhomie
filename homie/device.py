@@ -11,6 +11,7 @@ class HomieDevice:
     """MicroPython implementation of the Homie MQTT convention for IoT."""
 
     def __init__(self, settings):
+        self._state = "init"
         self.mqtt = None
         self.errors = 0
         self.settings = settings
@@ -56,7 +57,7 @@ class HomieDevice:
 
         mqtt.set_callback(self.sub_cb)  # for all callbacks
         mqtt.set_last_will(
-            b"/".join((self.topic, b"$online")), b"false", retain=True, qos=1
+            b"/".join((self.topic, b"$state")), b"lost", retain=True, qos=1
         )
 
         mqtt.connect()
@@ -142,14 +143,15 @@ class HomieDevice:
         publish = self.publish
 
         # device properties
-        publish(b"$homie", b"2.0.1")
-        publish(b"$online", b"true")
+        publish(b"$homie", b"3.0.1")
         publish(b"$name", self.settings.DEVICE_NAME)
+        publish(b"$state", b"init")
         publish(b"$fw/name", self.settings.DEVICE_FW_NAME)
         publish(b"$fw/version", __version__)
         publish(b"$implementation", bytes(sys.platform, "utf-8"))
         publish(b"$localip", utils.get_local_ip())
         publish(b"$mac", utils.get_local_mac())
+        publish(b"$stats", b"interval,uptime,freeheap")
         publish(b"$stats/interval", self.stats_interval)
         publish(b"$nodes", b",".join(self.node_ids))
 
@@ -184,8 +186,14 @@ class HomieDevice:
         if _time() > self.next_update:
             uptime = _time() - self.start_time
             self.publish(b"$stats/uptime", uptime)
+            self.publish(b"$stats/freeheap", gc.mem_free())
             # set next update
             self.next_update = _time() + self.stats_interval
+
+    def set_state(self, state):
+        if state in ["ready", "disconnected", "sleeping", "alert"]:
+            self._state = state
+            self.publish(b"$state", state)
 
     def node_error(self, node, error):
         self.errors += 1
@@ -198,14 +206,20 @@ class HomieDevice:
         self.subscribe_topics()
         gc.collect()
 
+        self.set_state("ready")
+
         while True:
-            if not utils.wlan.isconnected():
-                utils.wifi_connect()
+            try:
+                if not utils.wlan.isconnected():
+                    utils.wifi_connect()
 
-            # publish device data
-            self.publish_data()
+                # publish device data
+                self.publish_data()
 
-            # check for new mqtt messages
-            self.mqtt.check_msg()
+                # check for new mqtt messages
+                self.mqtt.check_msg()
 
-            sleep(1)
+                sleep(1)
+            except KeyboardInterrupt:
+                self.set_state("disconnected")
+                self.mqtt.disconnect()

@@ -16,6 +16,9 @@ def main():
     # publish device and node properties
     homie.publish_properties()
 
+    # subsribe to topics
+    homie.subscribe_topics()
+
     while True:
         # reset the errors
         homie.errors = 0

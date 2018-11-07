@@ -6,8 +6,8 @@ ONOFF = {b"off": 0, b"on": 1, 0: b"off", 1: b"on"}
 
 
 class LED(HomieNode):
-    def __init__(self, pin=2, interval=1):
-        super().__init__(interval=interval)
+    def __init__(self, name="Device LED", pin=2):
+        super().__init__(name=name)
         self.pin = pin
         self.led = Pin(pin, Pin.OUT, value=0)
         self.updated = True
@@ -26,10 +26,11 @@ class LED(HomieNode):
         return [b"led"]
 
     def get_properties(self):
+        yield (b"led/$name", self.name)
         yield (b"led/$type", b"led")
         yield (b"led/$properties", b"power")
+        yield (b"led/power/$name", b"LED switch")
         yield (b"led/power/$settable", b"true")
-        yield (b"led/power/$name", b"LED")
         yield (b"led/power/$datatype", b"string")
         yield (b"led/power/$format", b"on,off")
 

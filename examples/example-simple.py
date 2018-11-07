@@ -1,4 +1,3 @@
-import utime
 import settings
 
 from homie.node.simple import SimpleHomieNode
@@ -12,17 +11,8 @@ def main():
 
     homie.add_node(node)
 
-    # publish device and node properties
-    homie.publish_properties()
-
-    while True:
-
-        # publish device data
-        homie.publish_data()
-
-        node.value = utime.time()
-
-        utime.sleep(1)
+    # run forever
+    homie.start()
 
 
 main()
