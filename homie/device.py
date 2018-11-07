@@ -1,10 +1,9 @@
 import gc
 import sys
 
-from utime import time, sleep
+from homie import __version__, utils
 from umqtt.simple import MQTTClient
-
-from homie import utils, __version__
+from utime import sleep, time
 
 
 class HomieDevice:
@@ -27,7 +26,7 @@ class HomieDevice:
         self.stats_interval = self.settings.DEVICE_STATS_INTERVAL
 
         # device base topic
-        self.topic = b'/'.join(
+        self.topic = b"/".join(
             (self.settings.MQTT_BASE_TOPIC, self.settings.DEVICE_ID)
         )
 
@@ -38,7 +37,7 @@ class HomieDevice:
         try:
             self._umqtt_connect()
         except Exception:
-            print('ERROR: can not connect to MQTT')
+            print("ERROR: can not connect to MQTT")
             # self.mqtt.publish = lambda topic, payload, retain, qos: None
 
     def _umqtt_connect(self):
@@ -50,13 +49,15 @@ class HomieDevice:
             password=self.settings.MQTT_PASSWORD,
             keepalive=self.settings.MQTT_KEEPALIVE,
             ssl=self.settings.MQTT_SSL,
-            ssl_params=self.settings.MQTT_SSL_PARAMS)
+            ssl_params=self.settings.MQTT_SSL_PARAMS,
+        )
 
         mqtt.DEBUG = True
 
         mqtt.set_callback(self.sub_cb)  # for all callbacks
-        mqtt.set_last_will(b'/'.join((self.topic, b'$online')), b'false',
-                           retain=True, qos=1)
+        mqtt.set_last_will(
+            b"/".join((self.topic, b"$online")), b"false", retain=True, qos=1
+        )
 
         mqtt.connect()
         self.mqtt = mqtt
@@ -71,7 +72,7 @@ class HomieDevice:
         except NotImplementedError:
             raise
         except Exception:
-            print('ERROR: getting Node')
+            print("ERROR: getting Node")
 
     def subscribe_topics(self):
         """subscribe to all registered device and node topics"""
@@ -79,26 +80,26 @@ class HomieDevice:
         subscribe = self.mqtt.subscribe
 
         # device topics
-        subscribe(b'/'.join((base, b'$stats/interval/set')))
-        subscribe(b'/'.join((base, b'$broadcast/#')))
+        subscribe(b"/".join((base, b"$stats/interval/set")))
+        subscribe(b"/".join((base, b"$broadcast/#")))
 
         # node topics
         nodes = self.nodes
         for node in nodes:
             for topic in node.subscribe:
                 # print('MQTT SUBSCRIBE: {}'.format(b'/'.join((base, topic))))
-                subscribe(b'/'.join((base, topic)))
+                subscribe(b"/".join((base, topic)))
                 self.topic_callbacks[topic] = node.callback
 
     def sub_cb(self, topic, message):
         # device callbacks
         # print('MQTT MESSAGE: {} --> {}'.format(topic, message))
 
-        if b'/$stats/interval/set' in topic:
+        if b"/$stats/interval/set" in topic:
             self.stats_interval = int(message.decode())
-            self.publish(b'$stats/interval', self.stats_interval)
+            self.publish(b"$stats/interval", self.stats_interval)
             self.next_update = time() + self.stats_interval
-        elif b'/$broadcast' in topic:
+        elif b"/$broadcast" in topic:
             for node in self.nodes:
                 node.broadcast(topic, message)
         else:
@@ -111,8 +112,8 @@ class HomieDevice:
         utils.wifi_connect()
 
         if not isinstance(payload, bytes):
-            payload = bytes(str(payload), 'utf-8')
-        t = b'/'.join((self.topic, topic))
+            payload = bytes(str(payload), "utf-8")
+        t = b"/".join((self.topic, topic))
         done = False
         while not done:
             try:
@@ -133,7 +134,7 @@ class HomieDevice:
                         done_reconnect = True
                     except Exception as e:
                         done_reconnect = False
-                        print('ERROR: cannot connect, {}'.format(str(e)))
+                        print("ERROR: cannot connect, {}".format(str(e)))
                         sleep(self.retry_delay)
 
     def publish_properties(self):
@@ -141,16 +142,16 @@ class HomieDevice:
         publish = self.publish
 
         # device properties
-        publish(b'$homie', b'2.0.1')
-        publish(b'$online', b'true')
-        publish(b'$name', self.settings.DEVICE_NAME)
-        publish(b'$fw/name', self.settings.DEVICE_FW_NAME)
-        publish(b'$fw/version', __version__)
-        publish(b'$implementation', bytes(sys.platform, 'utf-8'))
-        publish(b'$localip', utils.get_local_ip())
-        publish(b'$mac', utils.get_local_mac())
-        publish(b'$stats/interval', self.stats_interval)
-        publish(b'$nodes', b','.join(self.node_ids))
+        publish(b"$homie", b"2.0.1")
+        publish(b"$online", b"true")
+        publish(b"$name", self.settings.DEVICE_NAME)
+        publish(b"$fw/name", self.settings.DEVICE_FW_NAME)
+        publish(b"$fw/version", __version__)
+        publish(b"$implementation", bytes(sys.platform, "utf-8"))
+        publish(b"$localip", utils.get_local_ip())
+        publish(b"$mac", utils.get_local_mac())
+        publish(b"$stats/interval", self.stats_interval)
+        publish(b"$nodes", b",".join(self.node_ids))
 
         # node properties
         for node in self.nodes:
@@ -182,13 +183,13 @@ class HomieDevice:
         _time = time
         if _time() > self.next_update:
             uptime = _time() - self.start_time
-            self.publish(b'$stats/uptime', uptime)
+            self.publish(b"$stats/uptime", uptime)
             # set next update
             self.next_update = _time() + self.stats_interval
 
     def node_error(self, node, error):
         self.errors += 1
-        print('ERROR: during publish_data for node: {}'.format(node))
+        print("ERROR: during publish_data for node: {}".format(node))
         print(error)
 
     def start(self):
