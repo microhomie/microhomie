@@ -4,12 +4,14 @@ from utime import time
 class HomieNode(object):
     def __init__(self, name, interval=60):
         self.name = name
+        self._node_id = None
         self.interval = interval
         self.next_update = time()
 
     def __repr__(self):
-        """Return this object as a reproducible string"""
-        raise NotImplementedError("not implemented")
+        return "{}(name={!r}, pin={!r}, interval={!r})".format(
+            self.__class__.__name__, self.name, self.pin, self.interval
+        )
 
     def __str__(self):
         """Return nice information about the object"""
@@ -18,6 +20,16 @@ class HomieNode(object):
     @property
     def subscribe(self):
         return ()
+
+    @property
+    def node_id(self):
+        if self._node_id is None:
+            raise NotImplementedError("missing node id")
+        return self._node_id
+
+    @node_id.setter
+    def node_id(self, val):
+        self._node_id = val
 
     def has_update(self):
         """Depending on the interval:
@@ -31,10 +43,6 @@ class HomieNode(object):
             self.next_update = _time() + self.interval
             return True
         return False
-
-    def get_node_id(self):
-        """Return one ore more node ids as list"""
-        raise NotImplementedError("not implemented")
 
     def get_properties(self):
         """General properties of this node"""

@@ -69,7 +69,8 @@ class HomieDevice:
 
         # add node_ids
         try:
-            self.node_ids.extend(node.get_node_id())
+            if node.node_id != b"$stats":
+                self.node_ids.append(node.node_id)
         except NotImplementedError:
             raise
         except Exception:

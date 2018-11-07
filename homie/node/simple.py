@@ -27,6 +27,7 @@ from homie.node import HomieNode
 class SimpleHomieNode(HomieNode):
     def __init__(self, type, property, interval=60):
         super().__init__(name=type, interval=interval)
+        self.node_id = type
         self.type = type
         self.property = property
         self.value = None
@@ -40,13 +41,6 @@ class SimpleHomieNode(HomieNode):
         return "{}/{}: {}".format(
             self.type.decode(), self.property.decode(), self.value
         )
-
-    def get_node_id(self):
-        return [self.type]
-
-    def broadcast_callback(self, payload):
-        """nothing happens on a broadcast"""
-        pass
 
     def get_data(self):
         """returns the data value"""
