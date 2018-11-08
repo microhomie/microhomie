@@ -1,6 +1,8 @@
 import gc
 import sys
 
+from machine import idle
+
 from homie import __version__, utils
 from umqtt.simple import MQTTClient
 from utime import sleep, time
@@ -221,6 +223,7 @@ class HomieDevice:
                 # check for new mqtt messages
                 self.mqtt.check_msg()
 
+                idle()
                 sleep(1)
             except KeyboardInterrupt:
                 self.set_state("disconnected")
