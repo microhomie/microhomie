@@ -89,25 +89,26 @@ class HomieDevice:
         nodes = self.nodes
         for node in nodes:
             for topic in node.subscribe:
-                # print('MQTT SUBSCRIBE: {}'.format(b'/'.join((base, topic))))
-                subscribe(b"/".join((base, topic)))
+                topic = b"/".join((base, topic))
+                # print('MQTT SUBSCRIBE: {}'.format(topic))
+                subscribe(topic)
                 self.topic_callbacks[topic] = node.callback
 
-    def sub_cb(self, topic, message):
-        # device callbacks
-        # print('MQTT MESSAGE: {} --> {}'.format(topic, message))
+    def sub_cb(self, topic, msg):
+        # print('MQTT MESSAGE: {} --> {}'.format(topic, msg))
 
+        # device callbacks
         if b"/$stats/interval/set" in topic:
-            self.stats_interval = int(message.decode())
+            self.stats_interval = int(msg.decode())
             self.publish(b"$stats/interval", self.stats_interval)
             self.next_update = time() + self.stats_interval
         elif b"/$broadcast" in topic:
             for node in self.nodes:
-                node.broadcast(topic, message)
+                node.broadcast(topic, msg)
         else:
             # node property callbacks
             if topic in self.topic_callbacks:
-                self.topic_callbacks[topic](topic, message)
+                self.topic_callbacks[topic](topic, msg)
 
     def publish(self, topic, payload, retain=True):
         # try wifi reconnect in case it lost connection
