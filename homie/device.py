@@ -30,7 +30,7 @@ class HomieDevice:
 
         # device base topic
         self.topic = b"/".join(
-            (self.settings.MQTT_BASE_TOPIC, self.settings.DEVICE_ID)
+            (settings.MQTT_BASE_TOPIC, settings.DEVICE_ID)
         )
 
         # setup wifi
@@ -150,7 +150,7 @@ class HomieDevice:
         publish(b"$homie", b"3.0.1")
         publish(b"$name", self.settings.DEVICE_NAME)
         publish(b"$state", b"init")
-        publish(b"$fw/name", self.settings.DEVICE_FW_NAME)
+        publish(b"$fw/name", b"Microhomie")
         publish(b"$fw/version", __version__)
         publish(b"$implementation", bytes(sys.platform, "utf-8"))
         publish(b"$localip", utils.get_local_ip())
