@@ -52,8 +52,5 @@ DEVICE_ID = get_unique_id()
 # Friendly name of the device
 DEVICE_NAME = b'mydevice'
 
-# Firmware name
-DEVICE_FW_NAME = b'uhomie'
-
 # Time in seconds the device updates device properties
 DEVICE_STATS_INTERVAL = 60
