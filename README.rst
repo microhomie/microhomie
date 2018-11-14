@@ -8,7 +8,7 @@ A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`
 
 Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
 
-Latest release: `v0.2.1 <https://github.com/microhomie/microhomie/tree/v0.2.1>`_
+Latest release: `v0.3.0 <https://github.com/microhomie/microhomie/tree/v0.3.0>`_
 
 *This project is in beta stage.*
 
