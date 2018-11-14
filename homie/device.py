@@ -29,9 +29,7 @@ class HomieDevice:
         self.stats_interval = self.settings.DEVICE_STATS_INTERVAL
 
         # device base topic
-        self.topic = b"/".join(
-            (settings.MQTT_BASE_TOPIC, settings.DEVICE_ID)
-        )
+        self.topic = b"/".join((settings.MQTT_BASE_TOPIC, settings.DEVICE_ID))
 
         # setup wifi
         utils.setup_network()
@@ -163,7 +161,8 @@ class HomieDevice:
         for node in self.nodes:
             try:
                 for propertie in node.get_properties():
-                    publish(*propertie)
+                    if propertie:
+                        publish(*propertie)
             except NotImplementedError:
                 raise
             except Exception as error:
