@@ -60,7 +60,7 @@ class HomieNode(object):
         """Gets called when self.subscribe has topics"""
         raise NotImplementedError("not implemented")
 
-    def broadcast_callback(self, payload):
+    def broadcast_callback(self, topic, payload):
         """Gets called when the broadcast topic receives a message"""
         pass
 

@@ -83,7 +83,7 @@ class HomieDevice:
 
         # device topics
         subscribe(b"/".join((base, b"$stats/interval/set")))
-        subscribe(b"/".join((base, b"$broadcast/#")))
+        subscribe(b"/".join((self.settings.MQTT_BASE_TOPIC, b"$broadcast/#")))
 
         # node topics
         nodes = self.nodes
@@ -104,7 +104,7 @@ class HomieDevice:
             self.next_update = time() + self.stats_interval
         elif b"/$broadcast" in topic:
             for node in self.nodes:
-                node.broadcast(topic, msg)
+                node.broadcast_callback(topic, msg)
         else:
             # node property callbacks
             if topic in self.topic_callbacks:
