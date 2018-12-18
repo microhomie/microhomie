@@ -11,3 +11,6 @@ dist/
 app/
 docs/_build
 *.bin
+build/
+micropython/
+esp-open-sdk/
