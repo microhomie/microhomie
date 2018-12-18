@@ -1,6 +1,6 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-VERSION := 0.3.0
+VERSION := 0.3.1
 MICROPYVERSION := 1.9.4
 PORT := /dev/ttyUSB0
 
