@@ -1,14 +1,15 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-VERSION := 0.3.1
+VERSION := 0.4.0-alpha
 MICROPYVERSION := 1.9.4
-PORT := /dev/ttyUSB0
+PORT := /dev/ttyUSB1
 
 
-all: clean copy firmware
+all: copy firmware
 
 requirements:
-	micropython -m upip install -p micropython/ports/esp8266/modules micropython-umqtt.simple
+	micropython -m upip install -p micropython/ports/esp8266/modules micropython-uasyncio
+	curl -o micropython/ports/esp8266/modules/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
 
 copy:
 	mkdir -p micropython/ports/esp8266/modules/homie/node

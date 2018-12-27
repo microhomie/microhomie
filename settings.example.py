@@ -20,7 +20,7 @@ WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 MQTT_BROKER = '127.0.0.1'
 
 # Broker port
-MQTT_PORT = 0
+MQTT_PORT = 1883
 
 # Username or None for anonymous login
 MQTT_USERNAME = None
@@ -34,7 +34,7 @@ MQTT_KEEPALIVE = 60
 # SSL connection to the broker. Some MicroPython implementations currently
 # have problems with receiving mqtt messages over ssl connections.
 MQTT_SSL = False
-MQTT_SSL_PARAMS = {}
+MQTT_SSL_PARAMS = None
 
 # Base mqtt topic the device publish and subscribes to, without leading slash.
 # Base topic format is bytestring

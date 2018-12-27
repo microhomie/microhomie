@@ -1,3 +1,5 @@
+import uasyncio as asyncio
+
 from utime import time
 
 
@@ -33,18 +35,18 @@ class HomieNodeProperty:
             self.format,
         )
 
-        def __str__(self):
-            return self.id
+    def __str__(self):
+        return self.id
 
-        @property
-        def data(self):
-            return self._data
+    @property
+    def data(self):
+        return self._data
 
-        @data.setter
-        def data(self, val):
-            if isinstance(val, bool):
-                val = str(val).lower()
-            self._data = val
+    @data.setter
+    def data(self, val):
+        if isinstance(val, bool):
+            val = str(val).lower()
+        self._data = val
 
 
 class HomieNode:
@@ -73,11 +75,9 @@ class HomieNode:
     def add_property(self, p):
         self._properties.append(p)
         if p.settable:
-            self._subscribe.append(
-                b"{}/{}/set".format(self.id, p.id,)
-            )
+            self._subscribe.append(b"{}/{}/set".format(self.id, p.id))
 
-    def subscribe(self):
+    async def subscribe(self):
         for t in self._subscribe:
             yield t
 
@@ -87,21 +87,23 @@ class HomieNode:
         returns True if its time for an update,
         returns False if its not yet time for an update
         """
-        _time = time
-        if _time() > self._next_update:
+        if time() > self._next_update:
             self.update_data()
-            self._next_update = _time() + self._interval
+            self._next_update = time() + self._interval
             return True
         return False
 
-    def get_properties(self):
+    async def get_properties(self):
         """General properties of this node"""
         nid = self.id
         yield (b"{}/$name".format(nid), self.name)
         yield (b"{}/$type".format(nid), self.type)
 
         if self._properties:
-            yield (b"{}/$properties".format(nid), b",".join(self._properties))
+            yield (
+                b"{}/$properties".format(nid),
+                b",".join([p.id.encode() for p in self._properties]),
+            )
 
             for p in self._properties:
                 t = "{}/{}".format(nid, p.id)
@@ -123,22 +125,27 @@ class HomieNode:
                 if p.datatype in ["enum", "color"]:
                     yield (b"{}/$format".format(t), p.format)
 
-    def get_data(self):
-        """Return the current values"""
-        nid = self.id
-        for p in self._properties:
-            if p.data is not None:
-                yield (b"{}/{}".format(nid, p.id), p.data, p.retained)
+    async def publish_data(self, client):
+        while True:
+            if self.has_update():
+                nid = self.id
+                for p in self._properties:
+                    if p.data is not None:
+                        await client.publish(
+                            b"{}/{}".format(nid, p.id), p.data, p.retained
+                        )
+
+            await asyncio.sleep_ms(100)
 
     def update_data(self):
         """Prepare new data. Measure nodes... """
         raise NotImplementedError("not implemented")
 
-    def callback(self, topic, payload):
+    def callback(self, topic, payload, retained):
         """Gets called when self.subscribe has topics"""
         raise NotImplementedError("not implemented")
 
-    def broadcast_callback(self, topic, payload):
+    def broadcast_callback(self, topic, payload, retained):
         """Gets called when the broadcast topic receives a message"""
         pass
 
