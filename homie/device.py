@@ -188,6 +188,7 @@ class HomieDevice:
         _time = time
         if _time() > self.next_update:
             uptime = _time() - self.start_time
+            self.publish(b"$stats/interval", self.stats_interval)
             self.publish(b"$stats/uptime", uptime)
             self.publish(b"$stats/freeheap", gc.mem_free())
             # set next update
