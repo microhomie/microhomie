@@ -1,9 +1,8 @@
 from gc import mem_free
 from sys import platform
 from utime import time
+from uasyncio import get_event_loop, sleep_ms
 from micropython import const
-
-import uasyncio as asyncio
 
 from mqtt_as import MQTTClient
 from homie import __version__, utils
@@ -18,9 +17,8 @@ class HomieDevice:
 
     def __init__(self, settings):
         self._state = "init"
+        self._stime = time()
 
-        self.errors = 0
-        self.start_time = time()
         self.stats_interval = settings.DEVICE_STATS_INTERVAL
 
         self.nodes = []
@@ -49,9 +47,15 @@ class HomieDevice:
             will=(b"/".join((self.dtopic, b"$state")), b"lost", True, QOS),
         )
 
+        # start coros
+        loop = get_event_loop()
+        loop.call_later(9, self.publish_stats())
+
     def add_node(self, node):
         """add a node class of Homie Node to this device"""
         self.nodes.append(node)
+        loop = get_event_loop()
+        loop.call_later(9, node.publish_data(self))
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
@@ -65,20 +69,16 @@ class HomieDevice:
         # subscribe to node topics
         nodes = self.nodes
         for n in nodes:
-            for t in n.subscribe():
+            cb = n.callback
+            subs = n._subscribe
+            for t in subs:
                 t = b"/".join((base, t))
                 # print('MQTT SUBSCRIBE: {}'.format(t))
                 await subscribe(t, QOS)
-                self.topic_callbacks[t] = n.callback
+                self.topic_callbacks[t] = cb
 
         await self.publish_properties()
         await self.set_state("ready")
-
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.publish_stats())
-
-        for n in self.nodes:
-            loop.create_task(n.publish_data(self))
 
     def sub_cb(self, topic, msg, retained):
         # print('MQTT MESSAGE: {} --> {}, {}'.format(topic, msg, retained))
@@ -91,7 +91,8 @@ class HomieDevice:
                 pass
         # broadcast callback passed to nodes
         elif b"/$broadcast" in topic:
-            for n in self.nodes:
+            nodes = self.nodes
+            for n in nodes:
                 n.broadcast_callback(topic, msg, retained)
         else:
             # node property callbacks
@@ -103,7 +104,7 @@ class HomieDevice:
             payload = bytes(str(payload), "utf-8")
         t = b"/".join((self.dtopic, topic))
         # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
-        await self.mqtt.publish(t, payload, retain=retain, qos=QOS)
+        await self.mqtt.publish(t, payload, retain, QOS)
 
     async def publish_properties(self):
         """publish device and node properties"""
@@ -125,7 +126,8 @@ class HomieDevice:
         )
 
         # node properties
-        for n in self.nodes:
+        nodes = self.nodes
+        for n in nodes:
             try:
                 for prop in n.get_properties():
                     await publish(*prop)
@@ -136,16 +138,19 @@ class HomieDevice:
                 print(error)
 
     async def publish_stats(self):
+        stime = self._stime
         interval = self.stats_interval
+        publish = self.publish
+
         while True:
-            uptime = time() - self.start_time
-            await self.publish(b"$stats/uptime", uptime)
-            await self.publish(b"$stats/freeheap", mem_free())
-            await asyncio.sleep(self.stats_interval)
+            uptime = time() - stime
+            await publish(b"$stats/uptime", uptime)
+            await publish(b"$stats/freeheap", mem_free())
+            await sleep_ms(self.stats_interval * 1000)
 
             # update interval stats if changed
             if interval != self.stats_interval:
-                await self.publish(b"$stats/interval", self.stats_interval)
+                await publish(b"$stats/interval", self.stats_interval)
                 interval = self.stats_interval
 
     async def set_state(self, val):
@@ -161,4 +166,4 @@ class HomieDevice:
             return
 
         while True:
-            await asyncio.sleep(5)
+            await sleep_ms(5000)

@@ -1,6 +1,6 @@
-import uasyncio as asyncio
-
+from copy import copy
 from utime import time
+from uasyncio import sleep_ms
 
 
 class HomieNodeProperty:
@@ -13,6 +13,8 @@ class HomieNodeProperty:
         unit=None,
         datatype="string",
         format=None,
+        range=0,
+        default=None,
     ):
         self.id = id
         self.name = name
@@ -21,10 +23,12 @@ class HomieNodeProperty:
         self.unit = unit
         self.datatype = datatype
         self.format = format
-        self._data = None
+        self.range = range
+        self._data = [default] * (range + 1)
+        self._ldata = [None] * (range + 1)  # last data for delta
 
     def __repr__(self):
-        return "{}(id={!r}, name={!r}, settable={!r}, retained={!r}, unit={!r}, datatype={!r}, format={!r})".format(
+        return "{}(id={!r}, name={!r}, settable={!r}, retained={!r}, unit={!r}, datatype={!r}, format={!r}), range={!r} default={!r}".format(
             self.__class__.__name__,
             self.id,
             self.name,
@@ -33,6 +37,8 @@ class HomieNodeProperty:
             self.unit,
             self.datatype,
             self.format,
+            self.range,
+            self.default,
         )
 
     def __str__(self):
@@ -42,11 +48,10 @@ class HomieNodeProperty:
     def data(self):
         return self._data
 
-    @data.setter
-    def data(self, val):
+    def set_data(self, index, val):
         if isinstance(val, bool):
             val = str(val).lower()
-        self._data = val
+        self._data[index] = val
 
 
 class HomieNode:
@@ -77,9 +82,9 @@ class HomieNode:
         if p.settable:
             self._subscribe.append(b"{}/{}/set".format(self.id, p.id))
 
-    async def subscribe(self):
-        for t in self._subscribe:
-            yield t
+            if p.range:
+                for i in range(p.range):
+                    self._subscribe.append(b"{}/{}/{}/set".format(self.id, p.id, i))
 
     def has_update(self):
         """Depending on the interval:
@@ -96,16 +101,20 @@ class HomieNode:
     async def get_properties(self):
         """General properties of this node"""
         nid = self.id
+
+        # node attributes
         yield (b"{}/$name".format(nid), self.name)
         yield (b"{}/$type".format(nid), self.type)
 
-        if self._properties:
+        # property attributes
+        props = self._properties
+        if props:
             yield (
                 b"{}/$properties".format(nid),
-                b",".join([p.id.encode() for p in self._properties]),
+                b",".join([p.id.encode() for p in props]),
             )
 
-            for p in self._properties:
+            for p in props:
                 t = "{}/{}".format(nid, p.id)
                 if p.name:
                     yield (b"{}/$name".format(t), p.name)
@@ -126,16 +135,26 @@ class HomieNode:
                     yield (b"{}/$format".format(t), p.format)
 
     async def publish_data(self, client):
+        nid = self.id
+        props = self._properties
         while True:
             if self.has_update():
-                nid = self.id
-                for p in self._properties:
-                    if p.data is not None:
-                        await client.publish(
-                            b"{}/{}".format(nid, p.id), p.data, p.retained
-                        )
+                for p in props:
+                    data = p.data
+                    ldata = p._ldata  # last data
+                    r = range(len(data))
+                    for i in r:
+                        if data[i] is not None:
+                            if data[i] == ldata[i]:
+                                continue
+                            t = b"{}/{}".format(nid, p.id)
+                            if i > 0:
+                                t += b"/{}".format(i - 1)
+                            await client.publish(t, data[i], p.retained)
 
-            await asyncio.sleep_ms(100)
+                    p._ldata = copy(data)
+
+            await sleep_ms(100)
 
     def update_data(self):
         """Prepare new data. Measure nodes... """
@@ -151,5 +170,9 @@ class HomieNode:
 
     def get_property_id_from_set_topic(self, topic):
         """Return the property id from topic as integer"""
-        topic = topic.decode()
-        return int(topic.split("/")[-3].split("_")[-1])
+        retval = None
+        try:
+            return int(topic.split(b"/")[-3].split(b"_")[-1])
+        except (TypeError, ValueError):
+            pass
+        return retval

@@ -1,15 +1,21 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
 VERSION := 0.4.0-alpha
-MICROPYVERSION := 1.9.4
-PORT := /dev/ttyUSB1
+MICROPYVERSION := 1.10
+PORT := /dev/ttyUSB0
 
 
 all: copy firmware
 
 requirements:
-	micropython -m upip install -p micropython/ports/esp8266/modules micropython-uasyncio
-	curl -o micropython/ports/esp8266/modules/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
+	mkdir -p micropython/ports/esp8266/modules/uasyncio
+	curl -s -o micropython/ports/esp8266/modules/types.py https://raw.githubusercontent.com/micropython/micropython-lib/master/types/types.py
+	curl -s -o micropython/ports/esp8266/modules/copy.py https://raw.githubusercontent.com/micropython/micropython-lib/master/copy/copy.py
+	curl -s -o micropython/ports/esp8266/modules/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
+	curl -s -o micropython/ports/esp8266/modules/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
+	curl -s -o micropython/ports/esp8266/modules/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
+	curl -s -o micropython/ports/esp8266/modules/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
+	curl -s -o micropython/ports/esp8266/modules/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
 
 copy:
 	mkdir -p micropython/ports/esp8266/modules/homie/node
