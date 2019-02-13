@@ -1,6 +1,7 @@
-from copy import copy
 from utime import time
 from uasyncio import sleep_ms
+
+from homie.device import await_ready_state
 
 
 class HomieNodeProperty:
@@ -15,6 +16,7 @@ class HomieNodeProperty:
         format=None,
         range=0,
         default=None,
+        restore=False,
     ):
         self.id = id
         self.name = name
@@ -24,6 +26,7 @@ class HomieNodeProperty:
         self.datatype = datatype
         self.format = format
         self.range = range
+        self.restore = restore
         self._data = [default] * (range + 1)
         self._ldata = [None] * (range + 1)  # last data for delta
 
@@ -62,7 +65,6 @@ class HomieNode:
         self._interval = interval
         self._next_update = time()
         self._properties = []
-        self._subscribe = []
 
     def __repr__(self):
         return "{}(id={!r}, name={!r}, type={!r}, interval={!r})".format(
@@ -79,12 +81,6 @@ class HomieNode:
 
     def add_property(self, p):
         self._properties.append(p)
-        if p.settable:
-            self._subscribe.append(b"{}/{}/set".format(self.id, p.id))
-
-            if p.range:
-                for i in range(p.range):
-                    self._subscribe.append(b"{}/{}/{}/set".format(self.id, p.id, i))
 
     def has_update(self):
         """Depending on the interval:
@@ -134,7 +130,8 @@ class HomieNode:
                 if p.datatype in ["enum", "color"]:
                     yield (b"{}/$format".format(t), p.format)
 
-    async def publish_data(self, client):
+    @await_ready_state
+    async def publish_data(self, publish):
         nid = self.id
         props = self._properties
         while True:
@@ -149,10 +146,10 @@ class HomieNode:
                                 continue
                             t = b"{}/{}".format(nid, p.id)
                             if i > 0:
-                                t += b"/{}".format(i - 1)
-                            await client.publish(t, data[i], p.retained)
+                                t += b"_{}".format(i - 1)
+                            await publish(t, data[i], p.retained)
 
-                    p._ldata = copy(data)
+                    p._ldata = data.copy()
 
             await sleep_ms(100)
 

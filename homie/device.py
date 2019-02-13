@@ -1,5 +1,6 @@
 from gc import mem_free
 from sys import platform
+from asyn import Event
 from utime import time
 from uasyncio import get_event_loop, sleep_ms
 from micropython import const
@@ -9,6 +10,14 @@ from homie import __version__, utils
 
 
 QOS = const(1)
+_EVENT = Event()
+
+
+def await_ready_state(func):
+    def new_gen(*args, **kwargs):
+        await _EVENT
+        await func(*args, **kwargs)
+    return new_gen
 
 
 class HomieDevice:
@@ -47,41 +56,83 @@ class HomieDevice:
             will=(b"/".join((self.dtopic, b"$state")), b"lost", True, QOS),
         )
 
-        # start coros
         loop = get_event_loop()
-        loop.call_later(9, self.publish_stats())
+        loop.create_task(self.publish_stats())
 
     def add_node(self, node):
         """add a node class of Homie Node to this device"""
         self.nodes.append(node)
         loop = get_event_loop()
-        loop.call_later(9, node.publish_data(self))
+        loop.create_task(node.publish_data(self.publish))
+
+    def format_topic(self, topic):
+        return b"/".join((self.dtopic, topic))
+
+    async def subscribe(self, topic, callback=False):
+        topic = self.format_topic(topic)
+        # print("MQTT SUBSCRIBE: {}".format(topic))
+        if callback:
+            self.topic_callbacks[topic] = callback
+        await self.mqtt.subscribe(topic, QOS)
+
+    async def unsubscribe(self, topic):
+        topic = self.format_topic(topic)
+        # print("MQTT UNSUBSCRIBE: {}".format(topic))
+        await self.mqtt.unsubscribe(topic)
+        del self.topic_callbacks[topic]
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
-        base = self.dtopic
-        subscribe = self.mqtt.subscribe
+        subscribe = self.subscribe
+        unsubscribe = self.unsubscribe
 
         # device topics
-        await subscribe(b"/".join((base, b"$stats/interval/set")), QOS)
-        await subscribe(b"/".join((self.btopic, b"$broadcast/#")), QOS)
+        await self.mqtt.subscribe(
+            b"/".join((self.btopic, b"$broadcast/#")), QOS
+        )
+        await subscribe(b"$stats/interval/set", False)
 
-        # subscribe to node topics
+        # node topics
         nodes = self.nodes
         for n in nodes:
             cb = n.callback
-            subs = n._subscribe
-            for t in subs:
-                t = b"/".join((base, t))
-                # print('MQTT SUBSCRIBE: {}'.format(t))
-                await subscribe(t, QOS)
-                self.topic_callbacks[t] = cb
+            props = n._properties
+            for p in props:
+                if p.settable:
+                    prange = None
+
+                    # retained topics to restore messages
+                    if p.restore:
+                        t = b"{}/{}".format(n.id, p.id)
+                        await subscribe(t, cb)
+                        await sleep_ms(100)
+                        await unsubscribe(t)
+
+                        if p.range:
+                            prange = range(p.range)
+                            for i in prange:
+                                t = b"{}/{}_{}".format(self.id, p.id, i)
+                                await subscribe(t, cb)
+                                await sleep_ms(100)
+                                await unsubscribe(t)
+
+                    await sleep_ms(100)
+
+                    # final /set topics
+                    t = b"{}/{}/set".format(n.id, p.id)
+                    await subscribe(t, cb)
+
+                    # array /set topics
+                    if p.range:
+                        for i in prange:
+                            t = b"{}/{}_{}/set".format(self.id, p.id, i)
+                            await subscribe(t, cb)
 
         await self.publish_properties()
         await self.set_state("ready")
 
     def sub_cb(self, topic, msg, retained):
-        # print('MQTT MESSAGE: {} --> {}, {}'.format(topic, msg, retained))
+        # print("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
 
         # device callbacks
         if b"/$stats/interval/set" in topic:
@@ -100,10 +151,10 @@ class HomieDevice:
                 self.topic_callbacks[topic](topic, msg, retained)
 
     async def publish(self, topic, payload, retain=True):
+        # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), "utf-8")
         t = b"/".join((self.dtopic, topic))
-        # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
     async def publish_properties(self):
@@ -137,6 +188,7 @@ class HomieDevice:
                 print("ERROR: publish properties for node: {}".format(n))
                 print(error)
 
+    @await_ready_state
     async def publish_stats(self):
         stime = self._stime
         interval = self.stats_interval
@@ -146,6 +198,7 @@ class HomieDevice:
             uptime = time() - stime
             await publish(b"$stats/uptime", uptime)
             await publish(b"$stats/freeheap", mem_free())
+            await publish(b"$stats/interval", self.stats_interval)
             await sleep_ms(self.stats_interval * 1000)
 
             # update interval stats if changed
@@ -157,13 +210,20 @@ class HomieDevice:
         if val in ["ready", "disconnected", "sleeping", "alert"]:
             self._state = val
             await self.publish(b"$state", val)
+            if val == "ready":
+                _EVENT.set()
+                await sleep_ms(1000)
+                _EVENT.clear()
 
     async def run(self):
         try:
             await self.mqtt.connect()
         except OSError:
             print("ERROR: can not connect to MQTT")
-            return
 
         while True:
             await sleep_ms(5000)
+
+    def start(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.run())

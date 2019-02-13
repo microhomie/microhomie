@@ -9,8 +9,6 @@ all: copy firmware
 
 requirements:
 	mkdir -p micropython/ports/esp8266/modules/uasyncio
-	curl -s -o micropython/ports/esp8266/modules/types.py https://raw.githubusercontent.com/micropython/micropython-lib/master/types/types.py
-	curl -s -o micropython/ports/esp8266/modules/copy.py https://raw.githubusercontent.com/micropython/micropython-lib/master/copy/copy.py
 	curl -s -o micropython/ports/esp8266/modules/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
 	curl -s -o micropython/ports/esp8266/modules/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
 	curl -s -o micropython/ports/esp8266/modules/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
