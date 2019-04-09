@@ -151,6 +151,14 @@ class HomieDevice:
         t = b"/".join((self.dtopic, topic))
         await self.mqtt.publish(t, payload, retain, QOS)
 
+    async def broadcast(self, payload):
+        if not isinstance(payload, bytes):
+            payload = bytes(str(payload), "utf-8")
+
+        topic = b"/".join((self._rtopic, b"$broadcast"))
+        print("MQTT BROADCAST: {} --> {}".format(topic, payload))
+        await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
+
     async def publish_properties(self):
         """publish device and node properties"""
         publish = self.publish
