@@ -1,5 +1,4 @@
 import settings
-import uasyncio as asyncio
 
 from machine import Pin
 
@@ -22,7 +21,9 @@ class LED(HomieNode):
             name="LED",
             settable=True,
             datatype="enum",
-            format="true,false,toggle"
+            format="true,false,toggle",
+            restore=True,
+            default=b"true",
         )
 
         self.add_property(self.led_property)
@@ -36,7 +37,7 @@ class LED(HomieNode):
         else:
             self.led(ONOFF[msg])
 
-        self.led_property.data = ONOFF[self.led()]
+        self.led_property.set_data(0, ONOFF[self.led()])
         self.updated = True
 
     def has_update(self):
@@ -52,10 +53,7 @@ def main():
 
     # Add LED node to device
     homie.add_node(LED())
-
-    # run forever
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(homie.run())
+    homie.start()
 
 
 main()
