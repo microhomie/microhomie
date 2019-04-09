@@ -34,7 +34,7 @@ class HomieDevice:
         self.stats_interval = settings.DEVICE_STATS_INTERVAL
 
         self.nodes = []
-        self.topic_callbacks = {}
+        self.callback_topics = {}
 
         self.device_name = settings.DEVICE_NAME
 
@@ -75,14 +75,14 @@ class HomieDevice:
         topic = self.format_topic(topic)
         # print("MQTT SUBSCRIBE: {}".format(topic))
         if callback:
-            self.topic_callbacks[topic] = callback
+            self.callback_topics[topic] = callback
         await self.mqtt.subscribe(topic, QOS)
 
     async def unsubscribe(self, topic):
         topic = self.format_topic(topic)
         # print("MQTT UNSUBSCRIBE: {}".format(topic))
         await self.mqtt.unsubscribe(topic)
-        del self.topic_callbacks[topic]
+        del self.callback_topics[topic]
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
@@ -141,14 +141,14 @@ class HomieDevice:
                 n.broadcast_callback(topic, msg, retained)
         else:
             # node property callbacks
-            if topic in self.topic_callbacks:
-                self.topic_callbacks[topic](topic, msg, retained)
+            if topic in self.callback_topics:
+                self.callback_topics[topic](topic, msg, retained)
 
     async def publish(self, topic, payload, retain=True):
-        # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), "utf-8")
         t = b"/".join((self.dtopic, topic))
+        # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
     async def broadcast(self, payload):
@@ -156,7 +156,7 @@ class HomieDevice:
             payload = bytes(str(payload), "utf-8")
 
         topic = b"/".join((self._rtopic, b"$broadcast"))
-        print("MQTT BROADCAST: {} --> {}".format(topic, payload))
+        # print("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
     async def publish_properties(self):
@@ -184,8 +184,6 @@ class HomieDevice:
             try:
                 for prop in n.get_properties():
                     await publish(*prop)
-            except NotImplementedError:
-                raise
             except Exception as error:
                 print("ERROR: publish properties for node: {}".format(n))
                 print(error)
@@ -200,13 +198,13 @@ class HomieDevice:
             uptime = time() - stime
             await publish(b"$stats/uptime", uptime)
             await publish(b"$stats/freeheap", mem_free())
-            await publish(b"$stats/interval", self.stats_interval)
-            await sleep_ms(self.stats_interval * 1000)
 
             # update interval stats if changed
             if interval != self.stats_interval:
-                await publish(b"$stats/interval", self.stats_interval)
                 interval = self.stats_interval
+                await publish(b"$stats/interval", interval)
+
+            await sleep_ms(interval * 1000)
 
     async def set_state(self, val):
         if val in ["ready", "disconnected", "sleeping", "alert"]:
@@ -224,8 +222,8 @@ class HomieDevice:
             print("ERROR: can not connect to MQTT")
 
         while True:
-            await sleep_ms(5000)
+            await sleep_ms(MAIN_DELAY)
 
     def start(self):
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         loop.run_until_complete(self.run())

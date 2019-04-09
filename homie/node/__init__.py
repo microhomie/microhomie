@@ -14,7 +14,7 @@ class HomieNodeProperty:
         unit=None,
         datatype="string",
         format=None,
-        range=0,
+        range=1,
         default=None,
         restore=False,
     ):
@@ -27,8 +27,12 @@ class HomieNodeProperty:
         self.format = format
         self.range = range
         self.restore = restore
-        self._data = [default] * (range + 1)
-        self._ldata = [None] * (range + 1)  # last data for delta
+
+        if isinstance(default, bool):
+            default = str(default).lower().encode()
+
+        self._data = [default] * range
+        self._ldata = [None] * range  # last data for delta
 
     def __repr__(self):
         return "{}(id={!r}, name={!r}, settable={!r}, retained={!r}, unit={!r}, datatype={!r}, format={!r}), range={!r} default={!r}".format(
@@ -47,14 +51,13 @@ class HomieNodeProperty:
     def __str__(self):
         return self.id
 
-    @property
-    def data(self):
-        return self._data
-
     def set_data(self, index, val):
-        if isinstance(val, bool):
-            val = str(val).lower()
-        self._data[index] = val
+        try:
+            if isinstance(val, bool):
+                val = str(val).lower().encode()
+            self._data[index] = val
+        except ValueError:
+            pass
 
 
 class HomieNode:
@@ -115,6 +118,9 @@ class HomieNode:
                 if p.name:
                     yield (b"{}/$name".format(t), p.name)
 
+                if p.range > 1:
+                    yield (b"{}/$array".format(t), b"0-{}".format(p.range - 1))
+
                 if p.settable:
                     yield (b"{}/$settable".format(t), b"true")
 
@@ -137,19 +143,21 @@ class HomieNode:
         while True:
             if self.has_update():
                 for p in props:
-                    data = p.data
+                    is_array = p.range > 1
                     ldata = p._ldata  # last data
-                    r = range(len(data))
-                    for i in r:
-                        if data[i] is not None:
-                            if data[i] == ldata[i]:
+                    for i, data in enumerate(p._data):
+                        if data is not None:
+                            if data == ldata[i]:
                                 continue
-                            t = b"{}/{}".format(nid, p.id)
-                            if i > 0:
-                                t += b"_{}".format(i - 1)
-                            await publish(t, data[i], p.retained)
 
-                    p._ldata = data.copy()
+                            if is_array:
+                                t = b"{}_{}/{}".format(nid, i, p.id)
+                            else:
+                                t = b"{}/{}".format(nid, p.id)
+
+                            await publish(t, data, p.retained)
+
+                    p._ldata = p._data.copy()
 
             await sleep_ms(100)
 
