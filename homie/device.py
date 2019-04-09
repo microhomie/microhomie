@@ -10,9 +10,12 @@ from homie import __version__, utils
 
 
 QOS = const(1)
+MAIN_DELAY = const(5000)
+STATS_DELAY = const(60000)
+RESTORE_DELAY = const(250)
+
+
 _EVENT = Event()
-
-
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         await _EVENT
@@ -98,35 +101,26 @@ class HomieDevice:
             cb = n.callback
             props = n._properties
             for p in props:
+                is_array = p.range > 1
                 if p.settable:
-                    prange = None
-
-                    # retained topics to restore messages
+                    # subscribe topic to restore retained messages
                     if p.restore:
-                        t = b"{}/{}".format(n.id, p.id)
+                        if is_array:
+                            t = b"{}/{}_{}".format(self.id, p.id, i)
+                        else:
+                            t = b"{}/{}".format(n.id, p.id)
+
                         await subscribe(t, cb)
-                        await sleep_ms(100)
+                        await sleep_ms(RESTORE_DELAY)
                         await unsubscribe(t)
 
-                        if p.range:
-                            prange = range(p.range)
-                            for i in prange:
-                                t = b"{}/{}_{}".format(self.id, p.id, i)
-                                await subscribe(t, cb)
-                                await sleep_ms(100)
-                                await unsubscribe(t)
+                    # final subscribe to /set topic
+                    if is_array:
+                        t = b"{}/{}_{}/set".format(self.id, p.id, i)
+                    else:
+                        t = b"{}/{}/set".format(n.id, p.id)
 
-                    await sleep_ms(100)
-
-                    # final /set topics
-                    t = b"{}/{}/set".format(n.id, p.id)
                     await subscribe(t, cb)
-
-                    # array /set topics
-                    if p.range:
-                        for i in prange:
-                            t = b"{}/{}_{}/set".format(self.id, p.id, i)
-                            await subscribe(t, cb)
 
         await self.publish_properties()
         await self.set_state("ready")
