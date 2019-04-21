@@ -2,11 +2,13 @@ import settings
 
 from machine import Pin
 
-from homie.node import HomieNodeProperty, HomieNode
+from homie.node import HomieNode
 from homie.device import HomieDevice
+from homie.property import HomieNodeProperty
+from homie.constants import TRUE, FALSE
 
 
-ONOFF = {b"false": 0, b"true": 1, 0: b"false", 1: b"true"}
+ONOFF = {FALSE: 0, TRUE: 1, 0: FALSE, 1: TRUE}
 
 
 class LED(HomieNode):
@@ -14,7 +16,6 @@ class LED(HomieNode):
         super().__init__(id="led", name=name, type="LED")
         self.pin = pin
         self.led = Pin(pin, Pin.OUT, value=0)
-        self.updated = True
 
         self.led_property = HomieNodeProperty(
             id="power",
@@ -23,13 +24,10 @@ class LED(HomieNode):
             datatype="enum",
             format="true,false,toggle",
             restore=True,
-            default=b"true",
+            default=TRUE,
         )
 
         self.add_property(self.led_property)
-
-    def __str__(self):
-        return "LED status: {}".format(ONOFF[self.led()])
 
     def callback(self, topic, msg, retained):
         if msg == b"toggle":
@@ -37,14 +35,7 @@ class LED(HomieNode):
         else:
             self.led(ONOFF[msg])
 
-        self.led_property.set_data(0, ONOFF[self.led()])
-        self.updated = True
-
-    def has_update(self):
-        if self.updated is True:
-            self.updated = False
-            return True
-        return False
+        self.led_property.set_data(ONOFF[self.led()])
 
 
 def main():
