@@ -16,9 +16,8 @@ requirements:
 	curl -s -o micropython/ports/esp8266/modules/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
 
 copy:
-	mkdir -p micropython/ports/esp8266/modules/homie/node
+	mkdir -p micropython/ports/esp8266/modules/homie
 	cp homie/*.py micropython/ports/esp8266/modules/homie
-	cp homie/node/__init__.py micropython/ports/esp8266/modules/homie/node
 
 firmware:
 	cd micropython/ports/esp8266; make

@@ -1,4 +1,4 @@
-from gc import mem_free
+from gc import mem_free, collect
 from sys import platform
 from asyn import Event
 from utime import time
@@ -7,12 +7,14 @@ from micropython import const
 
 from mqtt_as import MQTTClient
 from homie import __version__, utils
-
-
-QOS = const(1)
-MAIN_DELAY = const(5000)
-STATS_DELAY = const(60000)
-RESTORE_DELAY = const(250)
+from homie.constants import (
+    QOS,
+    MAIN_DELAY,
+    STATS_DELAY,
+    RESTORE_DELAY,
+    DEVICE_STATE,
+    SLASH,
+)
 
 
 _EVENT = Event()
@@ -39,7 +41,9 @@ class HomieDevice:
         self.device_name = settings.DEVICE_NAME
 
         self.btopic = settings.MQTT_BASE_TOPIC
-        self.dtopic = b"/".join((settings.MQTT_BASE_TOPIC, settings.DEVICE_ID))
+        self.dtopic = SLASH.join(
+            (settings.MQTT_BASE_TOPIC, settings.DEVICE_ID)
+        )
 
         # setup networking
         utils.setup_network()
@@ -56,33 +60,33 @@ class HomieDevice:
             ssl_params=settings.MQTT_SSL_PARAMS,
             subs_cb=self.sub_cb,
             connect_coro=self.connection_handler,
-            will=(b"/".join((self.dtopic, b"$state")), b"lost", True, QOS),
+            will=(SLASH.join((self.dtopic, DEVICE_STATE)), b"lost", True, QOS),
         )
 
+        # Start coros
         loop = get_event_loop()
         loop.create_task(self.publish_stats())
 
     def add_node(self, node):
         """add a node class of Homie Node to this device"""
+        node.device = self
         self.nodes.append(node)
         loop = get_event_loop()
-        loop.create_task(node.publish_data(self.publish))
+        loop.create_task(node.publish_data())
+        collect()
 
     def format_topic(self, topic):
-        return b"/".join((self.dtopic, topic))
+        return SLASH.join((self.dtopic, topic))
 
     async def subscribe(self, topic, callback=False):
         topic = self.format_topic(topic)
         # print("MQTT SUBSCRIBE: {}".format(topic))
-        if callback:
-            self.callback_topics[topic] = callback
         await self.mqtt.subscribe(topic, QOS)
 
     async def unsubscribe(self, topic):
         topic = self.format_topic(topic)
         # print("MQTT UNSUBSCRIBE: {}".format(topic))
         await self.mqtt.unsubscribe(topic)
-        del self.callback_topics[topic]
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
@@ -91,18 +95,18 @@ class HomieDevice:
 
         # device topics
         await self.mqtt.subscribe(
-            b"/".join((self.btopic, b"$broadcast/#")), QOS
+            SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
         await subscribe(b"$stats/interval/set", False)
 
         # node topics
         nodes = self.nodes
         for n in nodes:
-            cb = n.callback
             props = n._properties
             for p in props:
                 is_array = p.range > 1
                 if p.settable:
+                    self.callback_topics[n.id.encode()] = n.callback
                     # subscribe topic to restore retained messages
                     if p.restore:
                         if is_array:
@@ -110,7 +114,7 @@ class HomieDevice:
                         else:
                             t = b"{}/{}".format(n.id, p.id)
 
-                        await subscribe(t, cb)
+                        await subscribe(t)
                         await sleep_ms(RESTORE_DELAY)
                         await unsubscribe(t)
 
@@ -120,7 +124,7 @@ class HomieDevice:
                     else:
                         t = b"{}/{}/set".format(n.id, p.id)
 
-                    await subscribe(t, cb)
+                    await subscribe(t)
 
         await self.publish_properties()
         await self.set_state("ready")
@@ -141,13 +145,16 @@ class HomieDevice:
                 n.broadcast_callback(topic, msg, retained)
         else:
             # node property callbacks
-            if topic in self.callback_topics:
-                self.callback_topics[topic](topic, msg, retained)
+            nt = topic.split(SLASH)
+            node = nt[len(self.dtopic.split(SLASH))]
+            if node in self.callback_topics:
+                self.callback_topics[node](topic, msg, retained)
 
     async def publish(self, topic, payload, retain=True):
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), "utf-8")
-        t = b"/".join((self.dtopic, topic))
+
+        t = SLASH.join((self.dtopic, topic))
         # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
@@ -155,7 +162,7 @@ class HomieDevice:
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), "utf-8")
 
-        topic = b"/".join((self._rtopic, b"$broadcast"))
+        topic = SLASH.join((self.btopic, b"$broadcast"))
         # print("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
@@ -166,7 +173,7 @@ class HomieDevice:
         # device properties
         await publish(b"$homie", b"3.0.1")
         await publish(b"$name", self.device_name)
-        await publish(b"$state", b"init")
+        await publish(DEVICE_STATE, b"init")
         await publish(b"$fw/name", b"Microhomie")
         await publish(b"$fw/version", __version__)
         await publish(b"$implementation", bytes(platform, "utf-8"))
@@ -181,12 +188,7 @@ class HomieDevice:
         # node properties
         nodes = self.nodes
         for n in nodes:
-            try:
-                for prop in n.get_properties():
-                    await publish(*prop)
-            except Exception as error:
-                print("ERROR: publish properties for node: {}".format(n))
-                print(error)
+            await n.publish_properties()
 
     @await_ready_state
     async def publish_stats(self):
@@ -209,7 +211,7 @@ class HomieDevice:
     async def set_state(self, val):
         if val in ["ready", "disconnected", "sleeping", "alert"]:
             self._state = val
-            await self.publish(b"$state", val)
+            await self.publish(DEVICE_STATE, val)
             if val == "ready":
                 _EVENT.set()
                 await sleep_ms(1000)
