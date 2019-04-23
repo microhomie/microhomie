@@ -1,6 +1,4 @@
 import sys
-
-import settings
 import ubinascii
 import utime
 
@@ -15,7 +13,7 @@ def _not_implemented():
     return None
 
 
-def _setup_network():
+def _setup_network(password):
     """Setup platform specific network settings"""
     global wlan
     global secret
@@ -23,19 +21,19 @@ def _setup_network():
     if sys.platform in PYCOM:
         # Update secret as tuple with wlan mode for PyCom port.
         wlan = network.WLAN(network.WLAN.STA)
-        secret = (network.WLAN.WPA2, settings.WIFI_PASSWORD)
+        secret = (network.WLAN.WPA2, password)
     else:
         # default micropython wlan settings
         wlan = network.WLAN(network.STA_IF)
-        secret = settings.WIFI_PASSWORD
+        secret = password
 
 
-def _wifi_connect():
+def _wifi_connect(ssid):
     """Connects to WIFI"""
     if not wlan.isconnected():
         wlan.active(True)
-        print("NETWORK: connecting to network %s..." % settings.WIFI_SSID)
-        wlan.connect(settings.WIFI_SSID, secret)
+        print("NETWORK: connecting to network %s..." % ssid)
+        wlan.connect(ssid, secret)
         while not wlan.isconnected():
             print("NETWORK: waiting for connection...")
             utime.sleep(1)
@@ -81,3 +79,9 @@ def get_local_mac():
         return ubinascii.hexlify(network.WLAN(0).config("mac"), ":")
     except Exception:
         return b"cannotgetlocalmac"
+
+
+def ota_update():
+    import machine
+    machine.RTC().memory('yaotaota')
+    machine.reset()

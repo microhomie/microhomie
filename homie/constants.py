@@ -2,7 +2,7 @@ from micropython import const
 
 # Device
 QOS = const(1)
-MAIN_DELAY = const(5000)
+MAIN_DELAY = const(1000)
 STATS_DELAY = const(60000)
 RESTORE_DELAY = const(250)
 DEVICE_STATE = b"$state"

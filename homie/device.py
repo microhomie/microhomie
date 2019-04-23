@@ -1,9 +1,9 @@
 from gc import mem_free, collect
 from sys import platform
-from asyn import Event
+from asyn import Event, launch
 from utime import time
 from uasyncio import get_event_loop, sleep_ms
-from micropython import const
+from machine import WDT
 
 from mqtt_as import MQTTClient
 from homie import __version__, utils
@@ -46,8 +46,8 @@ class HomieDevice:
         )
 
         # setup networking
-        utils.setup_network()
-        utils.wifi_connect()
+        utils.setup_network(settings.WIFI_PASSWORD)
+        utils.wifi_connect(settings.WIFI_SSID)
 
         self.mqtt = MQTTClient(
             client_id=settings.DEVICE_ID,
@@ -78,7 +78,7 @@ class HomieDevice:
     def format_topic(self, topic):
         return SLASH.join((self.dtopic, topic))
 
-    async def subscribe(self, topic, callback=False):
+    async def subscribe(self, topic):
         topic = self.format_topic(topic)
         # print("MQTT SUBSCRIBE: {}".format(topic))
         await self.mqtt.subscribe(topic, QOS)
@@ -97,7 +97,8 @@ class HomieDevice:
         await self.mqtt.subscribe(
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
-        await subscribe(b"$stats/interval/set", False)
+        await subscribe(b"$stats/interval/set")
+        await subscribe(b"$fw/update")
 
         # node topics
         nodes = self.nodes
@@ -143,6 +144,9 @@ class HomieDevice:
             nodes = self.nodes
             for n in nodes:
                 n.broadcast_callback(topic, msg, retained)
+        # go into ota mode if $ota == true
+        elif b"/$fw/update" in topic:
+            launch(self.start_fw_ota_update, ())
         else:
             # node property callbacks
             nt = topic.split(SLASH)
@@ -209,7 +213,7 @@ class HomieDevice:
             await sleep_ms(interval * 1000)
 
     async def set_state(self, val):
-        if val in ["ready", "disconnected", "sleeping", "alert"]:
+        if val in ["ready", "disconnected", "sleeping", "alert", "ota"]:
             self._state = val
             await self.publish(DEVICE_STATE, val)
             if val == "ready":
@@ -223,9 +227,18 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
 
+        wdt = WDT()
+        collect()
         while True:
+            wdt.feed()
             await sleep_ms(MAIN_DELAY)
 
     def start(self):
         loop = get_event_loop()
         loop.run_until_complete(self.run())
+
+    async def start_fw_ota_update(self):
+        from homie.utils import ota_update
+        await self.set_state("ota")
+        await sleep_ms(2000)
+        ota_update()
