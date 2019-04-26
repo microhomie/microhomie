@@ -83,5 +83,6 @@ def get_local_mac():
 
 def ota_update():
     import machine
+    wdt = machine.WDT()
     machine.RTC().memory('yaotaota')
     machine.reset()

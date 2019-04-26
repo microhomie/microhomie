@@ -3,7 +3,6 @@ from sys import platform
 from asyn import Event, launch
 from utime import time
 from uasyncio import get_event_loop, sleep_ms
-from machine import WDT
 
 from mqtt_as import MQTTClient
 from homie import __version__, utils
@@ -227,10 +226,9 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
 
-        wdt = WDT()
         collect()
         while True:
-            wdt.feed()
+            # wdt.feed()
             await sleep_ms(MAIN_DELAY)
 
     def start(self):
@@ -240,5 +238,5 @@ class HomieDevice:
     async def start_fw_ota_update(self):
         from homie.utils import ota_update
         await self.set_state("ota")
-        await sleep_ms(2000)
+        await sleep_ms(1500)
         ota_update()
