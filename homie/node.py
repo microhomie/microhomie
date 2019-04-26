@@ -61,6 +61,7 @@ class HomieNode:
         nid = self.id
         props = self._properties
         publish = self.device.publish
+
         while True:
             for p in props:
                 if p._update is True:
@@ -72,7 +73,7 @@ class HomieNode:
                     is_array = p.range > 1
                     for i, data in enumerate(p._data):
                         if data is not None:
-                            if data == delta[i] and p._force is False:
+                            if data == delta[i]:
                                 continue
 
                             if is_array:
@@ -82,7 +83,8 @@ class HomieNode:
 
                             await publish(t, data, p.retained)
 
-                    p.update_delta()
+                    if p.retained:
+                        p.update_delta()
 
             await sleep_ms(PUBLISH_DELAY)
 

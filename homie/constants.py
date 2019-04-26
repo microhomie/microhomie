@@ -8,7 +8,7 @@ RESTORE_DELAY = const(250)
 DEVICE_STATE = b"$state"
 
 # Node
-PUBLISH_DELAY = const(25)
+PUBLISH_DELAY = const(20)
 
 # General
 SLASH = b"/"

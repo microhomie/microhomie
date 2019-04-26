@@ -29,10 +29,6 @@ class HomieNodeProperty:
         self._delta = [None] * range
         self._update = True
 
-        self._force = False
-        if self.retained is False:
-            self._force = True
-
     def __str__(self):
         return self.id
 

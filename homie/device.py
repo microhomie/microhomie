@@ -226,9 +226,7 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
 
-        collect()
         while True:
-            # wdt.feed()
             await sleep_ms(MAIN_DELAY)
 
     def start(self):
