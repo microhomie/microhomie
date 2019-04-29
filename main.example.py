@@ -30,12 +30,13 @@ class LED(HomieNode):
         self.add_property(self.led_property)
 
     def callback(self, topic, msg, retained):
-        if msg == b"toggle":
-            self.led(not self.led())
-        else:
-            self.led(ONOFF[msg])
+        if b"led/power" in topic:
+            if msg == b"toggle":
+                self.led(not self.led())
+            else:
+                self.led(ONOFF[msg])
 
-        self.led_property.set_data(ONOFF[self.led()])
+            self.led_property.set_data(ONOFF[self.led()])
 
 
 def main():
@@ -44,6 +45,8 @@ def main():
 
     # Add LED node to device
     homie.add_node(LED())
+
+    # run forever
     homie.start()
 
 
