@@ -1,6 +1,6 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-VERSION := 0.4.0-alpha
+VERSION := 1.0.0-alpha
 MICROPYVERSION := 1.10
 PORT := /dev/ttyUSB0
 
@@ -20,11 +20,10 @@ copy:
 	cp homie/*.py micropython/ports/esp8266/modules/homie
 
 firmware:
-	cd yaota8266; make
-	cd micropython/ports/esp8266; make ota
+	cd micropython/ports/esp8266; make
 
 copy-firmware:
-	cp micropython/ports/esp8266/build/firmware-ota.bin ./microhomie-esp8266-ota-v$(VERSION).bin
+	cp micropython/ports/esp8266/build/firmware-combined.bin ./microhomie-esp8266-v$(VERSION).bin
 
 release: all copy-firmware
 
@@ -38,8 +37,7 @@ erase:
 	esptool.py --port $(PORT) --baud 460800 erase_flash
 
 flash:
-	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 yaota8266/yaota8266.bin
-	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x3c000 micropython/ports/esp8266/build/firmware-ota.bin
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 micropython/ports/esp8266/build/firmware-combined.bin
 
 espopensdk:
 	-git clone --recursive https://github.com/pfalcon/esp-open-sdk.git
@@ -51,11 +49,4 @@ micropython:
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
 
-yaota:
-	-git clone --recursive https://github.com/schinckel/yaota8266.git
-	cd yaota8266; git checkout merged
-	cd yaota8266; cp config.h.example config.h
-	cd yaota8266/ota-client; bash gen_keys.sh
-	cd yaota8266/ota-client; python -c "import rsa_sign; rsa_sign.dump_c(rsa_sign.load_key())"
-
-bootstrap: espopensdk micropython requirements yaota
+bootstrap: espopensdk micropython requirements

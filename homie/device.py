@@ -97,7 +97,6 @@ class HomieDevice:
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
         await subscribe(b"$stats/interval/set")
-        await subscribe(b"$fw/update")
 
         # node topics
         nodes = self.nodes
@@ -143,9 +142,6 @@ class HomieDevice:
             nodes = self.nodes
             for n in nodes:
                 n.broadcast_callback(topic, msg, retained)
-        # go into ota mode if $ota == true
-        elif b"/$fw/update" in topic:
-            launch(self.start_fw_ota_update, ())
         else:
             # node property callbacks
             nt = topic.split(SLASH)
@@ -209,15 +205,15 @@ class HomieDevice:
                 interval = self.stats_interval
                 await publish(b"$stats/interval", interval)
 
-            await sleep_ms(interval * 1000)
+            await sleep_ms(interval * MAIN_DELAY)
 
     async def set_state(self, val):
-        if val in ["ready", "disconnected", "sleeping", "alert", "ota"]:
+        if val in ["ready", "disconnected", "sleeping", "alert"]:
             self._state = val
             await self.publish(DEVICE_STATE, val)
             if val == "ready":
                 _EVENT.set()
-                await sleep_ms(1000)
+                await sleep_ms(MAIN_DELAY)
                 _EVENT.clear()
 
     async def run(self):
@@ -232,9 +228,3 @@ class HomieDevice:
     def start(self):
         loop = get_event_loop()
         loop.run_until_complete(self.run())
-
-    async def start_fw_ota_update(self):
-        from homie.utils import ota_update
-        await self.set_state("ota")
-        await sleep_ms(1500)
-        ota_update()

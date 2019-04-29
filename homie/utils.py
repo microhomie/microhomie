@@ -79,10 +79,3 @@ def get_local_mac():
         return ubinascii.hexlify(network.WLAN(0).config("mac"), ":")
     except Exception:
         return b"cannotgetlocalmac"
-
-
-def ota_update():
-    import machine
-    wdt = machine.WDT()
-    machine.RTC().memory('yaotaota')
-    machine.reset()

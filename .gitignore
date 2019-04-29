@@ -14,4 +14,3 @@ docs/_build
 build/
 micropython/
 esp-open-sdk/
-yaota8266/
