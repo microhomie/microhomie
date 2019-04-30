@@ -73,7 +73,7 @@ class HomieNode:
                     is_array = p.range > 1
                     for i, data in enumerate(p._data):
                         if data is not None:
-                            if data == delta[i]:
+                            if data == delta[i] and is_array:
                                 continue
 
                             if is_array:
