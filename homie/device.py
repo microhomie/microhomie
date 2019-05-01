@@ -108,6 +108,7 @@ class HomieDevice:
                     # subscribe topic to restore retained messages
                     if p.restore:
                         if is_array:
+                            #TODO: i not defined
                             t = b"{}/{}_{}".format(self.id, p.id, i)
                         else:
                             t = b"{}/{}".format(n.id, p.id)
@@ -118,6 +119,7 @@ class HomieDevice:
 
                     # final subscribe to /set topic
                     if is_array:
+                        #TODO: i not defined
                         t = b"{}/{}_{}/set".format(self.id, p.id, i)
                     else:
                         t = b"{}/{}/set".format(n.id, p.id)
