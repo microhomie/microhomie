@@ -8,7 +8,7 @@ from homie.property import HomieNodeProperty
 from homie.constants import TRUE, FALSE
 
 
-ONOFF = {FALSE: 0, TRUE: 1, 0: FALSE, 1: TRUE}
+ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
 
 
 class LED(HomieNode):
@@ -36,7 +36,7 @@ class LED(HomieNode):
             else:
                 self.led(ONOFF[msg])
 
-            self.led_property.set_data(ONOFF[self.led()])
+            self.led_property.data = ONOFF[self.led()]
 
 
 def main():
@@ -50,4 +50,5 @@ def main():
     homie.start()
 
 
-main()
+if __name__ == "__main__":
+    main()

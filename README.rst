@@ -4,26 +4,33 @@ Microhomie
 
 |build-status| |pypi|
 
-A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
+A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT. Main target for Microhomie is the ESP8266 device.
 
 Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
 
-*This project is in beta stage. This branch use asyncio and will break with existing Microhomie devices/nodes*
+!Important! Microhomie 1.0.0 (asyncio version) is not compatible with the previous 0.3 Homie device and nodes.
 
 
 Known issues
 ------------
 
-* SSL connection problems at least with ESP8266
+* SSL connection problems
 
 
 Install
 -------
 
-You can get the detailed installation instructions here: http://microhomie.readthedocs.io/
+Download the `latest image <https://github.com/microhomie/microhomie/releases>`_ and flash it like any MircoPython image to your ESP8266 device. I.E:
 
-Build
------
+.. code-block:: shell
+
+    esptool --port PORT --baud 460800 write_flash --flash_size=detect --verify -fm dio 0x0 microhomie-esp8266-VERSION.bin
+
+Make your changes in `settings.example.py` and copy this file as `settings.py` to your device. You can now test our example nodes from `examples/`, just copy the `main.py` to your device. Start with the `examples/led` node to turn on and off the on-board LED.
+
+
+Build image
+-----------
 
 To build your own Microhomie image run:
 
@@ -32,25 +39,4 @@ To build your own Microhomie image run:
     make bootstrap
     make requirements
     make
-
-
-Local Development setup
------------------------
-
-You have to compile micropython with this guide https://github.com/micropython/micropython/wiki/Getting-Started
-
-After that, you can install the required libraries.
-
-.. code-block:: shell
-
-    micropython -m upip install micropython-umqtt.simple
-    micropython -m upip install micropython-logging
-    micropython -m upip install micropython-machine
-
-.. |build-status| image:: https://readthedocs.org/projects/microhomie/badge/?version=master
-    :target: http://microhomie.readthedocs.io/en/master/?badge=master
-    :alt: Documentation Status
-
-.. |pypi| image:: https://img.shields.io/pypi/v/microhomie.svg
-    :target: https://pypi.python.org/pypi/microhomie/
-    :alt: PyPi Status
+    make flash PORT
