@@ -3,13 +3,7 @@ from sys import platform
 
 from asyn import Event
 from homie import __version__, utils
-from homie.constants import (
-    DEVICE_STATE,
-    MAIN_DELAY,
-    QOS,
-    RESTORE_DELAY,
-    SLASH,
-)
+from homie.constants import DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY, SLASH
 from mqtt_as import MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from utime import time
@@ -101,14 +95,13 @@ class HomieDevice:
         nodes = self.nodes
         for n in nodes:
             props = n._properties
-            for p in props:
+            for i, p in enumerate(props):
                 is_array = p.range > 1
                 if p.settable:
                     self.callback_topics[n.id.encode()] = n.callback
                     # subscribe topic to restore retained messages
                     if p.restore:
                         if is_array:
-                            #TODO: i not defined
                             t = b"{}/{}_{}".format(self.id, p.id, i)
                         else:
                             t = b"{}/{}".format(n.id, p.id)
@@ -119,7 +112,6 @@ class HomieDevice:
 
                     # final subscribe to /set topic
                     if is_array:
-                        #TODO: i not defined
                         t = b"{}/{}_{}/set".format(self.id, p.id, i)
                     else:
                         t = b"{}/{}/set".format(n.id, p.id)
