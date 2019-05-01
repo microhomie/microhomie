@@ -11,7 +11,7 @@ from homie.property import HomieNodeProperty
 
 class DHT22(HomieNode):
 
-    def __init__(self, name="Temp & Hum", pin=4, interval=60, pull=-1):
+    def __init__(self, name="Temp & Humid", pin=4, interval=60, pull=-1):
         super().__init__(id="dht22", name=name, type="dht22")
         self.dht22 = dht.DHT22(Pin(pin, Pin.IN, pull))
         self.interval = interval
@@ -43,8 +43,8 @@ class DHT22(HomieNode):
 
         while True:
             dht22.measure()
-            self.temp_property.set_data(dht22.temperature())
-            self.hum_property.set_data(dht22.humidity())
+            self.temp_property.data = dht22.temperature()
+            self.hum_property.data = dht22.humidity()
 
             await sleep_ms(delay)
 

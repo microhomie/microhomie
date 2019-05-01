@@ -34,7 +34,7 @@ class HTTP(HomieNode):
             r = urequests.request(
                 self.method, self.url, headers=self.headers
             )
-            self.response_property.set_data(r.text)
+            self.response_property.data = r.text
             r.close()
 
             await sleep_ms(delay)

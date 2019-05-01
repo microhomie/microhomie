@@ -71,13 +71,13 @@ class AmbientLight(HomieNode):
             else:
                 return
 
-            self.light_property.set_data(msg)
+            self.light_property.data = msg
 
         elif b"color" in topic:
             rgb = convert_str_to_rgb(msg)
             if rgb is not None:
                 self.color_property.set_data(msg)
-                if self.light_property.get_data() == TRUE:
+                if self.light_property.data == TRUE:
                     all_on(self.np, color=rgb)
 
 

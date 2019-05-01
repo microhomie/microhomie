@@ -36,7 +36,7 @@ class LED(HomieNode):
             else:
                 self.led(ONOFF[msg])
 
-            self.led_property.set_data(ONOFF[self.led()])
+            self.led_property.data = ONOFF[self.led()]
 
 
 def main():

@@ -46,7 +46,7 @@ class PIR(HomieNode):
             else:
                 return
 
-            self.pir_property.set_data(msg)
+            self.pir_property.data = msg
             if retained:
                 self.pir_sensor.update_delta()
 
