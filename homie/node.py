@@ -1,7 +1,6 @@
-from uasyncio import sleep_ms
-
+from homie.constants import FALSE, PUBLISH_DELAY, TRUE
 from homie.device import await_ready_state
-from homie.constants import PUBLISH_DELAY, TRUE, FALSE
+from uasyncio import sleep_ms
 
 
 class HomieNode:
@@ -94,7 +93,6 @@ class HomieNode:
 
     def broadcast_callback(self, topic, payload, retained):
         """Gets called when the broadcast topic receives a message"""
-        pass
 
     def get_property_id_from_set_topic(self, topic):
         """Return the property id from topic as integer"""

@@ -50,3 +50,23 @@ micropython:
 	cd micropython/ports/unix; make axtls; make
 
 bootstrap: espopensdk micropython requirements
+
+
+# linting!
+black:
+	find homie -name '*.py' | grep -v with_errors  | xargs black --line-length=79 --safe $(ARGS)
+
+isort:
+	isort --recursive --apply homie
+
+mypy:
+	find homie -name '*.py' | xargs mypy --follow-imports skip --ignore-missing-imports
+
+autoflake:
+	find homie -name '*.py' | xargs autoflake --in-place --remove-unused-variables
+
+flake8:
+	flake8 homie
+
+# isort must come first as black reformats the imports again
+lint: autoflake isort black flake8 mypy

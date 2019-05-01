@@ -1,19 +1,18 @@
-from gc import mem_free, collect
+from gc import collect, mem_free
 from sys import platform
-from asyn import Event, launch
-from utime import time
-from uasyncio import get_event_loop, sleep_ms
 
-from mqtt_as import MQTTClient
+from asyn import Event
 from homie import __version__, utils
 from homie.constants import (
-    QOS,
-    MAIN_DELAY,
-    STATS_DELAY,
-    RESTORE_DELAY,
     DEVICE_STATE,
+    MAIN_DELAY,
+    QOS,
+    RESTORE_DELAY,
     SLASH,
 )
+from mqtt_as import MQTTClient
+from uasyncio import get_event_loop, sleep_ms
+from utime import time
 
 
 _EVENT = Event()
