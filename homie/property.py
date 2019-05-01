@@ -30,19 +30,39 @@ class HomieNodeProperty:
         self._update = True
 
     def __str__(self):
-        return self.id
+        return self._data[0]
 
-    def update_delta(self):
-        self._delta = self._data.copy()
+    def __len__(self):
+        return len(self._data)
 
-    def set_data(self, val, index=0):
+    def __iter__(self):
+        for d in self._data:
+            yield d
+
+    def __contains__(self, i):
+        if i in self._data:
+            return True
+        return False
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    def __setitem__(self, k, v):
         try:
-            if isinstance(val, bool):
-                val = str(val).lower().encode()
-            self._data[index] = val
+            if isinstance(v, bool):
+                v = str(v).lower().encode()
+            self._data[k] = v
             self._update = True
         except (ValueError, IndexError):
             pass
 
-    def get_data(self, index=0):
-        return self._data[index]
+    @property
+    def data(self):
+        return self._data[0]
+
+    @data.setter
+    def data(self, value):
+        self._data[0] = value
+
+    def update_delta(self):
+        self._delta = self._data.copy()
