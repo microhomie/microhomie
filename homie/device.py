@@ -89,7 +89,6 @@ class HomieDevice:
         await self.mqtt.subscribe(
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
-        await subscribe(b"$stats/interval/set")
 
         # node topics
         nodes = self.nodes
@@ -124,14 +123,8 @@ class HomieDevice:
     def sub_cb(self, topic, msg, retained):
         # print("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
 
-        # device callbacks
-        if b"/$stats/interval/set" in topic:
-            try:
-                self.stats_interval = int(msg.decode())
-            except ValueError:
-                pass
         # broadcast callback passed to nodes
-        elif b"/$broadcast" in topic:
+        if b"/$broadcast" in topic:
             nodes = self.nodes
             for n in nodes:
                 n.broadcast_callback(topic, msg, retained)
@@ -172,7 +165,6 @@ class HomieDevice:
         await publish(b"$localip", utils.get_local_ip())
         await publish(b"$mac", utils.get_local_mac())
         await publish(b"$stats", b"interval,uptime,freeheap")
-        await publish(b"$stats/interval", self.stats_interval)
         await publish(
             b"$nodes", b",".join([n.id.encode() for n in self.nodes])
         )
@@ -184,21 +176,15 @@ class HomieDevice:
 
     @await_ready_state
     async def publish_stats(self):
-        stime = self._stime
-        interval = self.stats_interval
+        delay = self.stats_interval * MAIN_DELAY
         publish = self.publish
-
         while True:
-            uptime = time() - stime
+            uptime = time() - self._stime
+            # re-publish interval for some controller (i.e. openhab)
+            await publish(b"$stats/interval", self.stats_interval)
             await publish(b"$stats/uptime", uptime)
             await publish(b"$stats/freeheap", mem_free())
-
-            # update interval stats if changed
-            if interval != self.stats_interval:
-                interval = self.stats_interval
-                await publish(b"$stats/interval", interval)
-
-            await sleep_ms(interval * MAIN_DELAY)
+            await sleep_ms(delay)
 
     async def set_state(self, val):
         if val in ["ready", "disconnected", "sleeping", "alert"]:
