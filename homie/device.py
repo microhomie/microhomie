@@ -94,28 +94,34 @@ class HomieDevice:
         nodes = self.nodes
         for n in nodes:
             props = n._properties
-            for i, p in enumerate(props):
+            for p in props:
                 is_array = p.range > 1
                 if p.settable:
                     self.callback_topics[n.id.encode()] = n.callback
                     # subscribe topic to restore retained messages
                     if p.restore:
                         if is_array:
-                            t = b"{}/{}_{}".format(self.id, p.id, i)
+                            r = range(p.range)
+                            for i in r:
+                                t = b"{}_{}/{}".format(n.id, i, p.id)
+                                await subscribe(t)
+                                await sleep_ms(RESTORE_DELAY)
+                                await unsubscribe(t)
                         else:
                             t = b"{}/{}".format(n.id, p.id)
-
-                        await subscribe(t)
-                        await sleep_ms(RESTORE_DELAY)
-                        await unsubscribe(t)
+                            await subscribe(t)
+                            await sleep_ms(RESTORE_DELAY)
+                            await unsubscribe(t)
 
                     # final subscribe to /set topic
                     if is_array:
-                        t = b"{}/{}_{}/set".format(self.id, p.id, i)
+                        r = range(p.range)
+                        for i in r:
+                            t = b"{}_{}/{}/set".format(n.id, i, p.id)
+                            await subscribe(t)
                     else:
                         t = b"{}/{}/set".format(n.id, p.id)
-
-                    await subscribe(t)
+                        await subscribe(t)
 
         await self.publish_properties()
         await self.set_state("ready")
@@ -132,6 +138,8 @@ class HomieDevice:
             # node property callbacks
             nt = topic.split(SLASH)
             node = nt[len(self.dtopic.split(SLASH))]
+            if b"_" in node:
+                node = node.split(b"_")[0]
             if node in self.callback_topics:
                 self.callback_topics[node](topic, msg, retained)
 
