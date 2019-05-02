@@ -2,7 +2,7 @@ export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools
 
 VERSION := 1.0.0-alpha
 MICROPYVERSION := 1.10
-PORT := /dev/ttyUSB0
+PORT ?= /dev/ttyUSB0
 
 
 all: copy firmware
@@ -48,6 +48,7 @@ micropython:
 	cd micropython; git checkout $(MICROPYVERSION)
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
+	cd micropython; git apply ../micropython.patch
 
 bootstrap: espopensdk micropython requirements
 
