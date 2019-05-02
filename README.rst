@@ -8,13 +8,15 @@ A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`
 
 Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
 
-!Important! Microhomie 1.0.0 (asyncio version) is not compatible with the previous 0.3 Homie device and nodes.
+!Important! Microhomie 1.0.0 (asyncio version) is not compatible with previous 0.3 Microhomie nodes.
+
+Documentation is also outdated, the examples are a good starting point until we update the documentation.
 
 
-Known issues
-------------
+Micropython changes
+-------------------
 
-* SSL connection problems
+To safe some space we disabled **webrepl** and **btree** support. The AccessPoint SSID is `Microhomie-MAC` with the secret `microhomiE`. You can see all the details in the `micropython.patch` file.
 
 
 Install
@@ -40,3 +42,9 @@ To build your own Microhomie image run:
     make requirements
     make
     make flash PORT
+
+
+Known issues
+------------
+
+* SSL connection problems (not tested, with mqtt_as)
