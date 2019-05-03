@@ -127,13 +127,3 @@ You can chose from multiple Apps for Android / iOS / Desktop to display the sens
 - MQTT Dash: https://play.google.com/store/apps/details?id=net.routix.mqttdash
 
 .. image:: _static/images/mobileapp.png
-
-
-Send Data to IOTA with the homie-iota-gateway
--------------------------------------------------
-
-This is still the great unknown. The good news is, the data can be gathered with Microhomie in the Homie format (or by other systems!) and its waiting in MQTT. 
-
-We already have boilerplate code in place, which subscribes in real time to updates of the data in MQTT and it can be configured. We just need the "push to IOTA" part when the data marketplace is public!
-
-You can follow the final development on Github https://github.com/microhomie/homie-iota
