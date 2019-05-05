@@ -151,11 +151,15 @@ class HomieDevice:
         # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
-    async def broadcast(self, payload):
+    async def broadcast(self, payload, level=None):
         if not isinstance(payload, bytes):
             payload = bytes(str(payload), "utf-8")
 
         topic = SLASH.join((self.btopic, b"$broadcast"))
+        if level is not None:
+            if isinstance(level, str):
+                level = level.encode()
+            topic = SLASH.join((topic, level))
         # print("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 

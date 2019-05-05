@@ -2,6 +2,12 @@
 Changelog
 =========
 
+1.0.0-beta (unreleased)
+-----------------------
+
+* Add level to broadcast messages
+
+
 1.0.0-alpha
 -----------
 
