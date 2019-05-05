@@ -47,3 +47,8 @@ Known issues
 ------------
 
 * SSL connection problems (not tested, with mqtt_as)
+
+
+.. |build-status| image:: https://readthedocs.org/projects/microhomie/badge/?version=master
+    :target: http://microhomie.readthedocs.io/en/master/?badge=master
+    :alt: Documentation Status
