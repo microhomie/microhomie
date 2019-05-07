@@ -61,22 +61,22 @@ class AmbientLight(HomieNode):
         )
         self.add_property(self.color_property)
 
-    def callback(self, topic, msg, retained):
+    def callback(self, topic, payload, retained):
         if b"power" in topic:
-            if msg == TRUE:
+            if payload == TRUE:
                 rgb = convert_str_to_rgb(self.color_property.get_data())
                 all_on(self.np, color=rgb)
-            elif msg == FALSE:
+            elif payload == FALSE:
                 all_off(self.np)
             else:
                 return
 
-            self.light_property.data = msg
+            self.light_property.data = payload
 
         elif b"color" in topic:
-            rgb = convert_str_to_rgb(msg)
+            rgb = convert_str_to_rgb(payload)
             if rgb is not None:
-                self.color_property.set_data(msg)
+                self.color_property.set_data(payload)
                 if self.light_property.data == TRUE:
                     all_on(self.np, color=rgb)
 

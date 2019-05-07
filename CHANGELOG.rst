@@ -2,10 +2,12 @@
 Changelog
 =========
 
-1.0.0-beta (unreleased)
------------------------
+1.0.0-alpha2
+------------
 
 * Add level to broadcast messages
+* Fix property.data send updates when set
+* Rename msg to payload in examples
 
 
 1.0.0-alpha

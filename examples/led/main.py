@@ -29,12 +29,12 @@ class LED(HomieNode):
 
         self.add_property(self.led_property)
 
-    def callback(self, topic, msg, retained):
+    def callback(self, topic, payload, retained):
         if b"led/power" in topic:
-            if msg == b"toggle":
+            if payload == b"toggle":
                 self.led(not self.led())
             else:
-                self.led(ONOFF[msg])
+                self.led(ONOFF[payload])
 
             self.led_property.data = ONOFF[self.led()]
 

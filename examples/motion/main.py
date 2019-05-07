@@ -30,13 +30,13 @@ class PIR(HomieNode):
             default=TRUE,
         )
 
-    def callback(self, topic, msg, retained):
+    def callback(self, topic, payload, retained):
         if b"active" in topic:
-            if msg == FALSE:
+            if payload == FALSE:
                 if self.active:
                     asyn.launch(asyn.NamedTask.cancel, ("pir_sensor",))
                     self.active = False
-            elif msg == TRUE:
+            elif payload == TRUE:
                 if not self.active:
                     self.active = True
                     loop = get_event_loop()
@@ -46,7 +46,7 @@ class PIR(HomieNode):
             else:
                 return
 
-            self.pir_property.data = msg
+            self.pir_property.data = payload
             if retained:
                 self.pir_sensor.update_delta()
 
