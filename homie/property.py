@@ -62,7 +62,7 @@ class HomieNodeProperty:
 
     @data.setter
     def data(self, value):
-        self._data[0] = value
+        self[0] = value
 
     def update_delta(self):
         self._delta = self._data.copy()
