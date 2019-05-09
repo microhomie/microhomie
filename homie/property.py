@@ -29,9 +29,6 @@ class HomieNodeProperty:
         self._delta = [None] * range
         self._update = True
 
-    def __str__(self):
-        return self._data[0]
-
     def __len__(self):
         return len(self._data)
 

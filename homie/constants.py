@@ -12,6 +12,7 @@ PUBLISH_DELAY = const(20)
 
 # General
 SLASH = b"/"
+UNDERSCORE = b"_"
 
 ON = b"on"
 OFF = b"off"

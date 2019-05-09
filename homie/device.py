@@ -3,11 +3,11 @@ from sys import platform
 
 from asyn import Event
 from homie import __version__, utils
-from homie.constants import DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY, SLASH
+from homie.constants import (DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY,
+                             SLASH, UNDERSCORE)
 from mqtt_as import MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from utime import time
-
 
 _EVENT = Event()
 def await_ready_state(func):
@@ -138,8 +138,8 @@ class HomieDevice:
             # node property callbacks
             nt = topic.split(SLASH)
             node = nt[len(self.dtopic.split(SLASH))]
-            if b"_" in node:
-                node = node.split(b"_")[0]
+            if UNDERSCORE in node:
+                node = node.split(UNDERSCORE)[0]
             if node in self.callback_topics:
                 self.callback_topics[node](topic, msg, retained)
 

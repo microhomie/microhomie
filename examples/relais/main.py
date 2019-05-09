@@ -37,7 +37,7 @@ class Relais(HomieNode):
     def callback(self, topic, payload, retained):
         if b"power" in topic:
             if payload in [TRUE, FALSE]:
-                relay = self.get_property_id_from_set_topic(topic)
+                relay = self.get_array_id_from_set_topic(topic)
                 if relay is not None:
                     self.relay_property[relay] = payload
                     self.relais[relay](POWER[payload])

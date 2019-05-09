@@ -1,4 +1,4 @@
-from homie.constants import FALSE, PUBLISH_DELAY, TRUE
+from homie.constants import FALSE, PUBLISH_DELAY, SLASH, TRUE, UNDERSCORE
 from homie.device import await_ready_state
 from uasyncio import sleep_ms
 
@@ -93,12 +93,16 @@ class HomieNode:
     def broadcast_callback(self, topic, payload, retained):
         """Gets called when the broadcast topic receives a message"""
 
-    def get_property_id_from_set_topic(self, topic):
-        """Return the property id from topic as integer"""
-        retval = None
-        try:
-            return int(topic.split(b"/")[-3].split(b"_")[-1])
-        except (TypeError, ValueError):
-            pass
+    def get_array_id_from_set_topic(self, topic):
+        """Return the id from an array property topic as integer"""
+        levels = topic.split(SLASH)
+        for l in levels:
+            if UNDERSCORE in l:
+                try:
+                    return int(l.split(UNDERSCORE)[-1])
+                except ValueError:
+                    pass
 
-        return retval
+    def get_property_id_from_set_topic(self, topic):
+        # deprecated - will be removed in future
+        return self.get_array_id_from_set_topic(topic)
