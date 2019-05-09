@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.0.0-alpha3
+------------
+
+* Fix restore from array property
+* Add One-Wire example node for ds18b20 (Thanks Rick @palmtreefrb)
+
+
 1.0.0-alpha2
 ------------
 
