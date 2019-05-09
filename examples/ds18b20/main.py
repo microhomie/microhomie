@@ -74,5 +74,11 @@ class DS18B20(HomieNode):
         return (c * 1.8) + 32
 
 
+def main():
+    homie = HomieDevice(settings)
+    homie.add_node(DS18B20())
+    homie.start()
+
+
 if __name__ == "__main__":
     main()
