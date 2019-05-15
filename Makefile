@@ -5,19 +5,20 @@ MICROPYVERSION := 1.10
 PORT ?= /dev/ttyUSB0
 
 
-all: copy firmware
+all: copy-lib firmware
 
 requirements:
-	mkdir -p micropython/ports/esp8266/modules/uasyncio
-	curl -s -o micropython/ports/esp8266/modules/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
-	curl -s -o micropython/ports/esp8266/modules/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
-	curl -s -o micropython/ports/esp8266/modules/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
-	curl -s -o micropython/ports/esp8266/modules/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
-	curl -s -o micropython/ports/esp8266/modules/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
+	mkdir -p lib/uasyncio
+	curl -s -o lib/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
+	curl -s -o lib/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
+	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as_minimal.py
+	curl -s -o lib/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
+	curl -s -o lib/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
 
-copy:
+copy-lib:
 	mkdir -p micropython/ports/esp8266/modules/homie
 	cp homie/*.py micropython/ports/esp8266/modules/homie
+	cp -rf lib/* micropython/ports/esp8266/modules
 
 firmware:
 	cd micropython/ports/esp8266; make
