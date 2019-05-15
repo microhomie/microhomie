@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.0.0-beta1
+-----------
+
+* Add mpfshell install script and documentation for ESP32 boards.
+* Download requirements to lib/ directory
+
+
 1.0.0-alpha3
 ------------
 
