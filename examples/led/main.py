@@ -8,6 +8,7 @@ from homie.property import HomieNodeProperty
 from homie.constants import TRUE, FALSE
 
 
+# reversed values for the esp8266 boards onboard led
 ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
 
 

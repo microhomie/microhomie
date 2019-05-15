@@ -8,7 +8,7 @@ A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`
 
 Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
 
-!Important! Microhomie 1.0.0 (asyncio version) is not compatible with previous 0.3 Microhomie nodes.
+**Important** Microhomie 1.0.0 (asyncio version) is not compatible with previous 0.3 Microhomie nodes.
 
 Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started. If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or get in contact with us on `Slack <https://join.slack.com/t/microhomie/shared_invite/enQtMzA3MTIwNTg3OTU4LTdjMmQxNGI1ZTIzN2IwZjNiMDRkMDE4NGM3Mjc3MWE4ZWUxNzdhOTVhZWIxYmNiZDBjZDlhMTY2MmIyOGZiODI>`_.
 
@@ -46,7 +46,7 @@ To build your own Microhomie image run:
 Known issues
 ------------
 
-* SSL connection problems (not tested, with mqtt_as)
+* No SSL support for now
 
 
 .. |build-status| image:: https://readthedocs.org/projects/microhomie/badge/?version=master

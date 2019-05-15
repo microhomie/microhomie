@@ -1,0 +1,17 @@
+md lib
+cd lib
+md uasyncio
+md homie
+cd homie
+lcd homie
+mput .
+cd ..
+lcd ../micropython/ports/esp8266/modules
+cd uasyncio
+lcd uasyncio
+mput .
+lcd ..
+cd ..
+put aswitch.py
+put asyn.py
+put mqtt_as.py

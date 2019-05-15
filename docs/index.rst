@@ -6,7 +6,7 @@ Welcome! This is the documentation for Microhomie v1.0.0.
 
 Microhomie is a `MicroPython <https://micropython.org>`_ framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
 
-The main target device is the ESP8266.
+The main target device is the ESP8266 and we deliver pre-build firmware images. For ESP32 devices see the `Install Microhomie on the ESP32 <#id1>`_ section.
 
 
 Install Microhomie on the ESP8266
@@ -78,3 +78,48 @@ If you want to help with development, please use our linting:
 .. code-block:: shell
 
     make lint
+
+
+Install Microhomie on the ESP32
+-------------------------------
+
+For the ESP32 you can just copy all requirements and Microhomie to your device.
+
+Flash MicroPython to your your ESP23 with the official the `Firmware for ESP32 boards <https://micropython.org/download#esp32>`_.
+
+Clone the Microhomie repository and get all the requirements.
+
+.. code-block:: shell
+
+    git clone https://github.com/microhomie/microhomie.git
+    make requirements
+
+The requirements will be downloaded to the path ``lib``.
+
+Next copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory too:
+
+.. code-block:: shell
+
+    lib/
+    ├── aswitch.py
+    ├── asyn.py
+    ├── homie
+    │   ├── constants.py
+    │   ├── device.py
+    │   ├── __init__.py
+    │   ├── node.py
+    │   ├── property.py
+    │   └── utils.py
+    ├── mqtt_as.py
+    └── uasyncio
+        ├── core.py
+        └── __init__.py
+
+
+For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script ``esp32_install.mpf`` to automate the delpoyment:
+
+.. code-block:: shell
+
+    mpfshell ttyUSB0 -s esp32_install.mpf
+
+Continue with the `Configuration <#configuration>`_ and the `Get started with a simple LED node <#get-started-with-a-simple-led-node>`_.
