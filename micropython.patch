@@ -1,5 +1,5 @@
 diff --git a/ports/esp8266/Makefile b/ports/esp8266/Makefile
-index 0bbb990d2..de426bdaf 100644
+index 2162c72f0..7f6355519 100644
 --- a/ports/esp8266/Makefile
 +++ b/ports/esp8266/Makefile
 @@ -7,7 +7,7 @@ MICROPY_PY_USSL = 1
@@ -12,7 +12,7 @@ index 0bbb990d2..de426bdaf 100644
 
  FROZEN_DIR ?= scripts
 diff --git a/ports/esp8266/modules/inisetup.py b/ports/esp8266/modules/inisetup.py
-index cb4fc0413..8e2b992af 100644
+index cb4fc0413..6be3ca2e3 100644
 --- a/ports/esp8266/modules/inisetup.py
 +++ b/ports/esp8266/modules/inisetup.py
 @@ -5,8 +5,8 @@ from flashbdev import bdev
@@ -37,17 +37,17 @@ index cb4fc0413..8e2b992af 100644
 +esp.osdebug(None)
 +#import uos, machine
  #uos.dupterm(None, 1) # disable REPL on UART(0)
-+from homie.utils import disable_ap
-+disable_ap()
  import gc
 -#import webrepl
 -#webrepl.start()
++from homie.utils import disable_ap
++disable_ap()
  gc.collect()
  """)
      return vfs
 diff --git a/ports/esp8266/modules/webrepl.py b/ports/esp8266/modules/webrepl.py
 deleted file mode 100644
-index aa156d148..000000000
+index bbf8bdb32..000000000
 --- a/ports/esp8266/modules/webrepl.py
 +++ /dev/null
 @@ -1,79 +0,0 @@
@@ -55,7 +55,7 @@ index aa156d148..000000000
 -import socket
 -import uos
 -import network
--import websocket
+-import uwebsocket
 -import websocket_helper
 -import _webrepl
 -
@@ -93,7 +93,7 @@ index aa156d148..000000000
 -    print("\nWebREPL connection from:", remote_addr)
 -    client_s = cl
 -    websocket_helper.server_handshake(cl)
--    ws = websocket.websocket(cl, True)
+-    ws = uwebsocket.websocket(cl, True)
 -    ws = _webrepl._webrepl(ws)
 -    cl.setblocking(False)
 -    # notify REPL on socket incoming data
@@ -239,7 +239,7 @@ index 129313a21..000000000
 -
 -main()
 diff --git a/ports/esp8266/mpconfigport.h b/ports/esp8266/mpconfigport.h
-index b2a05e679..819838e61 100644
+index 03be59b06..89cd17566 100644
 --- a/ports/esp8266/mpconfigport.h
 +++ b/ports/esp8266/mpconfigport.h
 @@ -15,7 +15,7 @@
@@ -254,7 +254,7 @@ index b2a05e679..819838e61 100644
 @@ -88,7 +88,7 @@
  #define MICROPY_PY_MACHINE_SPI      (1)
  #define MICROPY_PY_MACHINE_SPI_MAKE_NEW machine_hspi_make_new
- #define MICROPY_PY_WEBSOCKET        (1)
+ #define MICROPY_PY_UWEBSOCKET       (1)
 -#define MICROPY_PY_WEBREPL          (1)
 +#define MICROPY_PY_WEBREPL          (0)
  #define MICROPY_PY_WEBREPL_DELAY    (20)
