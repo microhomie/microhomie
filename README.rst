@@ -12,6 +12,12 @@ Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/conve
 
 Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started. If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or get in contact with us on `Slack <https://join.slack.com/t/microhomie/shared_invite/enQtMzA3MTIwNTg3OTU4LTdjMmQxNGI1ZTIzN2IwZjNiMDRkMDE4NGM3Mjc3MWE4ZWUxNzdhOTVhZWIxYmNiZDBjZDlhMTY2MmIyOGZiODI>`_.
 
+Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_ and the following public key:
+
+.. code-block::
+
+    RWTwPeRvouNzP+mcL1t7QDTnKz96i3Kuf95fjpE28szMq8OTycMmiTzX
+
 
 Micropython changes
 -------------------
