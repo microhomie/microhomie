@@ -16,3 +16,4 @@ micropython/
 esp-open-sdk/
 .mypy_cache/
 /lib
+/releases

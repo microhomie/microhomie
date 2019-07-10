@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.0.0-beta2
+-----------
+
+* Update to MicroPython 1.11
+* Reset device if can not connect to mqtt on first start
+
+
 1.0.0-beta1
 -----------
 

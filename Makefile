@@ -1,6 +1,6 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-VERSION := 1.0.0-beta1
+VERSION := 1.0.0-beta2
 MICROPYVERSION := 1.11
 PORT ?= /dev/ttyUSB0
 
@@ -24,7 +24,7 @@ firmware:
 	cd micropython/ports/esp8266; make
 
 copy-firmware:
-	cp micropython/ports/esp8266/build/firmware-combined.bin ./microhomie-esp8266-v$(VERSION).bin
+	cp micropython/ports/esp8266/build/firmware-combined.bin ./releases/microhomie-esp8266-v$(VERSION).bin
 
 release: all copy-firmware
 
