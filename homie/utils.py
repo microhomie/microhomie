@@ -80,3 +80,10 @@ def get_local_mac():
         return ubinascii.hexlify(network.WLAN(0).config("mac"), ":")
     except Exception:
         return b"cannotgetlocalmac"
+
+
+def reset():
+    import machine
+    wdt = machine.WDT()
+    wdt.feed()
+    machine.reset()

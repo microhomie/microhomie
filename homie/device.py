@@ -212,6 +212,9 @@ class HomieDevice:
             await self.mqtt.connect()
         except OSError:
             print("ERROR: can not connect to MQTT")
+            from homie.utils import reset
+            await sleep_ms(5000)
+            reset()
 
         while True:
             await sleep_ms(MAIN_DELAY)
