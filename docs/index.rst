@@ -94,9 +94,15 @@ Clone the Microhomie repository and get all the requirements.
     git clone https://github.com/microhomie/microhomie.git
     make requirements
 
-The requirements will be downloaded to the path ``lib``.
+The requirements will be downloaded to the path ``./lib``.
 
-Next copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory too:
+To save some RAM on the ESP8266 we use the minimal version from mqtt_as.py. You need to download the file with ESP32 support and overwrite the existing:
+
+.. code-block:: shell
+
+    curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as.py
+
+Next copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory.
 
 .. code-block:: shell
 
