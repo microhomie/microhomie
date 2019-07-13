@@ -2,6 +2,13 @@
 Changelog
 =========
 
+1.0.0
+-----
+
+* Release version 1.0.0
+* Update docs for ESP32
+
+
 1.0.0-beta2
 -----------
 

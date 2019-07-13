@@ -3,8 +3,14 @@ from sys import platform
 
 from asyn import Event
 from homie import __version__, utils
-from homie.constants import (DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY,
-                             SLASH, UNDERSCORE)
+from homie.constants import (
+    DEVICE_STATE,
+    MAIN_DELAY,
+    QOS,
+    RESTORE_DELAY,
+    SLASH,
+    UNDERSCORE,
+)
 from mqtt_as import MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from utime import time
@@ -213,6 +219,7 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
             from homie.utils import reset
+
             await sleep_ms(5000)
             reset()
 

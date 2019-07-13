@@ -84,6 +84,7 @@ def get_local_mac():
 
 def reset():
     import machine
+
     wdt = machine.WDT()
     wdt.feed()
     machine.reset()

@@ -19,10 +19,10 @@ Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_
     RWTwPeRvouNzP+mcL1t7QDTnKz96i3Kuf95fjpE28szMq8OTycMmiTzX
 
 
-Micropython changes
+MicroPython changes
 -------------------
 
-To safe some space we disabled **webrepl** and **btree** support. The AccessPoint SSID is `Microhomie-MAC` with the secret `microhomiE`. You can see all the details in the `micropython.patch` file.
+To save some space we disabled **webrepl** and **btree** support. The AccessPoint SSID is `Microhomie-MAC` with the secret `microhomiE`. You can see all the details in the `micropython.patch` file.
 
 
 Install
