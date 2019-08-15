@@ -54,3 +54,12 @@ DEVICE_NAME = b'mydevice'
 
 # Time in seconds the device updates device properties
 DEVICE_STATS_INTERVAL = 60
+
+# Legacy extensions, for now we only have support for the two legacy extensions.
+# Later we will implement the posibility to add extensions.
+# No extensions will be loaded per default
+EXTENSIONS = []
+# EXTENSIONS = [
+#     b"org.homie.legacy-firmware:0.1.1:[4.x]",
+#     b"org.homie.legacy-stats:0.1.1:[4.x]",
+# ]

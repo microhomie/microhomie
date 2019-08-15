@@ -13,14 +13,14 @@ ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
 
 
 class LED(HomieNode):
-    def __init__(self, name="Device LED", pin=2):
+    def __init__(self, name="Onboard LED", pin=2):
         super().__init__(id="led", name=name, type="LED")
         self.pin = pin
         self.led = Pin(pin, Pin.OUT, value=0)
 
         self.led_property = HomieNodeProperty(
             id="power",
-            name="LED",
+            name="LED Power",
             settable=True,
             datatype="enum",
             format="true,false,toggle",
@@ -32,6 +32,9 @@ class LED(HomieNode):
 
     def callback(self, topic, payload, retained):
         if b"led/power" in topic:
+            if payload == self.led_property.data:
+                return
+
             if payload == b"toggle":
                 self.led(not self.led())
             else:
@@ -48,7 +51,7 @@ def main():
     homie.add_node(LED())
 
     # run forever
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

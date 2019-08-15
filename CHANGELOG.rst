@@ -2,6 +2,13 @@
 Changelog
 =========
 
+2.0.0 (unreleased)
+------------------
+
+* Update to Homie v4
+* Remove code for arrays
+* Add legacy extensions, default disabled
+
 1.0.0
 -----
 
