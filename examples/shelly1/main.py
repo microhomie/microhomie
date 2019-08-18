@@ -9,17 +9,9 @@ from homie.property import HomieNodeProperty
 from homie.constants import TRUE, FALSE
 
 
-def reset(led):
-    import machine
-    wdt = machine.WDT()
-    wdt.feed()
-    led(0)
-    machine.reset()
-
-
 class SmartSocket(HomieNode):
     def __init__(self):
-        super().__init__(id="relay", name="Power Socket", type="Relay")
+        super().__init__(id="relay", name="Light switch", type="Relay")
         self.relay = Pin(4, Pin.OUT, value=0)
         self.switch = Pin(5, Pin.IN)
 
