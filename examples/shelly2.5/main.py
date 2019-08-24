@@ -9,15 +9,15 @@ from homie.property import HomieNodeProperty
 from homie.constants import TRUE, FALSE
 
 
-class SmartSocket(HomieNode):
-    def __init__(self):
-        super().__init__(id="relay", name="Light switch", type="Shelly 1")
-        self.relay = Pin(4, Pin.OUT, value=0)
-        self.switch = Switch(Pin(5, Pin.IN))
+class ShellyRelay(HomieNode):
+    def __init__(self, id, rpin, swpin, name="Light Switch", type="Shelly"):
+        super().__init__(id=id, name=name, type=type)
+        self.relay = Pin(rpin, Pin.OUT, value=0)
+        self.switch = Switch(Pin(swpin, Pin.IN))
 
         self.relay_property = HomieNodeProperty(
             id="power",
-            name="Relay",
+            name=id,
             settable=True,
             retained=True,
             datatype="boolean",
@@ -52,8 +52,16 @@ class SmartSocket(HomieNode):
 
 
 def main():
+    relay1 = ShellyRelay(
+        "relay1", rpin=4, swpin=5, name="Light Switch 01", type="Shelly 2.5"
+    )
+    relay2 = ShellyRelay(
+        "relay2", rpin=15, swpin=13, name="Light Switch 02", type="Shelly 2.5"
+    )
+
     homie = HomieDevice(settings)
-    homie.add_node(SmartSocket())
+    homie.add_node(relay1)
+    homie.add_node(relay2)
     homie.start()
 
 

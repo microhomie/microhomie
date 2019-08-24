@@ -2,7 +2,7 @@
 *~
 *.mpy
 /main.py
-/settings.py
+settings.py
 /boot.py
 MANIFEST
 __pycache__
@@ -17,3 +17,4 @@ esp-open-sdk/
 .mypy_cache/
 /lib
 /releases
+/examples/*/settings.py
