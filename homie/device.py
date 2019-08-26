@@ -12,6 +12,7 @@ from homie.constants import (
     UNDERSCORE,
     STATE_READY,
     STATE_INIT,
+    STATE_RECOVER,
 )
 from mqtt_as import MQTTClient, eliza
 from uasyncio import get_event_loop, sleep_ms
@@ -33,6 +34,7 @@ class HomieDevice:
     def __init__(self, settings):
         self._state = STATE_INIT
         self._extensions = settings.EXTENSIONS
+        self._first_start = True
 
         self.async_tasks = []
         self.stats_interval = settings.DEVICE_STATS_INTERVAL
@@ -92,6 +94,9 @@ class HomieDevice:
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
+        if self._first_start is False:
+            await self.publish(DEVICE_STATE, STATE_RECOVER)
+
         subscribe = self.subscribe
         unsubscribe = self.unsubscribe
 
@@ -120,8 +125,17 @@ class HomieDevice:
                     t = b"{}/{}/set".format(n.id, p.id)
                     await subscribe(t)
 
-        await self.publish_properties()
-        await self.set_state(STATE_READY)
+        # publish device and node properties only on first connection
+        if self._first_start is True:
+            await self.publish_properties()
+            self._first_start = False
+
+            # start coros waiting for ready state
+            _EVENT.set()
+            await sleep_ms(MAIN_DELAY)
+            _EVENT.clear()
+
+        await self.publish(DEVICE_STATE, STATE_READY)
 
     def sub_cb(self, topic, msg, retained):
         # print("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
@@ -179,24 +193,15 @@ class HomieDevice:
         if self._extensions:
             await publish(b"$extensions", b",".join(self._extensions))
             if b"org.homie.legacy-firmware:0.1.1:[4.x]" in self._extensions:
-                await self.legacy_firmware()
+                await publish(b"$localip", utils.get_local_ip())
+                await publish(b"$mac", utils.get_local_mac())
+                await publish(b"$fw/name", b"Microhomie")
+                await publish(b"$fw/version", __version__)
             if b"org.homie.legacy-stats:0.1.1:[4.x]" in self._extensions:
-                await self.legacy_stats()
-
-    async def legacy_firmware(self):
-        publish = self.publish
-        await publish(b"$localip", utils.get_local_ip())
-        await publish(b"$mac", utils.get_local_mac())
-        await publish(b"$fw/name", b"Microhomie")
-        await publish(b"$fw/version", __version__)
-
-    async def legacy_stats(self):
-        await self.publish(b"$stats/interval", self.stats_interval)
-        # Start stats coro
-        if "stats" not in self.async_tasks:
-            loop = get_event_loop()
-            loop.create_task(self.publish_stats())
-            self.async_tasks.append("stats")
+                await self.publish(b"$stats/interval", self.stats_interval)
+                # Start stats coro
+                loop = get_event_loop()
+                loop.create_task(self.publish_stats())
 
     @await_ready_state
     async def publish_stats(self):
@@ -209,15 +214,6 @@ class HomieDevice:
             await publish(b"$stats/uptime", uptime)
             await publish(b"$stats/freeheap", mem_free())
             await sleep_ms(delay)
-
-    async def set_state(self, val):
-        if val in [STATE_READY, b"disconnected", b"sleeping", b"alert"]:
-            self._state = val
-            await self.publish(DEVICE_STATE, val)
-            if val == STATE_READY:
-                _EVENT.set()
-                await sleep_ms(MAIN_DELAY)
-                _EVENT.clear()
 
     async def run(self):
         try:

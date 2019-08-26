@@ -10,6 +10,7 @@ DEVICE_STATE = b"$state"
 # Device states
 STATE_INIT = b"init"
 STATE_READY = b"ready"
+STATE_RECOVER = b"recover"
 
 # Property datatypes
 P_STRING = b"string"
