@@ -13,7 +13,7 @@ from homie.constants import (
     STATE_READY,
     STATE_INIT,
 )
-from mqtt_as import MQTTClient
+from mqtt_as import MQTTClient, eliza
 from uasyncio import get_event_loop, sleep_ms
 from utime import time
 
@@ -58,11 +58,19 @@ class HomieDevice:
             user=settings.MQTT_USERNAME,
             password=settings.MQTT_PASSWORD,
             keepalive=settings.MQTT_KEEPALIVE,
+            ping_interval=0,
             ssl=settings.MQTT_SSL,
             ssl_params=settings.MQTT_SSL_PARAMS,
-            subs_cb=self.sub_cb,
-            connect_coro=self.connection_handler,
+            response_time=10,
+            clean_init=True,
+            clean=True,
+            max_repubs=4,
             will=(SLASH.join((self.dtopic, DEVICE_STATE)), b"lost", True, QOS),
+            subs_cb=self.sub_cb,
+            wifi_coro=eliza,
+            connect_coro=self.connection_handler,
+            ssid=None,
+            wifi_pw=None,
         )
 
     def add_node(self, node):
