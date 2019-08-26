@@ -34,6 +34,7 @@ class HomieDevice:
         self._state = STATE_INIT
         self._extensions = settings.EXTENSIONS
 
+        self.async_tasks = []
         self.stats_interval = settings.DEVICE_STATS_INTERVAL
 
         self.nodes = []
@@ -188,8 +189,10 @@ class HomieDevice:
     async def legacy_stats(self):
         await self.publish(b"$stats/interval", self.stats_interval)
         # Start stats coro
-        loop = get_event_loop()
-        loop.create_task(self.publish_stats())
+        if "stats" not in self.async_tasks:
+            loop = get_event_loop()
+            loop.create_task(self.publish_stats())
+            self.async_tasks.append("stats")
 
     @await_ready_state
     async def publish_stats(self):
