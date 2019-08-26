@@ -47,10 +47,6 @@ class HomieDevice:
             (settings.MQTT_BASE_TOPIC, settings.DEVICE_ID)
         )
 
-        # setup networking
-        utils.setup_network(settings.WIFI_PASSWORD)
-        utils.wifi_connect(settings.WIFI_SSID)
-
         self.mqtt = MQTTClient(
             client_id=settings.DEVICE_ID,
             server=settings.MQTT_BROKER,
@@ -69,8 +65,8 @@ class HomieDevice:
             subs_cb=self.sub_cb,
             wifi_coro=eliza,
             connect_coro=self.connection_handler,
-            ssid=None,
-            wifi_pw=None,
+            ssid=settings.WIFI_SSID,
+            wifi_pw=settings.WIFI_PASSWORD,
         )
 
     def add_node(self, node):
