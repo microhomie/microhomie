@@ -8,8 +8,6 @@ A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`
 
 Currently Microhomie implements `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_.
 
-**Important** Microhomie 1.0.0 (asyncio version) is not compatible with previous 0.3 Microhomie nodes.
-
 Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started. If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or get in contact with us on `Slack <https://join.slack.com/t/microhomie/shared_invite/enQtMzA3MTIwNTg3OTU4LTdjMmQxNGI1ZTIzN2IwZjNiMDRkMDE4NGM3Mjc3MWE4ZWUxNzdhOTVhZWIxYmNiZDBjZDlhMTY2MmIyOGZiODI>`_.
 
 Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_ and the following public key:
