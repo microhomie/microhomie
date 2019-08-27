@@ -29,11 +29,3 @@ def get_local_mac():
         return ubinascii.hexlify(network.WLAN(0).config("mac"), ":")
     except Exception:
         return b"00:00:00:00:00:00"
-
-
-def reset():
-    import machine
-
-    wdt = machine.WDT()
-    wdt.feed()
-    machine.reset()

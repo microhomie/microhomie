@@ -13,10 +13,12 @@ from homie.constants import (
     STATE_READY,
     STATE_INIT,
     STATE_RECOVER,
+    WDT_DELAY,
 )
 from mqtt_as import MQTTClient, eliza
 from uasyncio import get_event_loop, sleep_ms
 from utime import time
+from machine import WDT, reset
 
 
 _EVENT = Event()
@@ -125,10 +127,17 @@ class HomieDevice:
                     t = b"{}/{}/set".format(n.id, p.id)
                     await subscribe(t)
 
-        # publish device and node properties only on first connection
+        # on first connection:
+        # * publish device and node properties
+        # * enable WDT
+        # * run all coros
         if self._first_start is True:
             await self.publish_properties()
             self._first_start = False
+
+            # activate WDT
+            loop = get_event_loop()
+            loop.create_task(self.wdt())
 
             # start coros waiting for ready state
             _EVENT.set()
@@ -220,10 +229,8 @@ class HomieDevice:
             await self.mqtt.connect()
         except OSError:
             print("ERROR: can not connect to MQTT")
-            from homie.utils import reset
-
             await sleep_ms(5000)
-            reset()
+            machine.reset()
 
         while True:
             await sleep_ms(MAIN_DELAY)
@@ -231,6 +238,12 @@ class HomieDevice:
     def run_forever(self):
         loop = get_event_loop()
         loop.run_until_complete(self.run())
+
+    async def wdt(self):
+        wdt = WDT()
+        while True:
+            wdt.feed()
+            await sleep_ms(WDT_DELAY)
 
     def start(self):
         # DeprecationWarning

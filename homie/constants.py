@@ -5,6 +5,7 @@ QOS = const(1)
 MAIN_DELAY = const(1000)
 STATS_DELAY = const(60000)
 RESTORE_DELAY = const(250)
+WDT_DELAY = const(100)
 DEVICE_STATE = b"$state"
 
 # Device states
