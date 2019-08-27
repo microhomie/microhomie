@@ -20,6 +20,8 @@ Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_
 
     RWTwPeRvouNzP+mcL1t7QDTnKz96i3Kuf95fjpE28szMq8OTycMmiTzX
 
+Join the #microhomie channel on the `MicroPython Slack community <https://slack-micropython.herokuapp.com/>`_.
+
 
 MicroPython changes
 -------------------
