@@ -3,22 +3,15 @@ from sys import platform
 
 from asyn import Event
 from homie import __version__, utils
-from homie.constants import (
-    DEVICE_STATE,
-    MAIN_DELAY,
-    QOS,
-    RESTORE_DELAY,
-    SLASH,
-    UNDERSCORE,
-    STATE_READY,
-    STATE_INIT,
-    STATE_RECOVER,
-    WDT_DELAY,
-)
+from homie.constants import (DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY,
+                             SLASH, STATE_INIT, STATE_READY, STATE_RECOVER,
+                             UNDERSCORE, WDT_DELAY)
+from homie.utils import get_unique_id
+from machine import WDT, reset
 from mqtt_as import MQTTClient, eliza
 from uasyncio import get_event_loop, sleep_ms
+from ubinascii import hexlify
 from utime import time
-from machine import WDT, reset
 
 
 _EVENT = Event()
@@ -35,32 +28,31 @@ class HomieDevice:
 
     def __init__(self, settings):
         self._state = STATE_INIT
-        self._extensions = settings.EXTENSIONS
+        self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
 
         self.async_tasks = []
-        self.stats_interval = settings.DEVICE_STATS_INTERVAL
+        self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
         self.nodes = []
         self.callback_topics = {}
 
-        self.device_name = settings.DEVICE_NAME
+        self.device_name = getattr(settings, "DEVICE_NAME", b"mydevice")
 
-        self.btopic = settings.MQTT_BASE_TOPIC
-        self.dtopic = SLASH.join(
-            (settings.MQTT_BASE_TOPIC, settings.DEVICE_ID)
-        )
+        device_id = getattr(settings, "DEVICE_ID", get_unique_id())
+        self.btopic = getattr(settings, "MQTT_BASE_TOPIC", b"homie")
+        self.dtopic = SLASH.join((self.btopic, device_id))
 
         self.mqtt = MQTTClient(
-            client_id=settings.DEVICE_ID,
+            client_id=device_id,
             server=settings.MQTT_BROKER,
-            port=settings.MQTT_PORT,
-            user=settings.MQTT_USERNAME,
-            password=settings.MQTT_PASSWORD,
-            keepalive=settings.MQTT_KEEPALIVE,
+            port=getattr(settings, "MQTT_PORT", 1883),
+            user=getattr(settings, "MQTT_USERNAME", None),
+            password=getattr(settings, "MQTT_PASSWORD", None),
+            keepalive=getattr(settings, "MQTT_KEEPALIVE", 30),
             ping_interval=0,
-            ssl=settings.MQTT_SSL,
-            ssl_params=settings.MQTT_SSL_PARAMS,
+            ssl=getattr(settings, "MQTT_SSL", False),
+            ssl_params=getattr(settings, "MQTT_SSL_PARAMS", {}),
             response_time=10,
             clean_init=True,
             clean=True,
@@ -215,6 +207,7 @@ class HomieDevice:
     @await_ready_state
     async def publish_stats(self):
         from utime import time
+
         start_time = time()
         delay = self.stats_interval * MAIN_DELAY
         publish = self.publish
@@ -230,7 +223,7 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
             await sleep_ms(5000)
-            machine.reset()
+            reset()
 
         while True:
             await sleep_ms(MAIN_DELAY)
