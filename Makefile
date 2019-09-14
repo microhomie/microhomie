@@ -64,14 +64,9 @@ black:
 isort:
 	isort --recursive --apply homie
 
-mypy:
-	find homie -name '*.py' | xargs mypy --follow-imports skip --ignore-missing-imports
-
 autoflake:
 	find homie -name '*.py' | xargs autoflake --in-place --remove-unused-variables
 
-flake8:
-	flake8 homie
-
-# isort must come first as black reformats the imports again
-lint: autoflake isort black flake8 mypy
+# isort: must come first as black reformats the imports again
+# black: must be >19
+lint: autoflake isort black

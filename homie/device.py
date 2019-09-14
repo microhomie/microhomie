@@ -3,9 +3,18 @@ from sys import platform
 
 from asyn import Event
 from homie import __version__, utils
-from homie.constants import (DEVICE_STATE, MAIN_DELAY, QOS, RESTORE_DELAY,
-                             SLASH, STATE_INIT, STATE_READY, STATE_RECOVER,
-                             UNDERSCORE, WDT_DELAY)
+from homie.constants import (
+    DEVICE_STATE,
+    MAIN_DELAY,
+    QOS,
+    RESTORE_DELAY,
+    SLASH,
+    STATE_INIT,
+    STATE_READY,
+    STATE_RECOVER,
+    UNDERSCORE,
+    WDT_DELAY,
+)
 from homie.utils import get_unique_id
 from machine import WDT, reset
 from mqtt_as import MQTTClient, eliza
@@ -13,12 +22,16 @@ from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
 
-
 _EVENT = Event()
+
+
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
+        # fmt: off
         await _EVENT
         await func(*args, **kwargs)
+        # fmt: on
+
     return new_gen
 
 

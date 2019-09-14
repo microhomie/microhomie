@@ -1,4 +1,4 @@
-from homie.constants import FALSE, PUBLISH_DELAY, SLASH, TRUE, UNDERSCORE
+from homie.constants import FALSE, PUBLISH_DELAY, TRUE
 from homie.device import await_ready_state
 from uasyncio import sleep_ms
 

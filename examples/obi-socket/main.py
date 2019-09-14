@@ -1,17 +1,17 @@
-import settings
-
 from time import sleep_ms
-from machine import Pin
-from aswitch import Pushbutton
 
-from homie.node import HomieNode
+import settings
+from aswitch import Pushbutton
+from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
+from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from homie.constants import TRUE, FALSE
+from machine import Pin
 
 
 def reset(led):
     import machine
+
     wdt = machine.WDT()
     wdt.feed()
     led(0)
@@ -20,7 +20,9 @@ def reset(led):
 
 class SmartSocket(HomieNode):
     def __init__(self):
-        super().__init__(id="relay", name="Wifi Power Socket", type="OW8266-02Q")
+        super().__init__(
+            id="relay", name="Wifi Power Socket", type="OW8266-02Q"
+        )
         self.led = Pin(4, Pin.OUT, value=1)
         self.r_on = Pin(12, Pin.OUT)
         self.r_off = Pin(5, Pin.OUT)

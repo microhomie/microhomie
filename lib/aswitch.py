@@ -30,10 +30,14 @@
 
 import uasyncio as asyncio
 import utime as time
+
+
 # Remove dependency on asyn to save RAM:
 # launch: run a callback or initiate a coroutine depending on which is passed.
 async def _g():
     pass
+
+
 type_coro = type(_g())
 
 # If a callback is passed, run it and return.
@@ -92,10 +96,12 @@ class Delay_ms(object):
             launch(self.func, self.args)  # Timed out: execute callback
         self.tstop = None  # Not running
 
+
 class Switch(object):
     debounce_ms = 50
+
     def __init__(self, pin):
-        self.pin = pin # Should be initialised for input with pullup
+        self.pin = pin  # Should be initialised for input with pullup
         self._open_func = False
         self._close_func = False
         self.switchstate = self.pin.value()  # Get initial state
@@ -127,12 +133,14 @@ class Switch(object):
             # Ignore further state changes until switch has settled
             await asyncio.sleep_ms(Switch.debounce_ms)
 
+
 class Pushbutton(object):
     debounce_ms = 50
     long_press_ms = 1000
     double_click_ms = 400
+
     def __init__(self, pin, suppress=False):
-        self.pin = pin # Initialise for input
+        self.pin = pin  # Initialise for input
         self._supp = suppress
         self._dblpend = False  # Doubleclick waiting for 2nd click
         self._dblran = False  # Doubleclick executed user function
@@ -196,16 +204,20 @@ class Pushbutton(object):
                         if self._dd():  # Second click: timer running
                             self._dd.stop()
                             self._dblpend = False
-                            self._dblran = True  # Prevent suppressed launch on release
+                            self._dblran = (
+                                True  # Prevent suppressed launch on release
+                            )
                             launch(self._df, self._da)
                         else:
                             # First click: start doubleclick timer
                             self._dd.trigger(Pushbutton.double_click_ms)
-                            self._dblpend = True  # Prevent suppressed launch on release
+                            self._dblpend = (
+                                True  # Prevent suppressed launch on release
+                            )
                 else:  # Button release. Is there a release func?
                     if self._ff:
                         if self._supp:
-                            d = self._ld 
+                            d = self._ld
                             # If long delay exists, is running and doubleclick status is OK
                             if not self._dblpend and not self._dblran:
                                 if (d and d()) or not d:
