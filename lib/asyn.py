@@ -37,8 +37,6 @@ except ImportError:
 
 async def _g():
     pass
-
-
 type_coro = type(_g())
 
 # If a callback is passed, run it and return.
@@ -62,7 +60,7 @@ def launch(func, tup_args):
 # finally:
 #   lock.release
 # Uses normal scheduling on assumption that locks are held briefly.
-class Lock:
+class Lock():
     def __init__(self, delay_ms=0):
         self._locked = False
         self.delay_ms = delay_ms
@@ -88,9 +86,7 @@ class Lock:
 
     def release(self):
         if not self._locked:
-            raise RuntimeError(
-                "Attempt to release a lock which has not been set"
-            )
+            raise RuntimeError('Attempt to release a lock which has not been set')
         self._locked = False
 
 
@@ -98,7 +94,7 @@ class Lock:
 # A coro rasing the event issues event.set()
 # When all waiting coros have run
 # event.clear() should be issued
-class Event:
+class Event():
     def __init__(self, delay_ms=0):
         self.delay_ms = delay_ms
         self.clear()
@@ -127,7 +123,6 @@ class Event:
     def value(self):
         return self._data
 
-
 # A Barrier synchronises N coros. Each issues await barrier.
 # Execution pauses until all other participant coros are waiting on it.
 # At that point the callback is executed. Then the barrier is 'opened' and
@@ -140,8 +135,7 @@ class Event:
 # it. The use of nowait promotes efficiency by enabling tasks which have been
 # cancelled to leave the task queue as soon as possible.
 
-
-class Barrier:
+class Barrier():
     def __init__(self, participants, func=None, args=()):
         self._participants = participants
         self._func = func
@@ -189,12 +183,11 @@ class Barrier:
     def _update(self):
         self._count += -1 if self._down else 1
         if self._count < 0 or self._count > self._participants:
-            raise ValueError("Too many tasks accessing Barrier")
-
+            raise ValueError('Too many tasks accessing Barrier')
 
 # A Semaphore is typically used to limit the number of coros running a
 # particular piece of code at once. The number is defined in the constructor.
-class Semaphore:
+class Semaphore():
     def __init__(self, value=1):
         self._count = value
 
@@ -214,7 +207,6 @@ class Semaphore:
     def release(self):
         self._count += 1
 
-
 class BoundedSemaphore(Semaphore):
     def __init__(self, value=1):
         super().__init__(value)
@@ -224,29 +216,26 @@ class BoundedSemaphore(Semaphore):
         if self._count < self._initial_value:
             self._count += 1
         else:
-            raise ValueError("Semaphore released more than acquired")
-
+            raise ValueError('Semaphore released more than acquired')
 
 # Task Cancellation
 try:
     StopTask = asyncio.CancelledError  # More descriptive name
 except AttributeError:
-    raise OSError("asyn.py requires uasyncio V1.7.1 or above.")
+    raise OSError('asyn.py requires uasyncio V1.7.1 or above.')
 
-
-class TaskId:
+class TaskId():
     def __init__(self, taskid):
         self.taskid = taskid
 
     def __call__(self):
         return self.taskid
 
-
 # Sleep coro breaks up a sleep into shorter intervals to ensure a rapid
 # response to StopTask exceptions. Only relevant to official uasyncio V2.0.
 async def sleep(t, granularity=100):  # 100ms default
     if granularity <= 0:
-        raise ValueError("sleep granularity must be > 0")
+        raise ValueError('sleep granularity must be > 0')
     t = int(t * 1000)  # ms
     if t <= granularity:
         await asyncio.sleep_ms(t)
@@ -256,7 +245,6 @@ async def sleep(t, granularity=100):  # 100ms default
             await asyncio.sleep_ms(granularity)
         await asyncio.sleep_ms(rem)
 
-
 # Anonymous cancellable tasks. These are members of a group which is identified
 # by a user supplied name/number (default 0). Class method cancel_all() cancels
 # all tasks in a group and awaits confirmation. Confirmation of ending (whether
@@ -264,7 +252,7 @@ async def sleep(t, granularity=100):  # 100ms default
 # class method. Handled by the @cancellable decorator.
 
 
-class Cancellable:
+class Cancellable():
     task_no = 0  # Generated task ID, index of tasks dict
     tasks = {}  # Value is [coro, group, barrier] indexed by integer task_no
 
@@ -300,9 +288,7 @@ class Cancellable:
 
     @classmethod
     def _get_task_nos(cls, group):  # Return task nos in a group
-        return [
-            task_no for task_no in cls.tasks if cls.tasks[task_no][1] == group
-        ]
+        return [task_no for task_no in cls.tasks if cls.tasks[task_no][1] == group]
 
     @classmethod
     def _get_group(cls, task_no):  # Return group given a task_no
@@ -319,7 +305,7 @@ class Cancellable:
     def __init__(self, gf, *args, group=0, **kwargs):
         task = gf(TaskId(Cancellable.task_no), *args, **kwargs)
         if task in self.tasks:
-            raise ValueError("Task already exists.")
+            raise ValueError('Task already exists.')
         self.tasks[Cancellable.task_no] = [task, group, None]
         self.task_no = Cancellable.task_no  # For subclass
         Cancellable.task_no += 1
@@ -336,7 +322,6 @@ class Cancellable:
 
 # @cancellable decorator
 
-
 def cancellable(f):
     def new_gen(*args, **kwargs):
         if isinstance(args[0], TaskId):  # Not a bound method
@@ -351,9 +336,7 @@ def cancellable(f):
             return res
         finally:
             NamedTask._stopped(task_id)
-
     return new_gen
-
 
 # The NamedTask class enables a coro to be identified by a user defined name.
 # It constrains Cancellable to allow groups of one coro only.
@@ -396,8 +379,7 @@ namedtask = cancellable  # compatibility with old code
 
 # Condition class
 
-
-class Condition:
+class Condition():
     def __init__(self, lock=None):
         self.lock = Lock() if lock is None else lock
         self.events = []
@@ -405,8 +387,8 @@ class Condition:
     async def acquire(self):
         await self.lock.acquire()
 
-    # enable this syntax:
-    # with await condition [as cond]:
+# enable this syntax:
+# with await condition [as cond]:
     def __await__(self):
         yield from self.lock.acquire()
         return self
@@ -427,7 +409,7 @@ class Condition:
 
     def notify(self, n=1):  # Caller controls lock
         if not self.lock.locked():
-            raise RuntimeError("Condition notify with lock not acquired.")
+            raise RuntimeError('Condition notify with lock not acquired.')
         for _ in range(min(n, len(self.events))):
             ev = self.events.pop()
             ev.set()
@@ -437,13 +419,13 @@ class Condition:
 
     async def wait(self):
         if not self.lock.locked():
-            raise RuntimeError("Condition wait with lock not acquired.")
+            raise RuntimeError('Condition wait with lock not acquired.')
         ev = Event()
         self.events.append(ev)
         self.lock.release()
         await ev
         await self.lock.acquire()
-        assert ev not in self.events, "condition wait assertion fail"
+        assert ev not in self.events, 'condition wait assertion fail'
         return True  # CPython compatibility
 
     async def wait_for(self, predicate):
@@ -453,11 +435,9 @@ class Condition:
             result = predicate()
         return result
 
-
 # Provide functionality similar to asyncio.gather()
 
-
-class Gather:
+class Gather():
     def __init__(self, gatherables):
         ncoros = len(gatherables)
         self.barrier = Barrier(ncoros + 1)
@@ -474,19 +454,15 @@ class Gather:
         async def wrapped():
             coro, args, kwargs = gatherable()
             try:
-                tim = kwargs.pop("timeout")
+                tim = kwargs.pop('timeout')
             except KeyError:
                 self.results[idx] = await coro(*args, **kwargs)
             else:
-                self.results[idx] = await asyncio.wait_for(
-                    coro(*args, **kwargs), tim
-                )
+                self.results[idx] = await asyncio.wait_for(coro(*args, **kwargs), tim)
             self.barrier.trigger()
-
         return wrapped
 
-
-class Gatherable:
+class Gatherable():
     def __init__(self, coro, *args, **kwargs):
         self.arguments = coro, args, kwargs
 

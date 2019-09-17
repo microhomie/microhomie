@@ -1,4 +1,3 @@
-import uasyncio.core
 import uerrno
 import uselect as select
 import usocket as _socket
@@ -8,17 +7,16 @@ from uasyncio.core import *
 DEBUG = 0
 log = None
 
-
 def set_debug(val):
     global DEBUG, log
     DEBUG = val
     if val:
         import logging
-
         log = logging.getLogger("uasyncio")
 
 
 class PollEventLoop(EventLoop):
+
     def __init__(self, runq_len=16, waitq_len=16):
         EventLoop.__init__(self, runq_len, waitq_len)
         self.poller = select.poll()
@@ -69,7 +67,7 @@ class PollEventLoop(EventLoop):
             log.debug("poll.wait(%d)", delay)
         # We need one-shot behavior (second arg of 1 to .poll())
         res = self.poller.ipoll(delay, 1)
-        # log.debug("poll result: %s", res)
+        #log.debug("poll result: %s", res)
         # Remove "if res" workaround after
         # https://github.com/micropython/micropython/issues/2716 fixed.
         if res:
@@ -92,6 +90,7 @@ class PollEventLoop(EventLoop):
 
 
 class StreamReader:
+
     def __init__(self, polls, ios=None):
         if ios is None:
             ios = polls
@@ -106,7 +105,7 @@ class StreamReader:
                 break
             # This should not happen for real sockets, but can easily
             # happen for stream wrappers (ssl, websockets, etc.)
-            # log.warn("Empty read")
+            #log.warn("Empty read")
         if not res:
             yield IOReadDone(self.polls)
         return res
@@ -136,7 +135,7 @@ class StreamReader:
                 yield IOReadDone(self.polls)
                 break
             buf += res
-            if buf[-1] == 0x0A:
+            if buf[-1] == 0x0a:
                 break
         if DEBUG and __debug__:
             log.debug("StreamReader.readline(): %s", buf)
@@ -151,6 +150,7 @@ class StreamReader:
 
 
 class StreamWriter:
+
     def __init__(self, s, extra):
         self.s = s
         self.extra = extra
@@ -170,22 +170,17 @@ class StreamWriter:
             # If we spooled everything, return immediately
             if res == sz:
                 if DEBUG and __debug__:
-                    log.debug(
-                        "StreamWriter.awrite(): completed spooling %d bytes",
-                        res,
-                    )
+                    log.debug("StreamWriter.awrite(): completed spooling %d bytes", res)
                 return
             if res is None:
                 res = 0
             if DEBUG and __debug__:
-                log.debug(
-                    "StreamWriter.awrite(): spooled partial %d bytes", res
-                )
+                log.debug("StreamWriter.awrite(): spooled partial %d bytes", res)
             assert res < sz
             off += res
             sz -= res
             yield IOWrite(self.s)
-            # assert s2.fileno() == self.s.fileno()
+            #assert s2.fileno() == self.s.fileno()
             if DEBUG and __debug__:
                 log.debug("StreamWriter.awrite(): can write more")
 
@@ -220,14 +215,13 @@ def open_connection(host, port, ssl=False):
     if DEBUG and __debug__:
         log.debug("open_connection: After connect")
     yield IOWrite(s)
-    #    if __debug__:
-    #        assert s2.fileno() == s.fileno()
+#    if __debug__:
+#        assert s2.fileno() == s.fileno()
     if DEBUG and __debug__:
         log.debug("open_connection: After iowait: %s", s)
     if ssl:
         print("Warning: uasyncio SSL support is alpha")
         import ussl
-
         s.setblocking(True)
         s2 = ussl.wrap_socket(s)
         s.setblocking(False)
@@ -260,4 +254,5 @@ def start_server(client_coro, host, port, backlog=10):
         yield client_coro(StreamReader(s2), StreamWriter(s2, extra))
 
 
+import uasyncio.core
 uasyncio.core._event_loop_class = PollEventLoop
