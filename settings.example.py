@@ -36,7 +36,7 @@ MQTT_BROKER = "10.0.0.1"
 
 # Base mqtt topic the device publish and subscribes to, without leading slash.
 # Base topic format is bytestring.
-# MQTT_BASE_TOPIC = b'homie'
+# MQTT_BASE_TOPIC = b"homie"
 
 
 ###
@@ -49,7 +49,7 @@ MQTT_BROKER = "10.0.0.1"
 # DEVICE_ID = get_unique_id()
 
 # Friendly name of the device as bytestring
-# DEVICE_NAME = b'mydevice'
+# DEVICE_NAME = b"mydevice"
 
 # Time in seconds the device updates device properties
 # DEVICE_STATS_INTERVAL = 60

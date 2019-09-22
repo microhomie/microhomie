@@ -17,7 +17,7 @@ from homie.constants import (
 )
 from homie.utils import get_unique_id
 from machine import WDT, reset
-from mqtt_as import MQTTClient, eliza
+from mqtt_as import MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -63,19 +63,19 @@ class HomieDevice:
             user=getattr(settings, "MQTT_USERNAME", None),
             password=getattr(settings, "MQTT_PASSWORD", None),
             keepalive=getattr(settings, "MQTT_KEEPALIVE", 30),
-            ping_interval=0,
+            ping_interval=getattr(settings, "MQTT_PING_INTERVAL", 0),
             ssl=getattr(settings, "MQTT_SSL", False),
             ssl_params=getattr(settings, "MQTT_SSL_PARAMS", {}),
-            response_time=10,
-            clean_init=True,
-            clean=True,
-            max_repubs=4,
+            response_time=getattr(settings, "MQTT_RESPONSE_TIME", 10),
+            clean_init=getattr(settings, "MQTT_CLEAN_INIT", True),
+            clean=getattr(settings, "MQTT_CLEAN", True),
+            max_repubs=getattr(settings, "MQTT_MAX_REPUBS", 4),
             will=(SLASH.join((self.dtopic, DEVICE_STATE)), b"lost", True, QOS),
             subs_cb=self.sub_cb,
-            wifi_coro=eliza,
+            wifi_coro=None,
             connect_coro=self.connection_handler,
-            ssid=settings.WIFI_SSID,
-            wifi_pw=settings.WIFI_PASSWORD,
+            ssid=getattr(settings, "WIFI_SSID", None),
+            wifi_pw=getattr(settings, "WIFI_PASSWORD", None),
         )
 
     def add_node(self, node):
