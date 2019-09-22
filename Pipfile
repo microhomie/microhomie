@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+isort = "*"
+autoflake = "*"
+black = {git = "https://github.com/psf/black.git"}
+
+[packages]
+
+[requires]
+
+[pipenv]
+allow_prereleases = true

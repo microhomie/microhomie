@@ -87,22 +87,13 @@ For the ESP32 you can just copy all requirements and Microhomie to your device.
 
 Flash MicroPython to your your ESP23 with the official the `Firmware for ESP32 boards <https://micropython.org/download#esp32>`_.
 
-Clone the Microhomie repository and get all the requirements.
+Clone the Microhomie repository
 
 .. code-block:: shell
 
     git clone https://github.com/microhomie/microhomie.git
-    make requirements
 
-The requirements will be downloaded to the path ``./lib``.
-
-To save some RAM on the ESP8266 we use the minimal version from mqtt_as.py. You need to download the file with ESP32 support and overwrite the existing:
-
-.. code-block:: shell
-
-    curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as.py
-
-Next copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory.
+and copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory.
 
 .. code-block:: shell
 

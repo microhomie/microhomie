@@ -1,7 +1,7 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
 MICROPYVERSION := 1.11
-VERSION ?= 2.0.0-beta.3
+VERSION ?= 2.0.0
 PORT ?= /dev/ttyUSB0
 
 
@@ -54,12 +54,12 @@ micropython:
 	cd micropython/ports/unix; make axtls; make
 	cd micropython; git apply ../micropython.patch
 
-bootstrap: espopensdk micropython requirements
+bootstrap: espopensdk micropython
 
 
 # linting!
 black:
-	find homie -name '*.py' | grep -v with_errors  | xargs black --line-length=79 --safe $(ARGS)
+	find homie -name '*.py' | grep -v with_errors | xargs black --line-length=79 --safe $(ARGS)
 
 isort:
 	isort --recursive --apply homie
