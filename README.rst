@@ -4,23 +4,19 @@ Microhomie
 
 |build-status|
 
-A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT. Main target for Microhomie is the ESP8266 device.
+A MicroPython implementation of `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT. Main target for Microhomie is the ESP8266 device and has been well tested and used on ESP32.
 
-Currently Microhomie implements `Homie v3.0.1 <https://github.com/homieiot/convention/releases/tag/v3.0.1>`_.
+Microhomie v2 implements `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_.
 
-The `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_ version is currently in beta. Code is in `develop <https://github.com/microhomie/microhomie/tree/develop>`_ branch and we have pre-build `images <https://github.com/microhomie/microhomie/releases>`_.
+Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started.
 
-**Important** Microhomie 1.0.0 (asyncio version) is not compatible with previous 0.3 Microhomie nodes.
-
-Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started. If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or get in contact with us on `Slack <https://join.slack.com/t/microhomie/shared_invite/enQtMzA3MTIwNTg3OTU4LTdjMmQxNGI1ZTIzN2IwZjNiMDRkMDE4NGM3Mjc3MWE4ZWUxNzdhOTVhZWIxYmNiZDBjZDlhMTY2MmIyOGZiODI>`_.
+If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or join the #microhomie channel on the `MicroPython Slack community <https://slack-micropython.herokuapp.com/>`_ and chat with us.
 
 Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_ and the following public key:
 
 .. code-block::
 
     RWTwPeRvouNzP+mcL1t7QDTnKz96i3Kuf95fjpE28szMq8OTycMmiTzX
-
-Join the #microhomie channel on the `MicroPython Slack community <https://slack-micropython.herokuapp.com/>`_.
 
 
 MicroPython changes

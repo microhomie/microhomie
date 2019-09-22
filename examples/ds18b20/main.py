@@ -1,23 +1,20 @@
 import time
 
 from ds18x20 import DS18X20
-from onewire import OneWire
-
-from machine import Pin
-from uasyncio import get_event_loop, sleep_ms
-
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from machine import Pin
+from onewire import OneWire
+from uasyncio import get_event_loop, sleep_ms
 
 
 class DS18B20(HomieNode):
-
     def __init__(self, name="One Wire DS18B20", pin=12, interval=10, pull=-1):
         super().__init__(id="ds18b20", name=name, type="ds18b20")
         self.ds18b20 = DS18X20(OneWire(Pin(pin)))
         addrs = self.ds18b20.scan()
         if not addrs:
-            raise Exception('no DS18B20 found at bus on pin %d' % pin)
+            raise Exception("no DS18B20 found at bus on pin %d" % pin)
         # save what should be the only address found
         self.addr = addrs.pop()
 
@@ -58,7 +55,7 @@ class DS18B20(HomieNode):
         temp = self.ds18b20.read_temp(self.addr)
         if fahrenheit:
             ntemp = temp
-            print('Temp: ' + str(self.c_to_f(ntemp)))
+            print("Temp: " + str(self.c_to_f(ntemp)))
             return self.c_to_f(ntemp)
         return temp
 

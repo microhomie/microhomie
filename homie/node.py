@@ -1,4 +1,4 @@
-from homie.constants import FALSE, PUBLISH_DELAY, SLASH, TRUE, UNDERSCORE
+from homie.constants import FALSE, PUBLISH_DELAY, TRUE
 from homie.device import await_ready_state
 from uasyncio import sleep_ms
 
@@ -24,36 +24,27 @@ class HomieNode:
 
         # property attributes
         props = self._properties
-        if props:
-            await publish(
-                b"{}/$properties".format(nid),
-                b",".join([p.id.encode() for p in props]),
-            )
+        await publish(
+            b"{}/$properties".format(nid),
+            b",".join([p.id.encode() for p in props]),
+        )
 
-            for p in props:
-                t = "{}/{}".format(nid, p.id)
-                if p.name:
-                    await publish(b"{}/$name".format(t), p.name)
+        for p in props:
+            t = "{}/{}".format(nid, p.id)
+            await publish(b"{}/$name".format(t), p.name)
+            await publish(b"{}/$datatype".format(t), p.datatype)
 
-                if p.range > 1:
-                    await publish(
-                        b"{}/$array".format(t), b"0-{}".format(p.range - 1)
-                    )
+            if p.format is not None:
+                await publish(b"{}/$format".format(t), p.format)
 
-                if p.settable:
-                    await publish(b"{}/$settable".format(t), TRUE)
+            if p.settable is True:
+                await publish(b"{}/$settable".format(t), TRUE)
 
-                if p.retained is False:
-                    await publish(b"{}/$retained".format(t), FALSE)
+            if p.retained is False:
+                await publish(b"{}/$retained".format(t), FALSE)
 
-                if p.unit:
-                    await publish(b"{}/$unit".format(t), p.unit)
-
-                if p.datatype != "string":
-                    await publish(b"{}/$datatype".format(t), p.datatype)
-
-                if p.datatype in ["enum", "color"]:
-                    await publish(b"{}/$format".format(t), p.format)
+            if p.unit:
+                await publish(b"{}/$unit".format(t), p.unit)
 
     @await_ready_state
     async def publish_data(self):
@@ -64,25 +55,11 @@ class HomieNode:
         while True:
             for p in props:
                 if p._update is True:
+                    data = p._data
                     p._update = False
-
-                    delta = p._delta
-
-                    is_array = p.range > 1
-                    for i, data in enumerate(p):
-                        if data is not None:
-                            if data == delta[i] and is_array:
-                                continue
-
-                            if is_array:
-                                t = b"{}_{}/{}".format(nid, i, p.id)
-                            else:
-                                t = b"{}/{}".format(nid, p.id)
-
-                            await publish(t, data, p.retained)
-
-                    if p.retained:
-                        p.update_delta()
+                    if data is not None:
+                        t = b"{}/{}".format(nid, p.id)
+                        await publish(t, data, p.retained)
 
             await sleep_ms(PUBLISH_DELAY)
 
@@ -92,17 +69,3 @@ class HomieNode:
 
     def broadcast_callback(self, topic, payload, retained):
         """Gets called when the broadcast topic receives a message"""
-
-    def get_array_id_from_set_topic(self, topic):
-        """Return the id from an array property topic as integer"""
-        levels = topic.split(SLASH)
-        for l in levels:
-            if UNDERSCORE in l:
-                try:
-                    return int(l.split(UNDERSCORE)[-1])
-                except ValueError:
-                    pass
-
-    def get_property_id_from_set_topic(self, topic):
-        # deprecated - will be removed in future
-        return self.get_array_id_from_set_topic(topic)

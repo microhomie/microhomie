@@ -1,3 +1,6 @@
+from homie.constants import P_STRING
+
+
 class HomieNodeProperty:
     def __init__(
         self,
@@ -6,9 +9,8 @@ class HomieNodeProperty:
         settable=False,
         retained=True,
         unit=None,
-        datatype="string",
+        datatype=P_STRING,
         format=None,
-        range=1,
         default=None,
         restore=True,
     ):
@@ -25,41 +27,19 @@ class HomieNodeProperty:
         if isinstance(default, bool):
             default = str(default).lower().encode()
 
-        self._data = [default] * range
-        self._delta = [None] * range
+        self._data = default
         self._update = True
-
-    def __len__(self):
-        return len(self._data)
-
-    def __iter__(self):
-        for d in self._data:
-            yield d
-
-    def __contains__(self, i):
-        if i in self._data:
-            return True
-        return False
-
-    def __getitem__(self, i):
-        return self._data[i]
-
-    def __setitem__(self, k, v):
-        try:
-            if isinstance(v, bool):
-                v = str(v).lower().encode()
-            self._data[k] = v
-            self._update = True
-        except (ValueError, IndexError):
-            pass
 
     @property
     def data(self):
-        return self._data[0]
+        return self._data
 
     @data.setter
     def data(self, value):
-        self[0] = value
-
-    def update_delta(self):
-        self._delta = self._data.copy()
+        try:
+            if isinstance(value, bool):
+                value = str(value).lower().encode()
+            self._data = value
+            self._update = True
+        except (ValueError, IndexError):
+            pass

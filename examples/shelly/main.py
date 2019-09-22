@@ -1,12 +1,10 @@
 import settings
-
-from machine import Pin
 from aswitch import Switch
-
-from homie.node import HomieNode
+from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
+from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from homie.constants import TRUE, FALSE
+from machine import Pin
 
 
 class ShellyRelay(HomieNode):
