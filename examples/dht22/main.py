@@ -1,16 +1,13 @@
 import dht
 import settings
-
+from homie.device import HomieDevice
+from homie.node import HomieNode
+from homie.property import HomieNodeProperty
 from machine import Pin
 from uasyncio import get_event_loop, sleep_ms
 
-from homie.node import HomieNode
-from homie.device import HomieDevice
-from homie.property import HomieNodeProperty
-
 
 class DHT22(HomieNode):
-
     def __init__(self, name="Temp & Humid", pin=4, interval=60, pull=-1):
         super().__init__(id="dht22", name=name, type="dht22")
         self.dht22 = dht.DHT22(Pin(pin, Pin.IN, pull))

@@ -1,21 +1,18 @@
 import asyn
 import settings
-
-from machine import Pin
-from uasyncio import get_event_loop, sleep_ms
-from micropython import const
-
-from homie.node import HomieNode
+from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
+from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from homie.constants import TRUE, FALSE
+from machine import Pin
+from micropython import const
+from uasyncio import get_event_loop, sleep_ms
 
 
 PIR_DELAY = const(20)
 
 
 class PIR(HomieNode):
-
     def __init__(self, name="Motion sensor", pin=4):
         super().__init__(id="pir", name=name, type="PIR")
         self.pir = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
