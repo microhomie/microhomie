@@ -14,6 +14,7 @@ from homie.constants import (
     STATE_RECOVER,
     UNDERSCORE,
     WDT_DELAY,
+    UTF8,
 )
 from homie.utils import get_unique_id
 from mqtt_as import MQTTClient, LINUX
@@ -175,7 +176,7 @@ class HomieDevice:
 
     async def publish(self, topic, payload, retain=True):
         if not isinstance(payload, bytes):
-            payload = bytes(str(payload), "utf-8")
+            payload = bytes(str(payload), UTF8)
 
         t = SLASH.join((self.dtopic, topic))
         # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
@@ -183,7 +184,7 @@ class HomieDevice:
 
     async def broadcast(self, payload, level=None):
         if not isinstance(payload, bytes):
-            payload = bytes(str(payload), "utf-8")
+            payload = bytes(str(payload), UTF8)
 
         topic = SLASH.join((self.btopic, b"$broadcast"))
         if level is not None:
@@ -201,7 +202,7 @@ class HomieDevice:
         await publish(b"$homie", b"4.0.0")
         await publish(b"$name", self.device_name)
         await publish(DEVICE_STATE, STATE_INIT)
-        await publish(b"$implementation", bytes(platform, "utf-8"))
+        await publish(b"$implementation", bytes(platform, UTF8))
         await publish(
             b"$nodes", b",".join([n.id.encode() for n in self.nodes])
         )

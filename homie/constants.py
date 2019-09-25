@@ -20,6 +20,7 @@ P_STRING = b"string"
 PUBLISH_DELAY = const(20)
 
 # General
+UTF8 = "utf-8"
 SLASH = b"/"
 UNDERSCORE = b"_"
 
