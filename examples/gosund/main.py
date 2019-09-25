@@ -33,7 +33,7 @@ class SmartSocket(HomieNode):
             name="Relay",
             settable=True,
             retained=True,
-            datatype="bool",
+            datatype="boolean",
             default=FALSE,
             restore=True,
         )
