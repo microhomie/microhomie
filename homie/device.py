@@ -16,8 +16,7 @@ from homie.constants import (
     WDT_DELAY,
 )
 from homie.utils import get_unique_id
-from machine import WDT, reset
-from mqtt_as import MQTTClient
+from mqtt_as import MQTTClient, LINUX
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -52,8 +51,15 @@ class HomieDevice:
 
         self.device_name = getattr(settings, "DEVICE_NAME", b"mydevice")
 
-        device_id = getattr(settings, "DEVICE_ID", get_unique_id())
+        # Generate unique id if settings has no DEVICE_ID
+        try:
+            device_id = settings.DEVICE_ID
+        except AttributeError:
+            device_id = get_unique_id()
+
+        # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", b"homie")
+        # Device base topic
         self.dtopic = SLASH.join((self.btopic, device_id))
 
         self.mqtt = MQTTClient(
@@ -80,11 +86,11 @@ class HomieDevice:
 
     def add_node(self, node):
         """add a node class of Homie Node to this device"""
+        collect()
         node.device = self
         self.nodes.append(node)
         loop = get_event_loop()
         loop.create_task(node.publish_data())
-        collect()
 
     def format_topic(self, topic):
         return SLASH.join((self.dtopic, topic))
@@ -141,8 +147,9 @@ class HomieDevice:
             self._first_start = False
 
             # activate WDT
-            loop = get_event_loop()
-            loop.create_task(self.wdt())
+            if LINUX is False:
+                loop = get_event_loop()
+                loop.create_task(self.wdt())
 
             # start coros waiting for ready state
             _EVENT.set()
@@ -236,7 +243,7 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
             await sleep_ms(5000)
-            reset()
+            self.run_forever()
 
         while True:
             await sleep_ms(MAIN_DELAY)
@@ -246,6 +253,7 @@ class HomieDevice:
         loop.run_until_complete(self.run())
 
     async def wdt(self):
+        from machine import WDT
         wdt = WDT()
         while True:
             wdt.feed()
