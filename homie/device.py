@@ -40,6 +40,7 @@ class HomieDevice:
     """MicroPython implementation of the Homie MQTT convention for IoT."""
 
     def __init__(self, settings):
+        self.debug = getattr(settings, "DEBUG", False)
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
@@ -148,7 +149,7 @@ class HomieDevice:
             self._first_start = False
 
             # activate WDT
-            if LINUX is False:
+            if LINUX is False and self.debug is False:
                 loop = get_event_loop()
                 loop.create_task(self.wdt())
 
