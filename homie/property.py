@@ -1,4 +1,4 @@
-from homie.constants import P_STRING
+from homie.constants import STRING
 
 
 class HomieNodeProperty:
@@ -9,7 +9,7 @@ class HomieNodeProperty:
         settable=False,
         retained=True,
         unit=None,
-        datatype=P_STRING,
+        datatype=STRING,
         format=None,
         default=None,
         restore=True,

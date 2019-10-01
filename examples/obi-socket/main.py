@@ -6,6 +6,7 @@ from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import BOOLEAN
 from machine import Pin
 
 
@@ -32,7 +33,7 @@ class SmartSocket(HomieNode):
             name="Relay",
             settable=True,
             retained=True,
-            datatype="bool",
+            datatype=BOOLEAN,
             default=FALSE,
             restore=True,
         )
@@ -71,7 +72,7 @@ class SmartSocket(HomieNode):
 def main():
     homie = HomieDevice(settings)
     homie.add_node(SmartSocket())
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

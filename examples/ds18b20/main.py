@@ -74,7 +74,7 @@ class DS18B20(HomieNode):
 def main():
     homie = HomieDevice(settings)
     homie.add_node(DS18B20())
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

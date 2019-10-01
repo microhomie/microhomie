@@ -3,6 +3,7 @@ import settings
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import FLOAT
 from machine import Pin
 from uasyncio import get_event_loop, sleep_ms
 
@@ -16,7 +17,7 @@ class DHT22(HomieNode):
         self.temp_property = HomieNodeProperty(
             id="temperature",
             name="Temperature",
-            datatype="float",
+            datatype=FLOAT,
             format="-40:80",
             unit="°C",
         )
@@ -25,7 +26,7 @@ class DHT22(HomieNode):
         self.hum_property = HomieNodeProperty(
             id="humidity",
             name="Humidity",
-            datatype="float",
+            datatype=FLOAT,
             format="0:100",
             unit="%",
         )
@@ -54,7 +55,7 @@ def main():
     homie.add_node(DHT22(pin=4))
 
     # run forever
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

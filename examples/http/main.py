@@ -38,7 +38,7 @@ class HTTP(HomieNode):
 def main():
     homie = HomieDevice(settings)
     homie.add_node(HTTP(url="http://10.0.0.1/status.html"))
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":
