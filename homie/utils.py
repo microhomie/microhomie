@@ -1,6 +1,5 @@
 from mqtt_as import LINUX
 
-
 if LINUX is False:
     from network import WLAN, AP_IF
     from machine import unique_id
@@ -18,7 +17,9 @@ def get_unique_id():
     if LINUX is False:
         return hexlify(unique_id())
     else:
-        raise NotImplementedError("Linux doesn't have a unique id. Provide the DEVICE_ID option in your settings.py.")
+        raise NotImplementedError(
+            "Linux doesn't have a unique id. Provide the DEVICE_ID option in your settings.py."
+        )
 
 
 def get_local_ip():

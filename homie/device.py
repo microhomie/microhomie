@@ -13,11 +13,11 @@ from homie.constants import (
     STATE_READY,
     STATE_RECOVER,
     UNDERSCORE,
-    WDT_DELAY,
     UTF8,
+    WDT_DELAY,
 )
 from homie.utils import get_unique_id
-from mqtt_as import MQTTClient, LINUX
+from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -45,7 +45,6 @@ class HomieDevice:
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
 
-        self.async_tasks = []
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
         self.nodes = []
@@ -115,7 +114,6 @@ class HomieDevice:
         subscribe = self.subscribe
         unsubscribe = self.unsubscribe
 
-        # device topics
         await self.mqtt.subscribe(
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
@@ -256,6 +254,7 @@ class HomieDevice:
 
     async def wdt(self):
         from machine import WDT
+
         wdt = WDT()
         while True:
             wdt.feed()
