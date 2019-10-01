@@ -49,7 +49,7 @@ espopensdk:
 
 micropython:
 	-git clone --recursive https://github.com/micropython/micropython.git
-	cd micropython; git checkout $(MICROPYVERSION)
+	cd micropython; git checkout v$(MICROPYVERSION)
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
 	cd micropython; git apply ../micropython.patch
