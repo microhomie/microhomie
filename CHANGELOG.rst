@@ -2,8 +2,16 @@
 Changelog
 =========
 
-2.0.0 (unreleased)
-------------------
+2.1.0-beta.1
+------------
+
+* Add DEBUG setting to disable WDT
+* Update mqtt_as, improves connection integrity at cost of power consumption (ESP8266)
+* Add Linux support
+* Add more datatypes to constants
+
+2.0.0
+-----
 
 * Update to Homie v4
 * Remove code for arrays
