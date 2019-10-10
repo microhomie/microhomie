@@ -16,7 +16,6 @@ from homie.constants import (
     UTF8,
     WDT_DELAY,
 )
-from homie.utils import get_unique_id
 from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
@@ -25,6 +24,7 @@ from utime import time
 _EVENT = Event()
 
 
+# Decorator to block methods and functions until device has "ready" state
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
@@ -56,7 +56,7 @@ class HomieDevice:
         try:
             device_id = settings.DEVICE_ID
         except AttributeError:
-            device_id = get_unique_id()
+            device_id = utils.get_unique_id()
 
         # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", b"homie")
@@ -94,6 +94,8 @@ class HomieDevice:
         loop.create_task(node.publish_data())
 
     def format_topic(self, topic):
+        if self.dtopic in topic:
+            return topic
         return SLASH.join((self.dtopic, topic))
 
     async def subscribe(self, topic):
@@ -106,11 +108,18 @@ class HomieDevice:
         # print("MQTT UNSUBSCRIBE: {}".format(topic))
         await self.mqtt.unsubscribe(topic)
 
+    async def add_node_cb(self, node):
+        # Add the node callback method only once to the callback list
+        nid = node.id.encode()
+        if nid not in self.callback_topics:
+            self.callback_topics[nid] = node.callback
+
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
         if self._first_start is False:
             await self.publish(DEVICE_STATE, STATE_RECOVER)
 
+        retained = []
         subscribe = self.subscribe
         unsubscribe = self.unsubscribe
 
@@ -123,20 +132,16 @@ class HomieDevice:
         for n in nodes:
             props = n._properties
             for p in props:
-                if p.settable:
-                    nid_enc = n.id.encode()
-                    if nid_enc not in self.callback_topics:
-                        self.callback_topics[nid_enc] = n.callback
-                    # retained topics to restore messages
-                    if p.restore:
-                        t = b"{}/{}".format(n.id, p.id)
-                        await subscribe(t)
-                        await sleep_ms(RESTORE_DELAY)
-                        await unsubscribe(t)
-
-                    # final subscribe to /set topics
-                    t = b"{}/{}/set".format(n.id, p.id)
+                if p.restore:
+                    # Restore from topic with retained message
+                    await self.add_node_cb(n)
+                    t = b"{}/{}".format(n.id, p.id)
                     await subscribe(t)
+                    retained.append(t)
+
+                if p.settable:
+                    await self.add_node_cb(n)
+                    await subscribe(b"{}/{}/set".format(n.id, p.id))
 
         # on first connection:
         # * publish device and node properties
@@ -144,6 +149,11 @@ class HomieDevice:
         # * run all coros
         if self._first_start is True:
             await self.publish_properties()
+
+            # unsubscribe from retained topic (restore)
+            for t in retained:
+                await self.unsubscribe(t)
+
             self._first_start = False
 
             # activate WDT
