@@ -58,3 +58,11 @@ Known issues
 .. |build-status| image:: https://readthedocs.org/projects/microhomie/badge/?version=master
     :target: http://microhomie.readthedocs.io/en/master/?badge=master
     :alt: Documentation Status
+
+
+Included libraries
+------------------
+
+* `mqtt_as.py <https://github.com/peterhinch/micropython-mqtt>`_ by Peter Hinch but we use the `patched version <https://github.com/kevinkk525/micropython-mqtt>`_ from Kevin Köck. Kevins version has support for a keyword based configuration and unsubscribe.
+* asyn.py ('micro' synchronisation primitives for uasyncio) and aswitch.py (Switch and pushbutton classes for asyncio) from Peter Hinch `micropython-async <https://github.com/peterhinch/micropython-async>`_ repository.
+* uasyncio and uasyncio.core from the MicroPython library `repository <https://github.com/micropython/micropython-lib>`_
