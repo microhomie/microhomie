@@ -2,13 +2,19 @@
 Changelog
 =========
 
-2.1.0-beta.1
-------------
+2.1.0
+-----
 
 * Add DEBUG setting to disable WDT
 * Update mqtt_as, improves connection integrity at cost of power consumption (ESP8266)
 * Add Linux support
 * Add more datatypes to constants
+* Update mqtt_as (close socket if first connection fails/wrong)
+
+Refactor subscribtions:
+
+* Settable and not settable propterties can now restore from a topic with retained payload
+* Unsubscribe from restore topics after device properties are published and before asyncio coros start to publish node data
 
 2.0.0
 -----
