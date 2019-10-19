@@ -13,11 +13,10 @@ from homie.constants import (
     STATE_READY,
     STATE_RECOVER,
     UNDERSCORE,
+    UTF8,
     WDT_DELAY,
 )
-from homie.utils import get_unique_id
-from machine import WDT, reset
-from mqtt_as import MQTTClient
+from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -25,6 +24,7 @@ from utime import time
 _EVENT = Event()
 
 
+# Decorator to block methods and functions until device has "ready" state
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
@@ -40,11 +40,11 @@ class HomieDevice:
     """MicroPython implementation of the Homie MQTT convention for IoT."""
 
     def __init__(self, settings):
+        self.debug = getattr(settings, "DEBUG", False)
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
 
-        self.async_tasks = []
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
         self.nodes = []
@@ -52,8 +52,15 @@ class HomieDevice:
 
         self.device_name = getattr(settings, "DEVICE_NAME", b"mydevice")
 
-        device_id = getattr(settings, "DEVICE_ID", get_unique_id())
+        # Generate unique id if settings has no DEVICE_ID
+        try:
+            device_id = settings.DEVICE_ID
+        except AttributeError:
+            device_id = utils.get_unique_id()
+
+        # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", b"homie")
+        # Device base topic
         self.dtopic = SLASH.join((self.btopic, device_id))
 
         self.mqtt = MQTTClient(
@@ -80,13 +87,15 @@ class HomieDevice:
 
     def add_node(self, node):
         """add a node class of Homie Node to this device"""
+        collect()
         node.device = self
         self.nodes.append(node)
         loop = get_event_loop()
         loop.create_task(node.publish_data())
-        collect()
 
     def format_topic(self, topic):
+        if self.dtopic in topic:
+            return topic
         return SLASH.join((self.dtopic, topic))
 
     async def subscribe(self, topic):
@@ -99,15 +108,21 @@ class HomieDevice:
         # print("MQTT UNSUBSCRIBE: {}".format(topic))
         await self.mqtt.unsubscribe(topic)
 
+    async def add_node_cb(self, node):
+        # Add the node callback method only once to the callback list
+        nid = node.id.encode()
+        if nid not in self.callback_topics:
+            self.callback_topics[nid] = node.callback
+
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
         if self._first_start is False:
             await self.publish(DEVICE_STATE, STATE_RECOVER)
 
+        retained = []
         subscribe = self.subscribe
         unsubscribe = self.unsubscribe
 
-        # device topics
         await self.mqtt.subscribe(
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
         )
@@ -117,20 +132,16 @@ class HomieDevice:
         for n in nodes:
             props = n._properties
             for p in props:
-                if p.settable:
-                    nid_enc = n.id.encode()
-                    if nid_enc not in self.callback_topics:
-                        self.callback_topics[nid_enc] = n.callback
-                    # retained topics to restore messages
-                    if p.restore:
-                        t = b"{}/{}".format(n.id, p.id)
-                        await subscribe(t)
-                        await sleep_ms(RESTORE_DELAY)
-                        await unsubscribe(t)
-
-                    # final subscribe to /set topics
-                    t = b"{}/{}/set".format(n.id, p.id)
+                if p.restore:
+                    # Restore from topic with retained message
+                    await self.add_node_cb(n)
+                    t = b"{}/{}".format(n.id, p.id)
                     await subscribe(t)
+                    retained.append(t)
+
+                if p.settable:
+                    await self.add_node_cb(n)
+                    await subscribe(b"{}/{}/set".format(n.id, p.id))
 
         # on first connection:
         # * publish device and node properties
@@ -138,11 +149,17 @@ class HomieDevice:
         # * run all coros
         if self._first_start is True:
             await self.publish_properties()
+
+            # unsubscribe from retained topic (restore)
+            for t in retained:
+                await self.unsubscribe(t)
+
             self._first_start = False
 
             # activate WDT
-            loop = get_event_loop()
-            loop.create_task(self.wdt())
+            if LINUX is False and self.debug is False:
+                loop = get_event_loop()
+                loop.create_task(self.wdt())
 
             # start coros waiting for ready state
             _EVENT.set()
@@ -168,7 +185,7 @@ class HomieDevice:
 
     async def publish(self, topic, payload, retain=True):
         if not isinstance(payload, bytes):
-            payload = bytes(str(payload), "utf-8")
+            payload = bytes(str(payload), UTF8)
 
         t = SLASH.join((self.dtopic, topic))
         # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
@@ -176,7 +193,7 @@ class HomieDevice:
 
     async def broadcast(self, payload, level=None):
         if not isinstance(payload, bytes):
-            payload = bytes(str(payload), "utf-8")
+            payload = bytes(str(payload), UTF8)
 
         topic = SLASH.join((self.btopic, b"$broadcast"))
         if level is not None:
@@ -194,7 +211,7 @@ class HomieDevice:
         await publish(b"$homie", b"4.0.0")
         await publish(b"$name", self.device_name)
         await publish(DEVICE_STATE, STATE_INIT)
-        await publish(b"$implementation", bytes(platform, "utf-8"))
+        await publish(b"$implementation", bytes(platform, UTF8))
         await publish(
             b"$nodes", b",".join([n.id.encode() for n in self.nodes])
         )
@@ -236,7 +253,7 @@ class HomieDevice:
         except OSError:
             print("ERROR: can not connect to MQTT")
             await sleep_ms(5000)
-            reset()
+            self.run_forever()
 
         while True:
             await sleep_ms(MAIN_DELAY)
@@ -246,6 +263,8 @@ class HomieDevice:
         loop.run_until_complete(self.run())
 
     async def wdt(self):
+        from machine import WDT
+
         wdt = WDT()
         while True:
             wdt.feed()

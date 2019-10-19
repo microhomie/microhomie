@@ -4,6 +4,7 @@ from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import BOOLEAN, COLOR, RGB
 from machine import Pin
 
 
@@ -43,7 +44,7 @@ class AmbientLight(HomieNode):
             settable=True,
             retained=True,
             restore=True,
-            datatype="boolean",
+            datatype=BOOLEAN,
             default=FALSE,
         )
         self.add_property(self.light_property)
@@ -54,7 +55,8 @@ class AmbientLight(HomieNode):
             settable=True,
             retained=True,
             restore=True,
-            datatype="rgb",
+            datatype=COLOR,
+            format=RGB,
             default=b"254,128,40",
         )
         self.add_property(self.color_property)
@@ -87,7 +89,7 @@ def main():
     homie.add_node(AmbientLight(pin=5, leds=60))
 
     # run forever
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ class HomieNode:
             if p.retained is False:
                 await publish(b"{}/$retained".format(t), FALSE)
 
-            if p.unit:
+            if p.unit is not None:
                 await publish(b"{}/$unit".format(t), p.unit)
 
     @await_ready_state

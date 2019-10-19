@@ -4,6 +4,7 @@ from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import BOOLEAN
 from machine import Pin
 from micropython import const
 from uasyncio import get_event_loop, sleep_ms
@@ -22,7 +23,7 @@ class PIR(HomieNode):
             id="active",
             name="PIR Status",
             settable=True,
-            datatype="boolean",
+            datatype=BOOLEAN,
             restore=True,
             default=TRUE,
         )
@@ -68,7 +69,7 @@ def main():
     homie.add_node(PIR())
 
     # run forever
-    homie.start()
+    homie.run_forever()
 
 
 if __name__ == "__main__":

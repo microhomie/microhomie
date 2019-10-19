@@ -3,6 +3,7 @@ from homie.constants import FALSE, TRUE
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import ENUM
 from machine import Pin
 
 
@@ -20,7 +21,7 @@ class LED(HomieNode):
             id="power",
             name="LED Power",
             settable=True,
-            datatype="enum",
+            datatype=ENUM,
             format="true,false,toggle",
             restore=True,
             default=TRUE,

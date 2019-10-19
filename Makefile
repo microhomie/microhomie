@@ -1,7 +1,7 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
 MICROPYVERSION := 1.11
-VERSION ?= 2.0.0
+VERSION ?= 2.1.0-beta.2
 PORT ?= /dev/ttyUSB0
 
 
@@ -49,7 +49,7 @@ espopensdk:
 
 micropython:
 	-git clone --recursive https://github.com/micropython/micropython.git
-	cd micropython; git checkout $(MICROPYVERSION)
+	cd micropython; git checkout v$(MICROPYVERSION)
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
 	cd micropython; git apply ../micropython.patch

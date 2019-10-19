@@ -1,3 +1,6 @@
+# Debug mode disables WDT
+# DEBUG = False
+
 ###
 # Wifi settings
 ###
@@ -54,8 +57,7 @@ MQTT_BROKER = "10.0.0.1"
 # Time in seconds the device updates device properties
 # DEVICE_STATS_INTERVAL = 60
 
-# Legacy extensions, for now we only have support for the two legacy extensions.
-# Later we will implement the posibility to add extensions.
+# Legacy extensions, for now have support for the two legacy extensions.
 # No extensions will be loaded per default
 # EXTENSIONS = []
 # EXTENSIONS = [

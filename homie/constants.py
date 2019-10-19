@@ -14,12 +14,22 @@ STATE_READY = b"ready"
 STATE_RECOVER = b"recover"
 
 # Property datatypes
-P_STRING = b"string"
+STRING = b"string"
+ENUM = b"enum"
+BOOLEAN = b"boolean"
+INTEGER = b"integer"
+FLOAT = b"float"
+COLOR = b"color"
+
+# Property formats
+RGB = b"rgb"
+HSV = b"hsv"
 
 # Node
 PUBLISH_DELAY = const(20)
 
 # General
+UTF8 = "utf-8"
 SLASH = b"/"
 UNDERSCORE = b"_"
 
