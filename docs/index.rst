@@ -2,7 +2,7 @@
 Microhomie documentation
 ========================
 
-Welcome! This is the documentation for Microhomie v1.0.0.
+Welcome! This is the documentation for Microhomie v2.1.0.
 
 Microhomie is a `MicroPython <https://micropython.org>`_ framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
 
@@ -14,7 +14,7 @@ Install Microhomie on the ESP8266
 
 The first thing you need to do is to load the Microhomie firmware, a modified MicroPython firmware, onto your ESP8266 device. You can download the firmware from the `GitHub release page <https://github.com/microhomie/microhomie/releases>`_.
 
-If you just started with MicroPython, a good start is the `Getting started with MicroPython on the ESP8266 <http://docs.micropython.org/en/latest/esp8266/tutorial/intro.html>`_ from the MicroPython documentation.
+If you just started with MicroPython, a good start is the `Getting started with MicroPython on the ESP8266 <http://docs.micropython.org/en/latest/esp8266/tutorial/intro.html>`_ tutorial from the MicroPython documentation.
 
 
 Configuration
@@ -113,10 +113,10 @@ and copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be
         └── __init__.py
 
 
-For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script ``esp32_install.mpf`` to automate the delpoyment:
+For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script ``esp32_install.mpf`` to automate the deployment:
 
 .. code-block:: shell
 
     mpfshell ttyUSB0 -s esp32_install.mpf
 
-Continue with the `Configuration <#configuration>`_ and the `Get started with a simple LED node <#get-started-with-a-simple-led-node>`_.
+Continue with the `Configuration <#configuration>`_ and the `Get started with a simple LED node <#get-started-with-a-simple-led-node>`_ sections.
