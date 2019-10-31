@@ -100,12 +100,12 @@ class HomieDevice:
 
     async def subscribe(self, topic):
         topic = self.format_topic(topic)
-        # print("MQTT SUBSCRIBE: {}".format(topic))
+        self.dprint("MQTT SUBSCRIBE: {}".format(topic))
         await self.mqtt.subscribe(topic, QOS)
 
     async def unsubscribe(self, topic):
         topic = self.format_topic(topic)
-        # print("MQTT UNSUBSCRIBE: {}".format(topic))
+        self.dprint("MQTT UNSUBSCRIBE: {}".format(topic))
         await self.mqtt.unsubscribe(topic)
 
     async def add_node_cb(self, node):
@@ -169,7 +169,7 @@ class HomieDevice:
         await self.publish(DEVICE_STATE, STATE_READY)
 
     def sub_cb(self, topic, msg, retained):
-        # print("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
+        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
 
         # broadcast callback passed to nodes
         if b"/$broadcast" in topic:
@@ -188,7 +188,7 @@ class HomieDevice:
             payload = bytes(str(payload), UTF8)
 
         t = SLASH.join((self.dtopic, topic))
-        # print('MQTT PUBLISH: {} --> {}'.format(t, payload))
+        self.dprint('MQTT PUBLISH: {} --> {}'.format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
     async def broadcast(self, payload, level=None):
@@ -200,7 +200,7 @@ class HomieDevice:
             if isinstance(level, str):
                 level = level.encode()
             topic = SLASH.join((topic, level))
-        # print("MQTT BROADCAST: {} --> {}".format(topic, payload))
+        self.dprint("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
     async def publish_properties(self):
@@ -269,6 +269,10 @@ class HomieDevice:
         while True:
             wdt.feed()
             await sleep_ms(WDT_DELAY)
+
+    def dprint(self, *args):
+        if self.DEBUG:
+            print(*args)
 
     def start(self):
         # DeprecationWarning
