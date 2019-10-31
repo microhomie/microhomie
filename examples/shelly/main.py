@@ -1,10 +1,9 @@
 import settings
 from aswitch import Switch
-from homie.constants import FALSE, TRUE
+from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from homie.constants import BOOLEAN
 from machine import Pin
 
 

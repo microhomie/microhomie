@@ -8,7 +8,7 @@ from aswitch import Pushbutton
 from homie.node import HomieNode
 from homie.device import HomieDevice
 from homie.property import HomieNodeProperty
-from homie.constants import TRUE, FALSE
+from homie.constants import TRUE, FALSE, BOOLEAN
 
 
 def reset(led):
@@ -33,7 +33,7 @@ class SmartSocket(HomieNode):
             name="Relay",
             settable=True,
             retained=True,
-            datatype="boolean",
+            datatype=BOOLEAN,
             default=FALSE,
             restore=True,
         )

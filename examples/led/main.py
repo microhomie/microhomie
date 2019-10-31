@@ -1,9 +1,8 @@
 import settings
-from homie.constants import FALSE, TRUE
+from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from homie.constants import ENUM
 from machine import Pin
 
 
@@ -21,8 +20,7 @@ class LED(HomieNode):
             id="power",
             name="LED Power",
             settable=True,
-            datatype=ENUM,
-            format="true,false,toggle",
+            datatype=BOOLEAN,
             restore=True,
             default=TRUE,
         )
@@ -34,11 +32,7 @@ class LED(HomieNode):
             if payload == self.led_property.data:
                 return
 
-            if payload == b"toggle":
-                self.led(not self.led())
-            else:
-                self.led(ONOFF[payload])
-
+            self.led(ONOFF[payload])
             self.led_property.data = ONOFF[self.led()]
 
 

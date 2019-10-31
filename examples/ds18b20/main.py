@@ -3,6 +3,7 @@ import time
 from ds18x20 import DS18X20
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
+from homie.constants import FLOAT
 from machine import Pin
 from onewire import OneWire
 from uasyncio import get_event_loop, sleep_ms
@@ -25,7 +26,7 @@ class DS18B20(HomieNode):
         self.temp_property = HomieNodeProperty(
             id="temperature",
             name="Temperature",
-            datatype="float",
+            datatype=FLOAT,
             format="-40:80",
             unit="°F",
         )
