@@ -248,15 +248,14 @@ class HomieDevice:
             await sleep_ms(delay)
 
     async def run(self):
-        try:
-            await self.mqtt.connect()
-        except OSError:
-            print("ERROR: can not connect to MQTT")
-            await sleep_ms(5000)
-            self.run_forever()
-
         while True:
-            await sleep_ms(MAIN_DELAY)
+            try:
+                await self.mqtt.connect()
+                while True:
+                    await sleep_ms(MAIN_DELAY)
+            except OSError:
+                print("ERROR: can not connect to MQTT")
+                await sleep_ms(5000)
 
     def run_forever(self):
         loop = get_event_loop()
@@ -271,7 +270,7 @@ class HomieDevice:
             await sleep_ms(WDT_DELAY)
 
     def dprint(self, *args):
-        if self.DEBUG:
+        if self.debug:
             print(*args)
 
     def start(self):
