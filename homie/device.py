@@ -16,6 +16,7 @@ from homie.constants import (
     UTF8,
     WDT_DELAY,
     T_SET,
+    T_BC,
 )
 from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
@@ -177,7 +178,7 @@ class HomieDevice:
             return
 
         # broadcast callback passed to nodes
-        if b"/$broadcast" in topic:
+        if T_BC in topic:
             nodes = self.nodes
             for n in nodes:
                 n.broadcast_callback(topic, msg, retained)

@@ -29,6 +29,7 @@ HSV = b"hsv"
 PUBLISH_DELAY = const(20)
 
 # (Sub)Tobics
+T_BC = b"/$broadcast"
 T_SET = b"/set"
 
 # General
