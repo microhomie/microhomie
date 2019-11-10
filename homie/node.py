@@ -66,7 +66,7 @@ class HomieNode:
             await sleep_ms(PUBLISH_DELAY)
 
     def callback(self, topic, payload, retained):
-        """ Gets called when a payload arrived on node topics
+        """ Gets called when a payload arrive on node topics
 
             This method is keeped for backward compatibilty. Old
             Microhomie versions still can overwrite this method in child
