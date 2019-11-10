@@ -170,8 +170,8 @@ class HomieDevice:
 
         await self.publish(DEVICE_STATE, STATE_READY)
 
-    def sub_cb(self, topic, msg, retained):
-        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
+    def sub_cb(self, topic, payload, retained):
+        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained))
 
         # Only non-retained messages are allowed on /set topics
         if retained and topic.endswith(T_SET):
@@ -181,13 +181,13 @@ class HomieDevice:
         if T_BC in topic:
             nodes = self.nodes
             for n in nodes:
-                n.broadcast_callback(topic, msg, retained)
+                n.broadcast_callback(topic, payload, retained)
         else:
             # node property callbacks
             nt = topic.split(SLASH)
             node = nt[len(self.dtopic.split(SLASH))]
             if node in self.callback_topics:
-                self.callback_topics[node](topic, msg, retained)
+                self.callback_topics[node](topic, payload, retained)
 
     async def publish(self, topic, payload, retain=True):
         if not isinstance(payload, bytes):
