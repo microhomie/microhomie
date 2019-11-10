@@ -1,7 +1,7 @@
 from gc import collect, mem_free
 from sys import platform
 
-from asyn import Event
+from asyn import Event, launch
 from homie import __version__, utils
 from homie.constants import (
     DEVICE_STATE,
@@ -92,8 +92,7 @@ class HomieDevice:
         collect()
         node.device = self
         self.nodes.append(node)
-        loop = get_event_loop()
-        loop.create_task(node.publish_data())
+        launch(node.publish_data, ())
 
     def format_topic(self, topic):
         if self.dtopic in topic:
@@ -160,8 +159,7 @@ class HomieDevice:
 
             # activate WDT
             if LINUX is False and self.debug is False:
-                loop = get_event_loop()
-                loop.create_task(self.wdt())
+                launch(self.wdt, ())
 
             # start coros waiting for ready state
             _EVENT.set()
@@ -237,8 +235,7 @@ class HomieDevice:
             if b"org.homie.legacy-stats:0.1.1:[4.x]" in self._extensions:
                 await self.publish(b"$stats/interval", self.stats_interval)
                 # Start stats coro
-                loop = get_event_loop()
-                loop.create_task(self.publish_stats())
+                launch(self.publish_stats, ())
 
     @await_ready_state
     async def publish_stats(self):
