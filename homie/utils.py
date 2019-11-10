@@ -1,4 +1,15 @@
 from mqtt_as import LINUX
+from homie.constants import (
+    STRING,
+    INTEGER,
+    ENUM,
+    BOOLEAN,
+    FLOAT,
+    TRUE,
+    FALSE,
+    COLOR,
+)
+
 
 if LINUX is False:
     from network import WLAN, AP_IF
@@ -34,3 +45,27 @@ def get_local_mac():
         return hexlify(WLAN(0).config("mac"), ":")
     except NameError:
         return b"00:00:00:00:00:00"
+
+
+def payload_is_valid(cls, payload):
+    _dt = cls.datatype
+
+    if _dt == STRING:
+        pass
+    elif _dt == INTEGER or _dt == FLOAT:
+        try:
+            float(payload)
+        except ValueError:
+            return False
+    elif _dt == BOOLEAN:
+        if payload != TRUE and payload != FALSE:
+            return False
+    elif _dt == ENUM:
+        _values = cls.format.split(b",")
+        if payload not in _values:
+            return False
+    elif _dt == COLOR:
+        if len(payload.split(",")) != 3:
+            return False
+
+    return True
