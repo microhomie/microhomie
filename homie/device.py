@@ -15,6 +15,7 @@ from homie.constants import (
     UNDERSCORE,
     UTF8,
     WDT_DELAY,
+    T_SET,
 )
 from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
@@ -170,6 +171,10 @@ class HomieDevice:
 
     def sub_cb(self, topic, msg, retained):
         self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, msg, retained))
+
+        # Only non-retained messages are allowed on /set topics
+        if retained and topic.endswith(T_SET):
+            return
 
         # broadcast callback passed to nodes
         if b"/$broadcast" in topic:

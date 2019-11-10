@@ -28,6 +28,9 @@ HSV = b"hsv"
 # Node
 PUBLISH_DELAY = const(20)
 
+# (Sub)Tobics
+T_SET = b"/set"
+
 # General
 UTF8 = "utf-8"
 SLASH = b"/"
