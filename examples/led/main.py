@@ -16,24 +16,19 @@ class LED(HomieNode):
         self.pin = pin
         self.led = Pin(pin, Pin.OUT, value=0)
 
-        self.led_property = HomieNodeProperty(
+        self.power_property = HomieNodeProperty(
             id="power",
             name="LED Power",
             settable=True,
             datatype=BOOLEAN,
-            restore=True,
             default=TRUE,
         )
 
-        self.add_property(self.led_property)
+        self.add_property(self.power_property, self.on_power_msg)
 
-    def callback(self, topic, payload, retained):
-        if b"led/power" in topic:
-            if payload == self.led_property.data:
-                return
-
-            self.led(ONOFF[payload])
-            self.led_property.data = ONOFF[self.led()]
+    def on_power_msg(self, topic, payload, retained):
+        self.led(ONOFF[payload])
+        self.power_property.data = ONOFF[self.led()]
 
 
 def main():

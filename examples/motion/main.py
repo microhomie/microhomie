@@ -9,7 +9,8 @@ from micropython import const
 from uasyncio import get_event_loop, sleep_ms
 
 
-PIR_DELAY = const(20)
+_SENSOR = "sensor"
+_PIR_DELAY = const(20)
 
 
 class PIR(HomieNode):
@@ -18,7 +19,7 @@ class PIR(HomieNode):
         self.pir = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.active = True
 
-        self.pir_property = HomieNodeProperty(
+        self.active_property = HomieNodeProperty(
             id="active",
             name="PIR Status",
             settable=True,
@@ -26,26 +27,24 @@ class PIR(HomieNode):
             restore=True,
             default=TRUE,
         )
+        self.add_property(self.active_property, self.on_active_msg)
 
-    def callback(self, topic, payload, retained):
-        if b"active" in topic:
-            if payload == FALSE:
-                if self.active:
-                    asyn.launch(asyn.NamedTask.cancel, ("pir_sensor",))
-                    self.active = False
-            elif payload == TRUE:
-                if not self.active:
-                    self.active = True
-                    loop = get_event_loop()
-                    loop.create_task(
-                        asyn.NamedTask("pir_sensor", self.pir_sensor)()
-                    )
-            else:
-                return
+    def on_active_msg(self, topic, payload, retained):
+        if payload == FALSE:
+            if self.active:
+                asyn.launch(asyn.NamedTask.cancel, (_SENSOR,))
+                self.active = False
+        elif payload == TRUE:
+            if not self.active:
+                self.active = True
+                loop = get_event_loop()
+                loop.create_task(
+                    asyn.NamedTask(_SENSOR, self.pir_sensor)()
+                )
+        else:
+            return
 
-            self.pir_property.data = payload
-            if retained:
-                self.pir_sensor.update_delta()
+        self.active_property.data = payload
 
     async def pir_sensor(self):
         pir = self.pir
@@ -57,7 +56,7 @@ class PIR(HomieNode):
                 latest = s
                 self.device.broadcast("motion detected")
 
-            await sleep_ms(PIR_DELAY)
+            await sleep_ms(_PIR_DELAY)
 
 
 def main():

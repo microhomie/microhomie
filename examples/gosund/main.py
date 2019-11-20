@@ -21,23 +21,24 @@ def reset(led):
 
 
 class SmartSocket(HomieNode):
-    def __init__(self):
-        super().__init__(id="relay", name="Relay 16A", type="Gosund SP1 v23")
-        uos.dupterm(None, 1)  # disable REPL so we can use the blue led
-        self.led_b = Pin(1, Pin.OUT, value=1)
-        self.led_r = Pin(13, Pin.OUT, value=1)
+    def __init__(self, name="Relay 16A"):
+        super().__init__(id="relay", name=name, type="Gosund SP1")
+
+        # disable REPL so we can use the blue led
+        uos.dupterm(None, 1)
+
+        self.led_b = Pin(1, Pin.OUT, value=1)  # Blue LED
+        self.led_r = Pin(13, Pin.OUT, value=1)  # Red LED
         self.relay = Pin(14, Pin.OUT)
 
-        self.relay_property = HomieNodeProperty(
+        self.power_property = HomieNodeProperty(
             id="power",
             name="Relay",
             settable=True,
-            retained=True,
             datatype=BOOLEAN,
             default=FALSE,
-            restore=True,
         )
-        self.add_property(self.relay_property)
+        self.add_property(self.power_property, self.on_power_msg)
 
         self.button = Pushbutton(Pin(3, Pin.IN))
         self.button.release_func(self.toggle, ())
@@ -47,23 +48,22 @@ class SmartSocket(HomieNode):
         self.relay(0)
         self.led_b(0)
         self.led_r(1)
-        self.relay_property.data = FALSE
+        self.power_property.data = FALSE
 
     def on(self):
         self.relay(1)
         self.led_b(1)
         self.led_r(0)
-        self.relay_property.data = TRUE
+        self.power_property.data = TRUE
 
-    def callback(self, topic, payload, retained):
-        if b"power" in topic:
-            if payload == FALSE:
-                self.off()
-            elif payload == TRUE:
-                self.on()
+    def on_power_msg(self, topic, payload, retained):
+        if payload == FALSE:
+            self.off()
+        elif payload == TRUE:
+            self.on()
 
     def toggle(self):
-        if self.relay_property.data == TRUE:
+        if self.power_property.data == TRUE:
             self.off()
         else:
             self.on()
