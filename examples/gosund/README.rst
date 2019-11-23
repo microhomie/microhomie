@@ -13,7 +13,7 @@ Gosund must be flashed with ``-fm dout`` to acceess the repl.
 
 .. code-block:: shell
 
-    esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dout 0x0 micropython/ports/esp8266/build/firmware-combined.bin
+    esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dout 0x0 releases/microhomie-esp8266-vX.X.X.bin
 
 TODO
 ----
