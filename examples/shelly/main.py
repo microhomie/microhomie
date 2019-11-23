@@ -13,37 +13,34 @@ class ShellyRelay(HomieNode):
         self.relay = Pin(rpin, Pin.OUT, value=0)
         self.switch = Switch(Pin(swpin, Pin.IN))
 
-        self.relay_property = HomieNodeProperty(
+        self.power_property = HomieNodeProperty(
             id="power",
             name=id,
             settable=True,
-            retained=True,
             datatype=BOOLEAN,
             default=FALSE,
-            restore=True,
         )
-        self.add_property(self.relay_property)
+        self.add_property(self.power_property, self.on_power_msg)
 
         self.switch.open_func(self.toggle, ())
         self.switch.close_func(self.toggle, ())
 
     def off(self):
         self.relay(0)
-        self.relay_property.data = FALSE
+        self.power_property.data = FALSE
 
     def on(self):
         self.relay(1)
-        self.relay_property.data = TRUE
+        self.power_property.data = TRUE
 
-    def callback(self, topic, payload, retained):
-        if b"power" in topic:
-            if payload == FALSE:
-                self.off()
-            elif payload == TRUE:
-                self.on()
+    def on_power_msg(self, topic, payload, retained):
+        if payload == FALSE:
+            self.off()
+        elif payload == TRUE:
+            self.on()
 
     def toggle(self):
-        if self.relay_property.data == TRUE:
+        if self.power_property.data == TRUE:
             self.off()
         else:
             self.on()
@@ -51,10 +48,10 @@ class ShellyRelay(HomieNode):
 
 def main():
     relay1 = ShellyRelay(
-        "relay1", rpin=4, swpin=5, name="Light Switch 01", type="Shelly 2.5"
+        "relay1", rpin=4, swpin=5, name="Light Switch 1", type="Shelly 2.5"
     )
     relay2 = ShellyRelay(
-        "relay2", rpin=15, swpin=13, name="Light Switch 02", type="Shelly 2.5"
+        "relay2", rpin=15, swpin=13, name="Light Switch 2", type="Shelly 2.5"
     )
 
     homie = HomieDevice(settings)

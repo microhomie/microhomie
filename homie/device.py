@@ -26,7 +26,7 @@ from utime import time
 _EVENT = Event()
 
 
-# Decorator to block methods and functions until device has "ready" state
+# Decorator to block async coros until the device is in "ready" state
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
@@ -132,17 +132,17 @@ class HomieDevice:
         nodes = self.nodes
         for n in nodes:
             props = n._properties
-            for p in props:
+            for pid, p in props.items():
                 if p.restore:
                     # Restore from topic with retained message
                     await self.add_node_cb(n)
-                    t = b"{}/{}".format(n.id, p.id)
+                    t = b"{}/{}".format(n.id, pid)
                     await subscribe(t)
                     retained.append(t)
 
                 if p.settable:
                     await self.add_node_cb(n)
-                    await subscribe(b"{}/{}/set".format(n.id, p.id))
+                    await subscribe(b"{}/{}/set".format(n.id, pid))
 
         # on first connection:
         # * publish device and node properties

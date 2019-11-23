@@ -9,9 +9,6 @@ from homie.property import HomieNodeProperty
 from homie.constants import TRUE, FALSE, BOOLEAN, COLOR, RGB, ENUM
 
 
-_POWER = b"power"
-_BRIGHTNESS = b"brightness"
-
 BLACK = (0, 0, 0)
 
 DEFAULT = b"159,5,0"
@@ -53,7 +50,7 @@ class AmbientLight(HomieNode):
             datatype=BOOLEAN,
             default=FALSE,
         )
-        self.add_property(self.power_property)
+        self.add_property(self.power_property, self.on_power_msg)
 
         self.color_property = HomieNodeProperty(
             id="color",
@@ -65,7 +62,7 @@ class AmbientLight(HomieNode):
             default=DEFAULT,
             format=RGB,
         )
-        self.add_property(self.color_property)
+        self.add_property(self.color_property, self.on_color_msg)
 
         self.brightness_property = HomieNodeProperty(
             id="brightness",
@@ -77,7 +74,7 @@ class AmbientLight(HomieNode):
             format=b"1,2,3,4,5,6,7,8",
             default=4,
         )
-        self.add_property(self.brightness_property)
+        self.add_property(self.brightness_property, self.on_brightness_msg)
 
     @property
     def brightness(self):
@@ -101,32 +98,31 @@ class AmbientLight(HomieNode):
         )
         all_on(self.np, color=color)
 
-    def callback(self, topic, payload, retained):
-        if _POWER in topic:
-            if payload == TRUE:
-                rgb = convert_str_to_rgb(self.color_property.data)
+    def on_power_msg(self, topic, payload, retained):
+        if payload == TRUE:
+            rgb = convert_str_to_rgb(self.color_property.data)
+            self.on(rgb=rgb)
+        elif payload == FALSE:
+            all_off(self.np)
+        else:
+            return
+
+        self.power_property.data = payload
+
+    def on_color_msg(self, topic, payload, retained):
+        rgb = convert_str_to_rgb(payload)
+        if rgb is not None:
+            self.color_property.data = payload
+            if self.power_property.data == TRUE:
                 self.on(rgb=rgb)
-            elif payload == FALSE:
-                all_off(self.np)
-            else:
-                return
 
-            self.power_property.data = payload
-
-        elif COLOR in topic:
-            rgb = convert_str_to_rgb(payload)
-            if rgb is not None:
-                self.color_property.data = payload
-                if self.power_property.data == TRUE:
-                    self.on(rgb=rgb)
-
-        elif _BRIGHTNESS in topic:
-            try:
-                b = min(max(int(payload), 1), 8)
-                self.brightness = b
-                self.brightness_property.data = payload
-            except ValueError:
-                pass
+    def on_brightness_msg(self, topic, payload, retained):
+        try:
+            b = min(max(int(payload), 1), 8)
+            self.brightness = b
+            self.brightness_property.data = payload
+        except ValueError:
+            pass
 
 
 def main():

@@ -34,6 +34,7 @@ T_SET = b"/set"
 
 # General
 UTF8 = "utf-8"
+SET = b"set"
 SLASH = b"/"
 UNDERSCORE = b"_"
 

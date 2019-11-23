@@ -1,3 +1,4 @@
+from homie.utils import payload_is_valid
 from homie.constants import STRING
 
 
@@ -14,6 +15,8 @@ class HomieNodeProperty:
         default=None,
         restore=True,
     ):
+        self._data = default
+
         self.id = id
         self.name = name
         self.settable = settable
@@ -21,14 +24,9 @@ class HomieNodeProperty:
         self.unit = unit
         self.datatype = datatype
         self.format = format
-        self.range = range
         self.restore = restore
-
-        if isinstance(default, bool):
-            default = str(default).lower().encode()
-
-        self._data = default
-        self._update = True
+        self.update = True
+        self.on_message = None
 
     @property
     def data(self):
@@ -36,10 +34,16 @@ class HomieNodeProperty:
 
     @data.setter
     def data(self, value):
-        try:
-            if isinstance(value, bool):
-                value = str(value).lower().encode()
-            self._data = value
-            self._update = True
-        except (ValueError, IndexError):
-            pass
+        self._data = value
+        self.update = True
+
+    def msg_handler(self, topic, payload, retained):
+        """Gets called when the property receive a message"""
+        if payload_is_valid(self, payload):
+            if self.on_message is None:
+                self.data = payload
+            else:
+                self.on_message(topic, payload, retained)
+
+            if retained:
+                self._update = False
