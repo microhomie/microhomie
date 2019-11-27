@@ -1,2 +1,0 @@
-Install with Wizzard (experimental)
-------------------------------------

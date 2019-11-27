@@ -1,122 +1,114 @@
-========================
-Microhomie documentation
-========================
+.. raw:: html
 
-Welcome! This is the documentation for Microhomie v2.1.0.
+    <style>
+        .row {clear: both}
 
-Microhomie is a `MicroPython <https://micropython.org>`_ framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
+        .column img {border: 1px solid black;}
 
-The main target device is the ESP8266 and we deliver pre-build firmware images. For ESP32 devices see the `Install Microhomie on the ESP32 <#id1>`_ section.
+        @media only screen and (min-width: 1000px),
+               only screen and (min-width: 600px) and (max-width: 768px){
+            .column {
+                padding-left: 5px;
+                padding-right: 5px;
+                float: left;
+                width: 25%;
+            }
+        }
+        h2 {border-top: 1px solid black; padding-top: 1em}
+    </style>
 
 
-Install Microhomie on the ESP8266
+============================================
+Microhomie - Documentation and Specification
+============================================
+
+.. image:: _static/images/microhomie.png
+   :alt: 'Microhomie'
+   :class: 'main-visual'
+   :scale: 50%
+   :align: center
+
+
+Contents
+========
+
+.. rst-class:: clearfix row
+
+.. rst-class:: column
+
+
+:ref:`Get started <introduction>`
 ---------------------------------
 
-The first thing you need to do is to load the Microhomie firmware, a modified MicroPython firmware, onto your ESP8266 device. You can download the firmware from the `GitHub release page <https://github.com/microhomie/microhomie/releases>`_.
-
-If you just started with MicroPython, a good start is the `Getting started with MicroPython on the ESP8266 <http://docs.micropython.org/en/latest/esp8266/tutorial/intro.html>`_ tutorial from the MicroPython documentation.
+Start here with hands-on examples.
 
 
-Configuration
--------------
+.. rst-class:: column
 
-To configure your Microhomie device create a ``settings.py`` file from the ``settings.example.py`` file, make your changes and copy the file to your ESP8266 device.
-
-
-Get started with a simple LED node
+:ref:`How-to guides <howtoguides>`
 ----------------------------------
 
-The LED example in this guide use the on-board LED, so you don't need to do any wiring to get started.
+Step-by-step guides for the developer covering key operations and procedures
 
-Copy the ``main.py`` file from the ``examples/led`` directory to your ESP8266, reset the device and watch the incoming MQTT messages.
+.. rst-class:: column
 
-To turn the on-board LED from your ESP8266 on or off send ``true``, ``false`` or ``toggle`` to the property topic. For example:
+:ref:`Reference <reference>`
+----------------------------
 
-.. code-block:: shell
+Technical reference - tools, components and commands
 
-    mosquitto_pub -h HOST -u USER -P PASSWORD -t "homie/DEVICE-ID/led/power/set" -m true
-
-
-Build your own Microhomie ESP8266 firmware
-------------------------------------------
-
-If you want to build your own Microhomie firmware, maybe for helping us with development, learning or just for the fun to build your own firmware, follow the next steps.
-
-First clone the Microhomie repository:
-
-.. code-block:: shell
-
-    git clone https://github.com/microhomie/microhomie.git
-
-The next step is to setup the build environment, build the `esp-open-sdk <https://github.com/pfalcon/esp-open-sdk>`_ (`Requirements and Dependencies <https://github.com/pfalcon/esp-open-sdk#requirements-and-dependencies>`_), get the MicroPython source, prepare it for the Microhomie firmware and download the required MicroPython modules:
-
-.. code-block:: shell
-
-    cd microhomie
-    make bootstrap
-
-Now you can build your Microhomie firmware and load it to your ESP8266:
-
-.. code-block:: shell
-
-    make
-
-Erase and flash:
-
-.. code-block:: shell
-
-    make delpoy PORT=/dev/ttyUSBX
-
-Just flash:
-
-.. code-block:: shell
-
-    make flash PORT=/dev/ttyUSBX
-
-If you want to help with development, please use our linting:
-
-.. code-block:: shell
-
-    make lint
+.. rst-class:: column
 
 
-Install Microhomie on the ESP32
--------------------------------
+:ref:`Background <background>`
+------------------------------
 
-For the ESP32 you can just copy all requirements and Microhomie to your device.
+Explanation and discussion of key topics
 
-Flash MicroPython to your your ESP23 with the official the `Firmware for ESP32 boards <https://micropython.org/download#esp32>`_.
-
-Clone the Microhomie repository
-
-.. code-block:: shell
-
-    git clone https://github.com/microhomie/microhomie.git
-
-and copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be copied to the device ``lib`` directory.
-
-.. code-block:: shell
-
-    lib/
-    ├── aswitch.py
-    ├── asyn.py
-    ├── homie
-    │   ├── constants.py
-    │   ├── device.py
-    │   ├── __init__.py
-    │   ├── node.py
-    │   ├── property.py
-    │   └── utils.py
-    ├── mqtt_as.py
-    └── uasyncio
-        ├── core.py
-        └── __init__.py
+.. rst-class:: clearfix row
 
 
-For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script ``esp32_install.mpf`` to automate the deployment:
+About this documentation
+========================
 
-.. code-block:: shell
+This documentation is the central hub of information for all things Microhomie.
 
-    mpfshell ttyUSB0 -s esp32_install.mpf
 
-Continue with the `Configuration <#configuration>`_ and the `Get started with a simple LED node <#get-started-with-a-simple-led-node>`_ sections.
+What is Microhomie?
+===================
+
+Microhomie is a MicroPython framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT.
+
+Main target for Microhomie is the ESP8266 device but has been well tested and used on ESP32 too.
+
+Source is on `GitHub <https://github.com/microhomie/microhomie>`_.
+
+
+Notational Conventions
+======================
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
+
+The key words "unspecified", "undefined", and "implementation-defined" are to be interpreted as described in the [rationale for the C99 standard](http://www.open-std.org/jtc1/sc22/wg14/www/C99RationaleV5.10.pdf#page=18).
+
+An implementation is not compliant if it fails to satisfy one or more of the MUST, MUST NOT, REQUIRED, SHALL, or SHALL NOT requirements for the protocols it implements.
+An implementation is compliant if it satisfies all the MUST, MUST NOT, REQUIRED, SHALL, and SHALL NOT requirements for the protocols it implements.
+
+
+Detailed table of contents
+==========================
+
+.. toctree::
+   :maxdepth: 2
+
+   introduction/index
+   howto/index
+   reference/index
+   background/index
+
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`search`
