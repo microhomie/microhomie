@@ -7,7 +7,6 @@ from homie.constants import (
     DEVICE_STATE,
     MAIN_DELAY,
     QOS,
-    RESTORE_DELAY,
     SLASH,
     STATE_INIT,
     STATE_READY,
