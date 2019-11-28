@@ -1,15 +1,14 @@
-from mqtt_as import LINUX
 from homie.constants import (
-    STRING,
-    INTEGER,
-    ENUM,
     BOOLEAN,
-    FLOAT,
-    TRUE,
-    FALSE,
     COLOR,
+    ENUM,
+    FALSE,
+    FLOAT,
+    INTEGER,
+    STRING,
+    TRUE,
 )
-
+from mqtt_as import LINUX
 
 if LINUX is False:
     from network import WLAN, AP_IF

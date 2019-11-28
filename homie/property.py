@@ -1,5 +1,5 @@
-from homie.utils import payload_is_valid
 from homie.constants import STRING
+from homie.utils import payload_is_valid
 
 
 class HomieNodeProperty:

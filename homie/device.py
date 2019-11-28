@@ -11,11 +11,11 @@ from homie.constants import (
     STATE_INIT,
     STATE_READY,
     STATE_RECOVER,
+    T_BC,
+    T_SET,
     UNDERSCORE,
     UTF8,
     WDT_DELAY,
-    T_SET,
-    T_BC,
 )
 from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
@@ -152,7 +152,7 @@ class HomieDevice:
 
             # unsubscribe from retained topic (restore)
             for t in retained:
-                await self.unsubscribe(t)
+                await unsubscribe(t)
 
             self._first_start = False
 
@@ -168,7 +168,9 @@ class HomieDevice:
         await self.publish(DEVICE_STATE, STATE_READY)
 
     def sub_cb(self, topic, payload, retained):
-        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained))
+        self.dprint(
+            "MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained)
+        )
 
         # Only non-retained messages are allowed on /set topics
         if retained and topic.endswith(T_SET):
@@ -191,7 +193,7 @@ class HomieDevice:
             payload = bytes(str(payload), UTF8)
 
         t = SLASH.join((self.dtopic, topic))
-        self.dprint('MQTT PUBLISH: {} --> {}'.format(t, payload))
+        self.dprint("MQTT PUBLISH: {} --> {}".format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
     async def broadcast(self, payload, level=None):
