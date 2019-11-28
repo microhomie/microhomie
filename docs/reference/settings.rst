@@ -6,7 +6,7 @@
 .. module:: settings
    :synopsis: Module to configure Microhomie
 
-This module is to confgiure the home device. For reference see the example settings file in the repository.
+This module is to configure the home device. For reference see the example settings file in the repository.
 
 
 Mandatory

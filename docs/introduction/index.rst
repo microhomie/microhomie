@@ -27,6 +27,8 @@ You can download the Microhomie firmware from the `GitHub release page <https://
 
     esptool --port PORT --baud 460800 write_flash --flash_size=detect --verify -fm dio 0x0 microhomie-esp8266-v2.2.0.bin
 
+Continue with the `configuration`_ and the `Quick start with a simple LED node`_ sections.
+
 
 Install Microhomie on the ESP32
 ===============================
@@ -79,13 +81,15 @@ For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script
 
     mpfshell ttyUSB0 -s esp32_install.mpf
 
-Continue with the `Configuration <#configuration>`_ and the `Quick start with a simple LED node <#quick-start-with-a-simple-led-node>`_ sections.
+Continue with the `configuration`_ and the `Quick start with a simple LED node`_ sections.
 
 
 Configuration
 =============
 
 To configure your Microhomie device create a ``settings.py`` file from the ``settings.example.py`` file, make your changes and copy the file to your ESP8266 device.
+
+Reference: :ref:`reference_homie_settings`
 
 
 Quick start with a simple LED node
