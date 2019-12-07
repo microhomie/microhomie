@@ -2,6 +2,17 @@
 Changelog
 =========
 
+2.2.0
+-----
+
+* Updated mqqt_as version
+* Added debug print method (dprint)
+* Fixed runtime error if mqtt broker is not available on first start
+* Ignore retained messages on /set sub-topics
+* Payload validator
+* Message handler (70db1c8)
+* Updated documentation
+
 2.1.0
 -----
 
