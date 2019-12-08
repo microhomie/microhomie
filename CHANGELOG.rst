@@ -2,6 +2,11 @@
 Changelog
 =========
 
+2.2.1
+-----
+
+* Hotifx: Unsubscribe from retained topic after recover from net/mqtt outage.
+
 2.2.0
 -----
 
