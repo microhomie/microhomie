@@ -1,6 +1,8 @@
+from asyn import launch
+from uasyncio import sleep_ms
+
 from homie.constants import FALSE, PUBLISH_DELAY, SET, SLASH, TRUE
 from homie.device import await_ready_state
-from uasyncio import sleep_ms
 
 
 class HomieNode:
@@ -72,6 +74,10 @@ class HomieNode:
             Microhomie versions still can overwrite this method in child
             classes to handle mesages.
         """
+        # unsubscribe from retained topic
+        if retained:
+            launch(self.device.unsubscribe, (topic,))
+
         t = topic.split(SLASH)
         pid = t.pop()  # property id
         if pid == SET:

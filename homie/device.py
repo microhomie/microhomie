@@ -121,7 +121,6 @@ class HomieDevice:
 
         retained = []
         subscribe = self.subscribe
-        unsubscribe = self.unsubscribe
 
         await self.mqtt.subscribe(
             SLASH.join((self.btopic, b"$broadcast/#")), QOS
@@ -150,7 +149,8 @@ class HomieDevice:
         if self._first_start is True:
             await self.publish_properties()
 
-            # unsubscribe from retained topic (restore)
+            unsubscribe = self.unsubscribe
+            # unsubscribe from retained topics
             for t in retained:
                 await unsubscribe(t)
 
