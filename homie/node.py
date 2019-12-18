@@ -62,7 +62,7 @@ class HomieNode:
                     data = p._data
                     p.update = False
                     if data is not None:
-                        if isinstance(data, int):
+                        if isinstance(data, (int, float)):
                             data = str(data)
                         t = "{}/{}".format(nid, pid)
                         await publish(t, data, p.retained)
