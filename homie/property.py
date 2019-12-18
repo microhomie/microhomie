@@ -47,4 +47,4 @@ class HomieNodeProperty:
 
             # do not re-publish the data from a retained message
             if retained:
-                self._update = False
+                self.update = False
