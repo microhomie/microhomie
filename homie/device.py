@@ -57,12 +57,12 @@ class HomieDevice:
         try:
             device_id = settings.DEVICE_ID
         except AttributeError:
-            device_id = utils.get_unique_id()
+            device_id = utils.get_unique_id().decode()
 
         # Base topic
-        self.btopic = getattr(settings, "MQTT_BASE_TOPIC", b"homie")
+        self.btopic = getattr(settings, "MQTT_BASE_TOPIC", "homie")
         # Device base topic
-        self.dtopic = SLASH.join((self.btopic, device_id))
+        self.dtopic = "{}/{}".format(self.btopic, device_id)
 
         self.mqtt = MQTTClient(
             client_id=device_id,
@@ -78,7 +78,7 @@ class HomieDevice:
             clean_init=getattr(settings, "MQTT_CLEAN_INIT", True),
             clean=getattr(settings, "MQTT_CLEAN", True),
             max_repubs=getattr(settings, "MQTT_MAX_REPUBS", 4),
-            will=(SLASH.join((self.dtopic, DEVICE_STATE)), b"lost", True, QOS),
+            will=("{}/{}".format(self.dtopic, DEVICE_STATE), "lost", True, QOS),
             subs_cb=self.sub_cb,
             wifi_coro=None,
             connect_coro=self.connection_handler,
@@ -96,7 +96,7 @@ class HomieDevice:
     def format_topic(self, topic):
         if self.dtopic in topic:
             return topic
-        return SLASH.join((self.dtopic, topic))
+        return "{}/{}".format(self.dtopic, topic)
 
     async def subscribe(self, topic):
         topic = self.format_topic(topic)
@@ -110,7 +110,7 @@ class HomieDevice:
 
     async def add_node_cb(self, node):
         # Add the node callback method only once to the callback list
-        nid = node.id.encode()
+        nid = node.id
         if nid not in self.callback_topics:
             self.callback_topics[nid] = node.callback
 
@@ -123,7 +123,7 @@ class HomieDevice:
         subscribe = self.subscribe
 
         await self.mqtt.subscribe(
-            SLASH.join((self.btopic, b"$broadcast/#")), QOS
+            "{}/$broadcast/#".format(self.btopic), QOS
         )
 
         # node topics
@@ -134,13 +134,13 @@ class HomieDevice:
                 if p.restore:
                     # Restore from topic with retained message
                     await self.add_node_cb(n)
-                    t = b"{}/{}".format(n.id, pid)
+                    t = "{}/{}".format(n.id, pid)
                     await subscribe(t)
                     retained.append(t)
 
                 if p.settable:
                     await self.add_node_cb(n)
-                    await subscribe(b"{}/{}/set".format(n.id, pid))
+                    await subscribe("{}/{}/set".format(n.id, pid))
 
         # on first connection:
         # * publish device and node properties
@@ -168,6 +168,9 @@ class HomieDevice:
         await self.publish(DEVICE_STATE, STATE_READY)
 
     def sub_cb(self, topic, payload, retained):
+        topic = topic.decode()
+        payload = payload.decode()
+
         self.dprint(
             "MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained)
         )
@@ -189,22 +192,17 @@ class HomieDevice:
                 self.callback_topics[node](topic, payload, retained)
 
     async def publish(self, topic, payload, retain=True):
-        if not isinstance(payload, bytes):
-            payload = bytes(str(payload), UTF8)
-
-        t = SLASH.join((self.dtopic, topic))
+        t = "{}/{}".format(self.dtopic, topic)
         self.dprint("MQTT PUBLISH: {} --> {}".format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
     async def broadcast(self, payload, level=None):
-        if not isinstance(payload, bytes):
-            payload = bytes(str(payload), UTF8)
+        if isinstance(payload, int):
+            payload = str(payload)
 
-        topic = SLASH.join((self.btopic, b"$broadcast"))
+        topic = "{}/$broadcast".format(self.btopic)
         if level is not None:
-            if isinstance(level, str):
-                level = level.encode()
-            topic = SLASH.join((topic, level))
+            topic = "{}/{}".format(topic, level)
         self.dprint("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
@@ -213,12 +211,12 @@ class HomieDevice:
         publish = self.publish
 
         # device properties
-        await publish(b"$homie", b"4.0.0")
-        await publish(b"$name", self.device_name)
+        await publish("$homie", "4.0.0")
+        await publish("$name", self.device_name)
         await publish(DEVICE_STATE, STATE_INIT)
-        await publish(b"$implementation", bytes(platform, UTF8))
+        await publish("$implementation", bytes(platform, UTF8))
         await publish(
-            b"$nodes", b",".join([n.id.encode() for n in self.nodes])
+            "$nodes", ",".join([n.id for n in self.nodes])
         )
 
         # node properties
@@ -227,14 +225,14 @@ class HomieDevice:
             await n.publish_properties()
 
         if self._extensions:
-            await publish(b"$extensions", b",".join(self._extensions))
-            if b"org.homie.legacy-firmware:0.1.1:[4.x]" in self._extensions:
-                await publish(b"$localip", utils.get_local_ip())
-                await publish(b"$mac", utils.get_local_mac())
-                await publish(b"$fw/name", b"Microhomie")
-                await publish(b"$fw/version", __version__)
-            if b"org.homie.legacy-stats:0.1.1:[4.x]" in self._extensions:
-                await self.publish(b"$stats/interval", self.stats_interval)
+            await publish("$extensions", ",".join(self._extensions))
+            if "org.homie.legacy-firmware:0.1.1:[4.x]" in self._extensions:
+                await publish("$localip", utils.get_local_ip())
+                await publish("$mac", utils.get_local_mac())
+                await publish("$fw/name", "Microhomie")
+                await publish("$fw/version", __version__)
+            if "org.homie.legacy-stats:0.1.1:[4.x]" in self._extensions:
+                await self.publish("$stats/interval", str(self.stats_interval))
                 # Start stats coro
                 launch(self.publish_stats, ())
 
@@ -247,8 +245,8 @@ class HomieDevice:
         publish = self.publish
         while True:
             uptime = time() - start_time
-            await publish(b"$stats/uptime", uptime)
-            await publish(b"$stats/freeheap", mem_free())
+            await publish("$stats/uptime", str(uptime))
+            await publish("$stats/freeheap", str(mem_free()))
             await sleep_ms(delay)
 
     async def run(self):

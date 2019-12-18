@@ -60,7 +60,7 @@ def payload_is_valid(cls, payload):
         if payload != TRUE and payload != FALSE:
             return False
     elif _dt == ENUM:
-        _values = cls.format.split(b",")
+        _values = cls.format.split(",")
         if payload not in _values:
             return False
     elif _dt == COLOR:

@@ -23,32 +23,32 @@ class HomieNode:
         publish = self.device.publish
 
         # node attributes
-        await publish(b"{}/$name".format(nid), self.name)
-        await publish(b"{}/$type".format(nid), self.type)
+        await publish("{}/$name".format(nid), self.name)
+        await publish("{}/$type".format(nid), self.type)
 
         # property attributes
         props = self._properties
         await publish(
-            b"{}/$properties".format(nid),
-            b",".join([pid.encode() for pid in props]),
+            "{}/$properties".format(nid),
+            ",".join([pid for pid in props]),
         )
 
         for pid, p in props.items():
             t = "{}/{}".format(nid, pid)
-            await publish(b"{}/$name".format(t), p.name)
-            await publish(b"{}/$datatype".format(t), p.datatype)
+            await publish("{}/$name".format(t), p.name)
+            await publish("{}/$datatype".format(t), p.datatype)
 
             if p.format is not None:
-                await publish(b"{}/$format".format(t), p.format)
+                await publish("{}/$format".format(t), p.format)
 
             if p.settable is True:
-                await publish(b"{}/$settable".format(t), TRUE)
+                await publish("{}/$settable".format(t), TRUE)
 
             if p.retained is False:
-                await publish(b"{}/$retained".format(t), FALSE)
+                await publish("{}/$retained".format(t), FALSE)
 
             if p.unit is not None:
-                await publish(b"{}/$unit".format(t), p.unit)
+                await publish("{}/$unit".format(t), p.unit)
 
     @await_ready_state
     async def publish_data(self):
@@ -62,7 +62,9 @@ class HomieNode:
                     data = p._data
                     p.update = False
                     if data is not None:
-                        t = b"{}/{}".format(nid, pid)
+                        if isinstance(data, int):
+                            data = str(data)
+                        t = "{}/{}".format(nid, pid)
                         await publish(t, data, p.retained)
 
             await sleep_ms(PUBLISH_DELAY)
@@ -84,7 +86,7 @@ class HomieNode:
             pid = t.pop()
 
         try:
-            p = self._properties[pid.decode()]
+            p = self._properties[pid]
             p.msg_handler(topic, payload, retained)
         except KeyError:
             pass
