@@ -11,7 +11,7 @@ from homie.constants import TRUE, FALSE, BOOLEAN, COLOR, RGB, ENUM
 
 BLACK = (0, 0, 0)
 
-DEFAULT = b"159,5,0"
+DEFAULT = "159,5,0"
 
 
 def all_off(np):
@@ -26,7 +26,7 @@ def all_on(np, color=DEFAULT):
 
 def convert_str_to_rgb(rgb_str):
     try:
-        r, g, b = rgb_str.split(b",")
+        r, g, b = rgb_str.split(",")
         return (int(r.strip()), int(g.strip()), int(b.strip()))
     except (ValueError, TypeError):
         return None
@@ -71,7 +71,7 @@ class AmbientLight(HomieNode):
             retained=True,
             restore=True,
             datatype=ENUM,
-            format=b"1,2,3,4,5,6,7,8",
+            format="1,2,3,4,5,6,7,8",
             default=4,
         )
         self.add_property(self.brightness_property, self.on_brightness_msg)

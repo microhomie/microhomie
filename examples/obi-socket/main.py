@@ -27,7 +27,7 @@ class SmartSocket(HomieNode):
         self.r_on = Pin(12, Pin.OUT)
         self.r_off = Pin(5, Pin.OUT)
 
-        self.relay_property = HomieNodeProperty(
+        self.power_property = HomieNodeProperty(
             id="power",
             name="Relay",
             settable=True,
@@ -36,7 +36,7 @@ class SmartSocket(HomieNode):
             default=FALSE,
             restore=True,
         )
-        self.add_property(self.relay_property)
+        self.add_property(self.power_property, self.on_power_msg)
 
         self.button = Pushbutton(Pin(14, Pin.IN, Pin.PULL_UP))
         self.button.release_func(self.toggle, ())
@@ -46,23 +46,22 @@ class SmartSocket(HomieNode):
         self.r_off(0)
         sleep_ms(100)
         self.r_on(1)
-        self.relay_property.data = FALSE
+        self.power_property.data = FALSE
 
     def on(self):
         self.r_on(0)
         sleep_ms(100)
         self.r_off(1)
-        self.relay_property.data = TRUE
+        self.power_property.data = TRUE
 
-    def callback(self, topic, payload, retained):
-        if b"power" in topic:
-            if payload == FALSE:
-                self.off()
-            elif payload == TRUE:
-                self.on()
+    def on_power_msg(self, topic, payload, retained):
+        if payload == FALSE:
+            self.off()
+        elif payload == TRUE:
+            self.on()
 
     def toggle(self):
-        if self.relay_property.data == TRUE:
+        if self.power_property.data == TRUE:
             self.off()
         else:
             self.on()
