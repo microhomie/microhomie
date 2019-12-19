@@ -27,15 +27,15 @@ HSV = "hsv"
 # Node
 PUBLISH_DELAY = const(20)
 
-# (Sub)Tobics
-T_BC = "/$broadcast"
+# (Sub)Topics
+T_BC = "$broadcast"
 T_SET = "/set"
 
 # General
 UTF8 = "utf-8"
 SET = "set"
 SLASH = "/"
-UNDERSCORE = b"_"
+UNDERSCORE = "_"
 
 ON = "on"
 OFF = "off"

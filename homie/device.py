@@ -123,7 +123,7 @@ class HomieDevice:
         subscribe = self.subscribe
 
         await self.mqtt.subscribe(
-            "{}/$broadcast/#".format(self.btopic), QOS
+            "{}/{}/#".format(self.btopic, T_BC), QOS
         )
 
         # node topics
@@ -200,7 +200,7 @@ class HomieDevice:
         if isinstance(payload, int):
             payload = str(payload)
 
-        topic = "{}/$broadcast".format(self.btopic)
+        topic = "{}/{}".format(self.btopic, T_BC)
         if level is not None:
             topic = "{}/{}".format(topic, level)
         self.dprint("MQTT BROADCAST: {} --> {}".format(topic, payload))
