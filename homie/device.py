@@ -122,9 +122,8 @@ class HomieDevice:
         retained = []
         subscribe = self.subscribe
 
-        await self.mqtt.subscribe(
-            "{}/{}/#".format(self.btopic, T_BC), QOS
-        )
+        # Broadcast topic
+        await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
         # node topics
         nodes = self.nodes
