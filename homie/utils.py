@@ -16,6 +16,12 @@ if LINUX is False:
     from ubinascii import hexlify
 
 
+def enable_ap():
+    """Disables any Accesspoint"""
+    wlan = WLAN(AP_IF)
+    wlan.active(True)
+    print("NETWORK: Access Point enabled.")
+
 def disable_ap():
     """Disables any Accesspoint"""
     wlan = WLAN(AP_IF)
