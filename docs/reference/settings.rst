@@ -77,20 +77,20 @@ MQTT settings
 
 .. data:: MQTT_BASE_TOPIC
 
-    The base topic for the homie device. Default is ``b"homie"``. Value must be bytestring.
+    The base topic for the homie device. Default is ``b"homie"``. Value must be string.
 
 Device settings
 ---------------
 
 .. data:: DEVICE_ID
 
-    The device ID for registration at the broker. The device id is also the base topic of the device and must be unique. Default is to use a generated ID, hex encoded as bytestring: ``homie.utils.get_unique_id()``.
+    The device ID for registration at the broker. The device id is also the base topic of the device and must be unique. Default is to use a generated ID with ``homie.utils.get_unique_id()``.
 
-    Value must be bytestring and unique.
+    Value must be string and unique.
 
 .. data:: DEVICE_NAME
 
-    Friendly name of the device. Value must be bytestring.
+    Friendly name of the device. Value must be string.
 
 .. data:: DEVICE_STATS_INTERVAL
 
@@ -101,7 +101,7 @@ Extensions
 
 .. data:: EXTENSIONS
 
-    Default is a empty list() for no extensions. Microhomie currently supports two legacy extensions. Add the extensions to the list to activate them. Items in the list() must be bytestring.
+    Default is a empty list() for no extensions. Microhomie currently supports two legacy extensions. Add the extensions to the list to activate them. Items in the list() must be string.
 
     * org.homie.legacy-firmware:0.1.1:[4.x]
     * org.homie.legacy-stats:0.1.1:[4.x]
