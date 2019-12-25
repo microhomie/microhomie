@@ -22,7 +22,9 @@ Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_
 MicroPython changes
 -------------------
 
-To save some space we disabled **webrepl** and **btree** support. The AccessPoint SSID is `Microhomie-MAC` with the secret `microhomiE`. You can see all the details in the `micropython.patch` file.
+* **btree** support disabled to save some space
+* AccessPoint SSID changed to `Microhomie-MAC` with the secret `microhomiE`
+* inisetup.py writes a custom boot.py
 
 
 Install
