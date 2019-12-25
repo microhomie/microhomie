@@ -1,11 +1,15 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-MICROPYVERSION := 1.11
+MICROPYVERSION := 1.12
 VERSION ?= 2.3.0-dev
 PORT ?= /dev/ttyUSB0
 
+export MICROPY_PY_BTREE ?= 0
+export FROZEN_MANIFEST ?= ../../../manifest.py
 
-all: copy-lib firmware
+
+all: firmware
+ota: copy-lib firmware-ota
 
 requirements:
 	mkdir -p lib/uasyncio
@@ -15,13 +19,8 @@ requirements:
 	curl -s -o lib/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
 	curl -s -o lib/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
 
-copy-lib:
-	mkdir -p micropython/ports/esp8266/modules/homie
-	cp homie/*.py micropython/ports/esp8266/modules/homie
-	cp -rf lib/* micropython/ports/esp8266/modules
-
 firmware:
-	cd micropython/ports/esp8266; make
+	cd micropython/ports/esp8266; make clean-modules && make
 
 copy-firmware:
 	cp micropython/ports/esp8266/build/firmware-combined.bin ./releases/microhomie-esp8266-v$(VERSION).bin
@@ -38,7 +37,7 @@ erase:
 	esptool.py --port $(PORT) --baud 460800 erase_flash
 
 flash:
-	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 micropython/ports/esp8266/build/firmware-combined.bin
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 micropython/ports/esp8266/build-GENERIC/firmware-combined.bin
 
 flash-release:
 	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 releases/microhomie-esp8266-v$(VERSION).bin
