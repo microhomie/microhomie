@@ -9,7 +9,7 @@ export FROZEN_MANIFEST ?= ../../../manifest.py
 
 
 all: firmware
-ota: copy-lib firmware-ota
+ota: firmware-ota
 
 requirements:
 	mkdir -p lib/uasyncio
@@ -22,14 +22,18 @@ requirements:
 firmware:
 	cd micropython/ports/esp8266; make clean-modules && make
 
-copy-firmware:
-	cp micropython/ports/esp8266/build/firmware-combined.bin ./releases/microhomie-esp8266-v$(VERSION).bin
+firmware-ota:
+	cd micropython/ports/esp8266; make clean-modules && make ota
 
-release: all copy-firmware
+copy-firmware:
+	cp micropython/ports/esp8266/build-GENERIC/firmware-combined.bin ./releases/microhomie-esp8266-v$(VERSION).bin
+	cp micropython/ports/esp8266/build-GENERIC/firmware-ota.bin ./releases/microhomie-esp8266-ota-v$(VERSION).bin
+	cp micropython/ports/esp8266/build-GENERIC/firmware-ota.bin.ota ./releases/microhomie-esp8266-ota-v$(VERSION).ota
+
+release: clean firmware firmware-ota sign-ota copy-firmware
 
 clean:
 	cd micropython/ports/esp8266; make clean
-	-rm -rf micropython/ports/esp8266/modules/homie
 
 deploy: erase flash
 
@@ -42,6 +46,18 @@ flash:
 flash-release:
 	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 releases/microhomie-esp8266-v$(VERSION).bin
 
+flash-ota-release:
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 releases/microhomie-esp8266-ota-v$(VERSION).bin
+
+flash-yaota:
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 yaota8266/yaota8266.bin
+
+flash-ota:
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x3c000 micropython/ports/esp8266/build-GENERIC/firmware-ota.bin
+
+sign-ota:
+	cd yaota8266/ota-client; python ota_client.py sign ../../micropython/ports/esp8266/build-GENERIC/firmware-ota.bin
+
 espopensdk:
 	-git clone --recursive https://github.com/pfalcon/esp-open-sdk.git
 	cd esp-open-sdk; make
@@ -52,6 +68,12 @@ micropython:
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
 	cd micropython; git apply ../micropython.patch
+
+yaota:
+	-git clone --recursive https://github.com/schinckel/yaota8266.git
+	cd yaota8266; git checkout merged
+	cd yaota8266; cp config.h.example config.h
+	cd yaota8266/ota-client; bash gen_keys.sh;
 
 bootstrap: espopensdk micropython
 
