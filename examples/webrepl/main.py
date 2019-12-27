@@ -1,7 +1,7 @@
 import settings
 
 from homie.device import HomieDevice
-from homie.micro import MPy
+from homie.node import MPy
 
 
 def main():

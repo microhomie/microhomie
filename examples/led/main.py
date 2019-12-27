@@ -5,7 +5,7 @@ from aswitch import Pushbutton
 
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
-from homie.node import HomieNode
+from homie.node import HomieNode, MPy
 from homie.property import HomieNodeProperty
 
 
@@ -50,6 +50,9 @@ def main():
 
     # Add LED node to device
     homie.add_node(LED())
+
+    # Micropython node for WebREPL
+    homie.add_node(MPy())
 
     # run forever
     homie.run_forever()

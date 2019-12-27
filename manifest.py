@@ -28,10 +28,11 @@ freeze(
         "homie/__init__.py",
         "homie/constants.py",
         "homie/device.py",
-        "homie/micro.py",
-        "homie/node.py",
         "homie/property.py",
         "homie/utils.py",
+        "homie/node/__init__.py",
+        "homie/node/base.py",
+        "homie/node/micro.py",
     ),
 )
 

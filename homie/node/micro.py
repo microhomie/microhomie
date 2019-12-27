@@ -25,7 +25,7 @@ class MPy(HomieNode):
             name="Command",
             settable=True,
             datatype=ENUM,
-            format="reset,yaotaota",
+            format="reset,yaota8266",
             retained=False,
         )
         self.add_property(self.cmd_property, self.on_cmd_msg)
@@ -43,12 +43,12 @@ class MPy(HomieNode):
     def on_cmd_msg(self, topic, payload, retained):
         if payload == "reset":
             reset()
-        elif payload == "yaotaota":
+        elif payload == "yaota8266":
             from asyn import launch
             launch(self.yaotaota_init, ())
 
     async def yaotaota_init(self):
         RTC().memory(b"yaotaota")
-        await sleep_ms(1000)
         await self.device.mqtt.disconnect()
+        await sleep_ms(1000)
         reset()
