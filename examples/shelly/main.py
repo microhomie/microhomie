@@ -2,7 +2,7 @@ import settings
 from aswitch import Switch
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
-from homie.node import HomieNode
+from homie.node import HomieNode, MPy
 from homie.property import HomieNodeProperty
 from machine import Pin
 
@@ -55,8 +55,12 @@ def main():
     )
 
     homie = HomieDevice(settings)
+
+    homie.add_node(MPy())
+
     homie.add_node(relay1)
     homie.add_node(relay2)
+
     homie.run_forever()
 
 
