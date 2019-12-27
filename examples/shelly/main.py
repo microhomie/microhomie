@@ -2,7 +2,7 @@ import settings
 from aswitch import Switch
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
-from homie.node import HomieNode, MPy
+from homie.node import HomieNode
 from homie.property import HomieNodeProperty
 from machine import Pin
 
@@ -14,8 +14,8 @@ class ShellyRelay(HomieNode):
         self.switch = Switch(Pin(swpin, Pin.IN))
 
         self.power_property = HomieNodeProperty(
-            id="power",
-            name=id,
+            id=id,
+            name="Power",
             settable=True,
             datatype=BOOLEAN,
             default=FALSE,
@@ -55,9 +55,6 @@ def main():
     )
 
     homie = HomieDevice(settings)
-
-    homie.add_node(MPy())
-
     homie.add_node(relay1)
     homie.add_node(relay2)
 

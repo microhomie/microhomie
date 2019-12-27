@@ -33,7 +33,7 @@ class SmartSocket(HomieNode):
 
         self.power_property = HomieNodeProperty(
             id="power",
-            name="Relay",
+            name="Power",
             settable=True,
             datatype=BOOLEAN,
             default=FALSE,
