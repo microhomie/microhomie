@@ -31,7 +31,7 @@ def disable_ap():
 
 def get_unique_id():
     if LINUX is False:
-        return hexlify(unique_id())
+        return hexlify(unique_id()).decode()
     else:
         raise NotImplementedError(
             "Linux doesn't have a unique id. Provide the DEVICE_ID option in your settings.py."

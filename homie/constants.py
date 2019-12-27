@@ -11,6 +11,8 @@ DEVICE_STATE = "$state"
 STATE_INIT = "init"
 STATE_READY = "ready"
 STATE_RECOVER = "recover"
+STATE_OTA = "ota"
+STATE_WEBREPL = "webrepl"
 
 # Property datatypes
 STRING = "string"
@@ -29,6 +31,7 @@ PUBLISH_DELAY = const(20)
 
 # (Sub)Topics
 T_BC = "$broadcast"
+T_MPY = "$mpy"
 T_SET = "/set"
 
 # General

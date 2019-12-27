@@ -1,5 +1,12 @@
 import uos
+import network
 from flashbdev import bdev
+
+def wifi():
+    import ubinascii
+    ap_if = network.WLAN(network.AP_IF)
+    essid = b"Microhomie-%s" % ubinascii.hexlify(ap_if.config("mac")[-3:])
+    ap_if.config(essid=essid, authmode=network.AUTH_WPA_WPA2_PSK, password=b"microhomiE")
 
 def check_bootsec():
     buf = bytearray(bdev.SEC_SIZE)
@@ -28,6 +35,7 @@ programming).
 def setup():
     check_bootsec()
     print("Performing initial setup")
+    wifi()
     uos.VfsFat.mkfs(bdev)
     vfs = uos.VfsFat(bdev)
     uos.mount(vfs, '/')
@@ -39,14 +47,20 @@ esp.osdebug(None)
 #import uos, machine
 #uos.dupterm(None, 1) # disable REPL on UART(0)
 import gc
+from machine import RTC
 try:
+    if RTC().memory() == b"webrepl":
+        raise
+
     import main
     import settings
     from homie.utils import disable_ap
     disable_ap()
 except Exception:
+    import webrepl
     from homie.utils import enable_ap
     enable_ap()
+    webrepl.start(password="uhomie")
 gc.collect()
 """)
     return vfs

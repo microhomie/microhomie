@@ -8,15 +8,19 @@ from homie.constants import (
     MAIN_DELAY,
     QOS,
     SLASH,
+    STATE_OTA,
     STATE_INIT,
     STATE_READY,
     STATE_RECOVER,
+    STATE_WEBREPL,
     T_BC,
+    T_MPY,
     T_SET,
     UNDERSCORE,
     UTF8,
     WDT_DELAY,
 )
+from machine import RTC, reset
 from mqtt_as import LINUX, MQTTClient
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
@@ -44,6 +48,7 @@ class HomieDevice:
         self.debug = getattr(settings, "DEBUG", False)
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
+        self._extensions.append("org.microhomie.cmd:0.1.0:[4.x]")
         self._first_start = True
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
@@ -57,7 +62,7 @@ class HomieDevice:
         try:
             device_id = settings.DEVICE_ID
         except AttributeError:
-            device_id = utils.get_unique_id().decode()
+            device_id = utils.get_unique_id()
 
         # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", "homie")
@@ -125,6 +130,9 @@ class HomieDevice:
         # Broadcast topic
         await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
+        # Micropython extension
+        await self.mqtt.subscribe("{}/{}".format(self.dtopic, T_MPY), QOS)
+
         # node topics
         nodes = self.nodes
         for n in nodes:
@@ -183,6 +191,14 @@ class HomieDevice:
             nodes = self.nodes
             for n in nodes:
                 n.broadcast_callback(topic, payload, retained)
+        # Micropython extension
+        elif topic.endswith(T_MPY):
+            if payload == "reset":
+                reset()
+            elif payload == "webrepl":
+                launch(self.reset, ("webrepl",))
+            elif payload == "yaota8266":
+                launch(self.reset, ("yaotaota",))
         else:
             # node property callbacks
             nt = topic.split(SLASH)
@@ -259,8 +275,18 @@ class HomieDevice:
                 await sleep_ms(5000)
 
     def run_forever(self):
-        loop = get_event_loop()
-        loop.run_until_complete(self.run())
+        if RTC().memory() == b"webrepl":
+            RTC().memory(b"")
+        else:
+            loop = get_event_loop()
+            loop.run_until_complete(self.run())
+
+    async def reset(self, reason):
+        RTC().memory(reason)
+        await self.publish(DEVICE_STATE, reason)
+        await self.mqtt.disconnect()
+        await sleep_ms(500)
+        reset()
 
     async def wdt(self):
         from machine import WDT
