@@ -299,7 +299,3 @@ class HomieDevice:
     def dprint(self, *args):
         if self.debug:
             print(*args)
-
-    def start(self):
-        # DeprecationWarning
-        self.run_forever()
