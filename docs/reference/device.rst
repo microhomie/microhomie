@@ -72,7 +72,7 @@ Methods
 
 .. method:: HomieDevice.subscribe(self, topic)
 
-    This method subscribes to the given topic.
+    Async method to subscribes to the given topic.
 
     The arguments are:
 
@@ -81,7 +81,7 @@ Methods
 
 .. method:: HomieDevice.unsubscribe(self, topic)
 
-    This method is used to unsubscribe a topic.
+    Async method to unsubscribe from the given topic.
 
     The arguments are:
 
@@ -89,7 +89,7 @@ Methods
 
 .. method:: HomieDevice.add_node_cb(self, node)
 
-    This method is used internal the device object to add the node callback method to a dictionary.
+    Async method to add a node callback method to a dictionary.
 
     The arguments are:
 
@@ -97,7 +97,7 @@ Methods
 
 .. method:: HomieDevice.connection_handler(self, client)
 
-    Internal method that gets called when the mqtt connection is established. This method subscribes to all the topics, handle data restore and finaly register the coroutines to send data.
+    Internal async method that gets called when the mqtt connection is established. This method subscribes to all the topics, handle data restore and finaly register the coroutines to send data.
 
     The arguments are:
 
@@ -109,7 +109,7 @@ Methods
 
     This method test if the topic is a broadcast topic and pass the message to all nodes broadcast_callback method.
 
-    Else the payload should be passed to the node that has subscribed to the messages topic.
+    Else the payload will be passed to the node that has subscribed to the messages topic.
 
     The arguments are:
 
@@ -119,7 +119,7 @@ Methods
 
 .. method:: HomieDevice.publish(self, topic, payload, retained=True)
 
-    This method is used to publish data. Topics will be prefixed with the device base topic.
+    This async method is used to publish data. Topics will be prefixed with the device base topic.
 
     The arguments are:
 
@@ -129,7 +129,7 @@ Methods
 
 .. method:: HomieDevice.broadcast(self, payload, level=None)
 
-    This method can be used to send payload to the Homie broadcast topic. If the level argument is not None, it will be attached as a sub-topic to the broadcast topic.
+    This async method can be used to send payload to the Homie broadcast topic. If the level argument is not None, it will be attached as a sub-topic to the broadcast topic.
 
     The arguments are:
 
@@ -138,24 +138,35 @@ Methods
 
 .. method:: HomieDevice.publish_properties(self)
 
-    This method publish the device properties as defined in the Homie convention.
+    This async method publish the device properties as defined in the Homie convention.
 
 
 .. method:: HomieDevice.publish_stats(self)
 
-    This is a async coroutine to publish device stats.
+    This is a async coroutine to publish device stats as in the homie extension ``org.homie.legacy-stats:0.1.1:[4.x]``.
 
 .. method:: HomieDevice.run(self)
 
-    This method is the main loop. It handles the mqtt connection and tries to reconnect if there is an error.
+    This async method is the main loop. It handles the mqtt connection and tries to reconnect if there is an error.
+
+    If the RTC is set to ``webrepl``, the mainloop will not start to not block the WebREPL.
 
 .. method:: HomieDevice.run_forever(self)
 
     This method should be called from main to start the device.
 
+.. methid:: HomieDevice.reset(self, "reason")
+
+    Async method to reset the device or put the device into OTA or WebREPL mode. The device will restart after this method was called.
+
+    The arguments are:
+
+        - ``reason`` is the OAT method the device should start with.
+        ``yaota8266`` starts the yaota-server and wait for data send with yaota-client. ``webrepl`` activates the Access Point and the WebREPL.
+
 .. method:: HomieDevice.wdt(self):
 
-    This method is a loop that feeds a watch dog timer. To disable the WDT set DEBUG to True in the settings.py file.
+    This async method is a loop that feeds a watch dog timer. To disable the WDT set DEBUG to True in the settings.py file.
 
 .. method:: HomieDevice.dprint(self)
 

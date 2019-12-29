@@ -72,9 +72,11 @@ Device
 Device states
 =============
 
+.. data:: STATE_OTA
 .. data:: STATE_INIT
 .. data:: STATE_READY
 .. data:: STATE_RECOVER
+.. data:: STATE_WEBREPL
 
 
 Node
@@ -89,4 +91,5 @@ Node
 =============
 
 .. data:: T_BC
+.. data:: T_MPY
 .. data:: T_SET

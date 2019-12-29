@@ -47,7 +47,7 @@ Constructor
       - ``settable`` allows a property to be settable and enables the /set topic. Default is False.
       - ``retained`` specifies if the property is a retained message. Default is True.
       - ``unit`` optional unit of this proeprty.
-      - ``datatype`` specifies the data type as byte string. Allowed data types are string, integer, float, boolean, enum, color. This types can be importet from `homie.constants`. Default is STRING.
+      - ``datatype`` specifies the data type as string. Allowed data types are string, integer, float, boolean, enum, color. This types can be importet from `homie.constants`. Default is STRING.
       - ``format`` specifies restrictions or options for the given data type. Default is None.
 
         - For integer and float: Describes a range of payloads e.g. 10:15
@@ -65,7 +65,7 @@ Properties
 
 .. data:: HomieNodeProperty.data
 
-  This is where the property data/payload is stored.
+  This is where the property data/payload is stored. There is a coro which will publish data from this property if the data was changed or if ``self.update`` is ``True``.
 
 
 Methods
