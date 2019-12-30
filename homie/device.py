@@ -48,7 +48,7 @@ class HomieDevice:
         self.debug = getattr(settings, "DEBUG", False)
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
-        self._extensions.append("org.microhomie.cmd:0.1.0:[4.x]")
+        self._extensions.append("org.microhomie.mpy:0.1.0:[4.x]")
         self._first_start = True
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)

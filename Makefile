@@ -1,7 +1,7 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
 MICROPYVERSION := 1.12
-VERSION ?= 2.3.0-alpha.1
+VERSION ?= 2.3.0-beta.1
 PORT ?= /dev/ttyUSB0
 
 export MICROPY_PY_BTREE ?= 0
@@ -47,7 +47,7 @@ flash-release:
 	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 releases/microhomie-esp8266-v$(VERSION).bin
 
 flash-ota-release:
-	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 releases/microhomie-esp8266-ota-v$(VERSION).bin
+	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x3c000 releases/microhomie-esp8266-ota-v$(VERSION).bin
 
 flash-yaota:
 	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x0 yaota8266/yaota8266.bin
