@@ -208,6 +208,8 @@ class HomieDevice:
 
     async def publish(self, topic, payload, retain=True):
         t = "{}/{}".format(self.dtopic, topic)
+        if isinstance(payload, str):
+            payload = payload.encode()
         self.dprint("MQTT PUBLISH: {} --> {}".format(t, payload))
         await self.mqtt.publish(t, payload, retain, QOS)
 
