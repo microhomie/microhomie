@@ -2,6 +2,27 @@
 Changelog
 =========
 
+2.3.0
+-----
+
+* Updated to MicroPython v1.12
+* Removed byte / string mix, only strings are allowed
+* Experimental MicroPython Homie extension (homie/deviceID/$mpy) to reset the device, start WebREPL and yaota8266 OTA updater (ota version)
+* Removed deprecated method HomieDevice.start()
+* Start WebREPL if main.py and settings.py are missing or throw an exception (New boot.py)
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+You may need to update your settings.py and custom nodes and change bytes to strings: In example: b"abcde" to "abcde".
+
+
+2.2.2
+-----
+
+* Bugfix: Do not re-publish data from retained message
+
+
 2.2.1
 -----
 
