@@ -11,7 +11,10 @@ settings.py
 /main.py
 /boot.py
 /dist
+/webrepl
 /releases
+/yaota8266
+/mosquitto
 /docs/_build
 /micropython
 /esp-open-sdk
