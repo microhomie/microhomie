@@ -194,7 +194,7 @@ class HomieDevice:
         # Micropython extension
         elif topic.endswith(T_MPY):
             if payload == "reset":
-                reset()
+                launch(self.reset, ("reset",))
             elif payload == "webrepl":
                 launch(self.reset, ("webrepl",))
             elif payload == "yaota8266":
@@ -284,7 +284,8 @@ class HomieDevice:
             loop.run_until_complete(self.run())
 
     async def reset(self, reason):
-        RTC().memory(reason)
+        if reason != "reset":
+            RTC().memory(reason)
         await self.publish(DEVICE_STATE, reason)
         await self.mqtt.disconnect()
         await sleep_ms(500)

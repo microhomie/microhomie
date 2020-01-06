@@ -56,7 +56,7 @@ flash-ota:
 	esptool.py --port $(PORT) --baud 460800 write_flash  --flash_size=detect --verify -fm dio 0x3c000 micropython/ports/esp8266/build-GENERIC/firmware-ota.bin
 
 sign-ota:
-	cd yaota8266/ota-client; python ota_client.py sign ../../micropython/ports/esp8266/build-GENERIC/firmware-ota.bin
+	yaota8266/cli.py sign micropython/ports/esp8266/build-GENERIC/firmware-ota.bin
 
 espopensdk:
 	-git clone --recursive https://github.com/pfalcon/esp-open-sdk.git
@@ -70,10 +70,13 @@ micropython:
 	cd micropython; git apply ../micropython.patch
 
 yaota:
-	-git clone --recursive https://github.com/schinckel/yaota8266.git
-	cd yaota8266; git checkout merged
+	-git clone --recursive https://github.com/jedie/yaota8266.git
+	cd yaota8266; git checkout develop
+	cd yaota8266; make rsa-keys;
 	cd yaota8266; cp config.h.example config.h
-	cd yaota8266/ota-client; bash gen_keys.sh;
+
+yaota-build:
+	cd yaota8266; make build
 
 bootstrap: espopensdk micropython
 
