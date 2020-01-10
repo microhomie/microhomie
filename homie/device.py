@@ -207,11 +207,12 @@ class HomieDevice:
                 self.callback_topics[node](topic, payload, retained)
 
     async def publish(self, topic, payload, retain=True):
-        t = "{}/{}".format(self.dtopic, topic)
         if isinstance(payload, str):
             payload = payload.encode()
-        self.dprint("MQTT PUBLISH: {} --> {}".format(t, payload))
-        await self.mqtt.publish(t, payload, retain, QOS)
+
+        topic = "{}/{}".format(self.dtopic, topic)
+        self.dprint("MQTT PUBLISH: {} --> {}".format(topic, payload))
+        await self.mqtt.publish(topic, payload, retain, QOS)
 
     async def broadcast(self, payload, level=None):
         if isinstance(payload, int):
