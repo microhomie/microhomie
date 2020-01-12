@@ -2,6 +2,13 @@
 Changelog
 =========
 
+2.3.1
+-----
+
+* Fix reset
+* Switch to yaota8266 fork from @jedie
+
+
 2.3.0
 -----
 
