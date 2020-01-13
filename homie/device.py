@@ -99,7 +99,7 @@ class HomieDevice:
         launch(node.publish_data, ())
 
     def format_topic(self, topic):
-        if self.dtopic in topic:
+        if topic.startswith(self.dtopic):
             return topic
         return "{}/{}".format(self.dtopic, topic)
 
@@ -131,7 +131,7 @@ class HomieDevice:
         await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
         # Micropython extension
-        await self.mqtt.subscribe("{}/{}".format(self.dtopic, T_MPY), QOS)
+        await subscribe(self.format_topic(T_MPY))
 
         # node topics
         nodes = self.nodes
@@ -210,7 +210,7 @@ class HomieDevice:
         if isinstance(payload, str):
             payload = payload.encode()
 
-        topic = "{}/{}".format(self.dtopic, topic)
+        topic = self.format_topic(topic)
         self.dprint("MQTT PUBLISH: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain, QOS)
 
