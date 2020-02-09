@@ -21,7 +21,7 @@ from homie.constants import (
     WDT_DELAY,
 )
 from machine import RTC, reset
-from mqtt_as import LINUX, MQTTClient
+from mqtt_as import LINUX, MQTTClient, ESP8266
 from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -50,6 +50,7 @@ class HomieDevice:
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._extensions.append("org.microhomie.mpy:0.1.0:[4.x]")
         self._first_start = True
+        self._wdt_timeout = getattr(settings, "WDT_TIMEOUT", 2000)
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
@@ -197,7 +198,7 @@ class HomieDevice:
                 launch(self.reset, ("reset",))
             elif payload == "webrepl":
                 launch(self.reset, ("webrepl",))
-            elif payload == "yaota8266":
+            elif payload == "yaota8266" and ESP8266:
                 launch(self.reset, ("yaotaota",))
         else:
             # node property callbacks
@@ -295,7 +296,11 @@ class HomieDevice:
     async def wdt(self):
         from machine import WDT
 
-        wdt = WDT()
+        if ESP8266:
+            wdt = WDT()
+        else:
+            wdt = WDT(timeout=self._wdt_timeout)
+
         while True:
             wdt.feed()
             await sleep_ms(WDT_DELAY)

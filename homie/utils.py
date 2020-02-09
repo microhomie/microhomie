@@ -11,12 +11,12 @@ from homie.constants import (
 from mqtt_as import LINUX, PYCOM
 
 if not LINUX:
-    if PYCOM:
-        from network import WLAN
-    else:
-        from network import WLAN, AP_IF
+    from network import WLAN
     from machine import unique_id
     from ubinascii import hexlify
+
+    if not PYCOM:
+        from network import AP_IF
 
 
 def enable_ap():
@@ -56,6 +56,8 @@ def get_local_ip():
 
 def get_local_mac():
     try:
+        if PYCOM:
+            return hexlify(WLAN(0).mac().sta_mac, ":")
         return hexlify(WLAN(0).config("mac"), ":")
     except NameError:
         return b"00:00:00:00:00:00"
