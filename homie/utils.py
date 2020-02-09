@@ -8,25 +8,34 @@ from homie.constants import (
     STRING,
     TRUE,
 )
-from mqtt_as import LINUX
+from mqtt_as import LINUX, PYCOM
 
-if LINUX is False:
-    from network import WLAN, AP_IF
+if not LINUX:
+    if PYCOM:
+        from network import WLAN
+    else:
+        from network import WLAN, AP_IF
     from machine import unique_id
     from ubinascii import hexlify
 
 
 def enable_ap():
     """Disables any Accesspoint"""
-    wlan = WLAN(AP_IF)
-    wlan.active(True)
-    print("NETWORK: Access Point enabled.")
+    if PYCOM:
+        pass
+    else:
+        wlan = WLAN(AP_IF)
+        wlan.active(True)
+        print("NETWORK: Access Point enabled.")
 
 def disable_ap():
     """Disables any Accesspoint"""
-    wlan = WLAN(AP_IF)
-    wlan.active(False)
-    print("NETWORK: Access Point disabled.")
+    if PYCOM:
+        pass
+    else:
+        wlan = WLAN(AP_IF)
+        wlan.active(False)
+        print("NETWORK: Access Point disabled.")
 
 
 def get_unique_id():
