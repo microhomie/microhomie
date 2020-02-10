@@ -3,7 +3,7 @@ import settings
 from homie.device import HomieDevice
 
 from heartbeat import Heartbeat
-from pysence import SI7006A20Node
+from pysense import SI7006A20Node
 
 
 def main():
