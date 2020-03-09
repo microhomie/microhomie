@@ -78,7 +78,7 @@ yaota:
 yaota-build:
 	cd yaota8266; make build
 
-bootstrap: espopensdk micropython
+bootstrap: espopensdk micropython requirements
 
 
 # linting!
