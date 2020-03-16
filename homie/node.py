@@ -11,11 +11,14 @@ class HomieNode:
         self.name = name
         self.type = type
         self._properties = {}
+        self.device = None
 
     def add_property(self, p, cb=None):
+        p.node = self
+        self._properties[p.id] = p
+
         if cb:
             p.on_message = cb
-        self._properties[p.id] = p
 
     async def publish_properties(self):
         """General properties of this node"""
@@ -50,24 +53,16 @@ class HomieNode:
             if p.unit is not None:
                 await publish("{}/$unit".format(t), p.unit)
 
-    @await_ready_state
-    async def publish_data(self):
-        nid = self.id
-        props = self._properties
-        publish = self.device.publish
+    async def publish(self, p, v):
+        if v is None:
+            return
 
-        while True:
-            for pid, p in props.items():
-                if p.update is True:
-                    data = p._data
-                    p.update = False
-                    if data is not None:
-                        if isinstance(data, (int, float)):
-                            data = str(data)
-                        t = "{}/{}".format(nid, pid)
-                        await publish(t, data, p.retained)
+        if isinstance(v, (int, float)):
+            v = str(v)
 
-            await sleep_ms(PUBLISH_DELAY)
+        await self.device.publish(
+            "{}/{}".format(self.id, p.id), v, p.retained
+        )
 
     def callback(self, topic, payload, retained):
         """ Gets called when a payload arrive on node topics

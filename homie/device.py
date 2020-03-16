@@ -96,7 +96,6 @@ class HomieDevice:
         collect()
         node.device = self
         self.nodes.append(node)
-        launch(node.publish_data, ())
 
     def format_topic(self, topic):
         if self.dtopic in topic:

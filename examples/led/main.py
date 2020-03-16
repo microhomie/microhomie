@@ -27,9 +27,10 @@ class LED(HomieNode):
             settable=True,
             datatype=BOOLEAN,
             default=TRUE,
+            on_message=self.on_power_msg,
         )
 
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.power_property)
 
     def on_power_msg(self, topic, payload, retained):
         self.led(ONOFF[payload])
