@@ -30,7 +30,7 @@ MicroPython changes
 Install
 -------
 
-Download the `latest image <https://github.com/microhomie/microhomie/releases>`_ and flash it like any MircoPython image to your ESP8266 device. I.E:
+Download the `latest image <https://github.com/microhomie/microhomie/releases>`_ and flash it like any MicroPython image to your ESP8266 device. I.E:
 
 .. code-block:: shell
 

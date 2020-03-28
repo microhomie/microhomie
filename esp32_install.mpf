@@ -6,8 +6,8 @@ cd homie
 lcd homie
 mput .
 cd ..
-lcd ../micropython/ports/esp8266/modules
 cd uasyncio
+lcd ../lib
 lcd uasyncio
 mput .
 lcd ..
