@@ -1,3 +1,5 @@
+from uasyncio import get_event_loop, sleep_ms
+
 from homie.constants import STRING
 from homie.utils import payload_is_valid
 
@@ -14,8 +16,10 @@ class HomieNodeProperty:
         format=None,
         default=None,
         restore=True,
+        on_message=None,
     ):
         self._data = default
+        self._retained = False
 
         self.id = id
         self.name = name
@@ -25,8 +29,8 @@ class HomieNodeProperty:
         self.datatype = datatype
         self.format = format
         self.restore = restore
-        self.update = True
-        self.on_message = None
+        self.on_message = on_message
+        self.node = None
 
     @property
     def data(self):
@@ -35,16 +39,25 @@ class HomieNodeProperty:
     @data.setter
     def data(self, value):
         self._data = value
-        self.update = True
+
+        if not self._retained:
+            self.publish()
+        else:
+            self._retained = False
+
+    def publish(self):
+        loop = get_event_loop()
+        loop.create_task(self.node.publish(self, self.data))
 
     def msg_handler(self, topic, payload, retained):
         """Gets called when the property receive a message"""
         if payload_is_valid(self, payload):
+            if retained:
+                if not self.restore:
+                    return
+                self._retained = retained
+
             if self.on_message is None:
                 self.data = payload
             else:
                 self.on_message(topic, payload, retained)
-
-            # do not re-publish the data from a retained message
-            if retained:
-                self.update = False
