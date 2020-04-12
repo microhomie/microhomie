@@ -19,6 +19,9 @@ from homie.constants import (
     UNDERSCORE,
     UTF8,
     WDT_DELAY,
+    EXT_MPY,
+    EXT_FW,
+    EXT_STATS,
 )
 from machine import RTC, reset
 from mqtt_as import LINUX, MQTTClient
@@ -48,7 +51,6 @@ class HomieDevice:
         self.debug = getattr(settings, "DEBUG", False)
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
-        self._extensions.append("org.microhomie.mpy:0.1.0:[4.x]")
         self._first_start = True
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
@@ -243,12 +245,12 @@ class HomieDevice:
 
         if self._extensions:
             await publish("$extensions", ",".join(self._extensions))
-            if "org.homie.legacy-firmware:0.1.1:[4.x]" in self._extensions:
+            if EXT_FW in self._extensions:
                 await publish("$localip", utils.get_local_ip())
                 await publish("$mac", utils.get_local_mac())
                 await publish("$fw/name", "Microhomie")
                 await publish("$fw/version", __version__)
-            if "org.homie.legacy-stats:0.1.1:[4.x]" in self._extensions:
+            if EXT_STATS in self._extensions:
                 await self.publish("$stats/interval", str(self.stats_interval))
                 # Start stats coro
                 launch(self.publish_stats, ())

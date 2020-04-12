@@ -1,3 +1,5 @@
+from homie.constants import EXT_MPY, EXT_FW, EXT_STATS
+
 # Debug mode disables WDT, print mqtt messages
 # DEBUG = False
 
@@ -57,10 +59,10 @@ MQTT_BROKER = "10.0.0.1"
 # Time in seconds the device updates device properties
 # DEVICE_STATS_INTERVAL = 60
 
-# Legacy extensions, for now have support for the two legacy extensions.
-# No extensions will be loaded per default
-# EXTENSIONS = []
+# Enable build-in extensions
+EXTENSIONS = [EXT_MPY]
 # EXTENSIONS = [
-#    "org.homie.legacy-firmware:0.1.1:[4.x]",
-#    "org.homie.legacy-stats:0.1.1:[4.x]",
+#    EXT_MPY,
+#    EXT_FW,
+#    EXT_STATS,
 # ]
