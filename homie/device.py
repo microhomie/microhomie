@@ -52,6 +52,7 @@ class HomieDevice:
         self._state = STATE_INIT
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
+        self._bc_enabled = getattr(settings, "BROADCAST", True)
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
@@ -129,7 +130,8 @@ class HomieDevice:
         subscribe = self.subscribe
 
         # Broadcast topic
-        await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
+        if self._bc_enabled:
+            await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
         # Micropython extension
         await subscribe(self.format_topic(T_MPY))

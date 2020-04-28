@@ -59,6 +59,10 @@ MQTT_BROKER = "10.0.0.1"
 # Time in seconds the device updates device properties
 # DEVICE_STATS_INTERVAL = 60
 
+# Subscribe to broadcast topic is enabled by default. To disable broadcast
+# messages set BROADCAST to False
+# BROADCAST = True
+
 # Enable build-in extensions
 EXTENSIONS = [EXT_MPY]
 # EXTENSIONS = [
