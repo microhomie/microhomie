@@ -1,7 +1,7 @@
 from uasyncio import get_event_loop, sleep_ms
 
 from homie.constants import STRING
-from homie.utils import payload_is_valid
+from homie.validator import payload_is_valid
 
 
 class HomieNodeProperty:

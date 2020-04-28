@@ -54,11 +54,11 @@ try:
 
     import main
     import settings
-    from homie.utils import disable_ap
+    from homie.network import disable_ap
     disable_ap()
 except Exception:
     import webrepl
-    from homie.utils import enable_ap
+    from homie.network import enable_ap
     enable_ap()
     webrepl.start(password="uhomie")
 gc.collect()

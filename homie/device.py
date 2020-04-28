@@ -2,7 +2,8 @@ from gc import collect, mem_free
 from sys import platform
 
 from asyn import Event, launch
-from homie import __version__, utils
+from homie import __version__
+from homie.network import get_local_ip, get_local_mac
 from homie.constants import (
     DEVICE_STATE,
     MAIN_DELAY,
@@ -29,10 +30,19 @@ from uasyncio import get_event_loop, sleep_ms
 from ubinascii import hexlify
 from utime import time
 
-_EVENT = Event()
+
+def get_unique_id():
+    if LINUX is False:
+        from machine import unique_id
+        return hexlify(unique_id()).decode()
+    else:
+        raise NotImplementedError(
+            "Linux doesn't have a unique id. Provide the DEVICE_ID option in your settings.py."
+        )
 
 
 # Decorator to block async coros until the device is in "ready" state
+_EVENT = Event()
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
@@ -65,7 +75,7 @@ class HomieDevice:
         try:
             device_id = settings.DEVICE_ID
         except AttributeError:
-            device_id = utils.get_unique_id()
+            device_id = get_unique_id()
 
         # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", "homie")
@@ -248,8 +258,8 @@ class HomieDevice:
         if self._extensions:
             await publish("$extensions", ",".join(self._extensions))
             if EXT_FW in self._extensions:
-                await publish("$localip", utils.get_local_ip())
-                await publish("$mac", utils.get_local_mac())
+                await publish("$localip", get_local_ip())
+                await publish("$mac", get_local_mac())
                 await publish("$fw/name", "Microhomie")
                 await publish("$fw/version", __version__)
             if EXT_STATS in self._extensions:

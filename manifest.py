@@ -30,7 +30,8 @@ freeze(
         "homie/device.py",
         "homie/node.py",
         "homie/property.py",
-        "homie/utils.py",
+        "homie/network.py",
+        "homie/validator.py",
     ),
 )
 
