@@ -148,7 +148,7 @@ class HomieDevice:
         for n in nodes:
             props = n._properties
             for pid, p in props.items():
-                if p.restore:
+                if p.restore and self._first_start is True:
                     # Restore from topic with retained message
                     await self.add_node_cb(n)
                     t = "{}/{}".format(n.id, pid)
