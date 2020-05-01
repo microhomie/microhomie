@@ -72,10 +72,7 @@ class HomieDevice:
         self.device_name = getattr(settings, "DEVICE_NAME", "")
 
         # Generate unique id if settings has no DEVICE_ID
-        try:
-            device_id = settings.DEVICE_ID
-        except AttributeError:
-            device_id = get_unique_id()
+        device_id = getattr(settings, "DEVICE_ID", get_unique_id())
 
         # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", "homie")
