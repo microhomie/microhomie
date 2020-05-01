@@ -14,6 +14,17 @@ WIFI_SSID = "YOUR_WIFI_SSID"
 WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
 
+# Multiple WiFi credentials
+# If a ssid near your device matchs a wifi crentials in the dictionary,
+# WIFI_SSID and WIFI_PASSWORD will be overwitten with the corresponding
+# ssid,password.
+WIFI_CREDENTIALS = {
+    "ssid 1": "password 1",
+    "ssid 2": "password 2",
+    # ...
+}
+
+
 ###
 # MQTT settings
 ###
