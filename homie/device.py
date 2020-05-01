@@ -69,7 +69,7 @@ class HomieDevice:
         self.nodes = []
         self.callback_topics = {}
 
-        self.device_name = getattr(settings, "DEVICE_NAME", b"mydevice")
+        self.device_name = getattr(settings, "DEVICE_NAME", "")
 
         # Generate unique id if settings has no DEVICE_ID
         try:
