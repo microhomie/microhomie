@@ -252,17 +252,17 @@ class HomieDevice:
         for n in nodes:
             await n.publish_properties()
 
-        if self._extensions:
-            await publish("$extensions", ",".join(self._extensions))
-            if EXT_FW in self._extensions:
-                await publish("$localip", get_local_ip())
-                await publish("$mac", get_local_mac())
-                await publish("$fw/name", "Microhomie")
-                await publish("$fw/version", __version__)
-            if EXT_STATS in self._extensions:
-                await self.publish("$stats/interval", str(self.stats_interval))
-                # Start stats coro
-                launch(self.publish_stats, ())
+        # extensions
+        await publish("$extensions", ",".join(self._extensions))
+        if EXT_FW in self._extensions:
+            await publish("$localip", get_local_ip())
+            await publish("$mac", get_local_mac())
+            await publish("$fw/name", "Microhomie")
+            await publish("$fw/version", __version__)
+        if EXT_STATS in self._extensions:
+            await self.publish("$stats/interval", str(self.stats_interval))
+            # Start stats coro
+            launch(self.publish_stats, ())
 
     @await_ready_state
     async def publish_stats(self):
