@@ -41,7 +41,7 @@ def get_unique_id():
         )
 
 
-# Decorator to block async coros until the device is in "ready" state
+# Decorator to block async tasks until the device is in "ready" state
 _EVENT = Event()
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
@@ -141,7 +141,8 @@ class HomieDevice:
             await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
         # Micropython extension
-        await subscribe(self.format_topic(T_MPY))
+        if EXT_MPY in self.extension:
+            await subscribe(self.format_topic(T_MPY))
 
         # node topics
         nodes = self.nodes
@@ -166,22 +167,24 @@ class HomieDevice:
         if self._first_start is True:
             await self.publish_properties()
 
+            # Unsubscribe from retained topics
             unsubscribe = self.unsubscribe
-            # unsubscribe from retained topics
             for t in retained:
                 await unsubscribe(t)
 
-            self._first_start = False
-
-            # activate WDT
+            # Activate watchdog timer
             if LINUX is False and self.debug is False:
                 launch(self.wdt, ())
 
-            # start coros waiting for ready state
+            # Start all async tasks decorated with await_ready_state
             _EVENT.set()
             await sleep_ms(MAIN_DELAY)
             _EVENT.clear()
 
+            # Do not run this if clause again on wifi/broker reconnect
+            self._first_start = False
+
+        # Announce that the device is ready
         await self.publish(DEVICE_STATE, STATE_READY)
 
     def sub_cb(self, topic, payload, retained):

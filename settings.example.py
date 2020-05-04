@@ -1,5 +1,3 @@
-from homie.constants import EXT_MPY, EXT_FW, EXT_STATS
-
 # Debug mode disables WDT, print mqtt messages
 # DEBUG = False
 
@@ -64,7 +62,10 @@ MQTT_BROKER = "10.0.0.1"
 # BROADCAST = True
 
 # Enable build-in extensions
+from homie.constants import EXT_MPY
 EXTENSIONS = [EXT_MPY]
+
+# from homie.constants import EXT_MPY, EXT_FW, EXT_STATS
 # EXTENSIONS = [
 #    EXT_MPY,
 #    EXT_FW,
