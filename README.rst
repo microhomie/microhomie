@@ -24,7 +24,7 @@ Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_
 MicroPython changes
 -------------------
 
-* **btree** support disabled to save some space
+* **btree** and vfat support disabled to save some space
 * AccessPoint SSID changed to `Microhomie-MAC` with the secret `microhomiE`
 * inisetup.py writes a custom boot.py
 
