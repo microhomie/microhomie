@@ -1,7 +1,8 @@
+import uasyncio as asyncio
+
 from gc import collect, mem_free
 from sys import platform
 
-from asyn import Event, launch
 from homie import __version__
 from homie.network import get_local_ip, get_local_mac
 from homie.constants import (
@@ -26,9 +27,10 @@ from homie.constants import (
 )
 from machine import RTC, reset
 from mqtt_as import LINUX, MQTTClient
-from uasyncio import get_event_loop, sleep_ms
+from uasyncio import sleep_ms
 from ubinascii import hexlify
 from utime import time
+from primitives.message import Message
 
 
 def get_unique_id():
@@ -42,11 +44,11 @@ def get_unique_id():
 
 
 # Decorator to block async tasks until the device is in "ready" state
-_EVENT = Event()
+_MESSAGE = Message()
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
-        await _EVENT
+        await _MESSAGE
         await func(*args, **kwargs)
         # fmt: on
 
@@ -174,12 +176,12 @@ class HomieDevice:
 
             # Activate watchdog timer
             if LINUX is False and self.debug is False:
-                launch(self.wdt, ())
+                asyncio.create_task(self.wdt())
 
             # Start all async tasks decorated with await_ready_state
-            _EVENT.set()
+            _MESSAGE.set()
             await sleep_ms(MAIN_DELAY)
-            _EVENT.clear()
+            _MESSAGE.clear()
 
             # Do not run this if clause again on wifi/broker reconnect
             self._first_start = False
@@ -207,11 +209,11 @@ class HomieDevice:
         # Micropython extension
         elif topic.endswith(T_MPY):
             if payload == "reset":
-                launch(self.reset, ("reset",))
+                asyncio.create_task(self.reset("reset"))
             elif payload == "webrepl":
-                launch(self.reset, ("webrepl",))
+                asyncio.create_task(self.reset("webrepl"))
             elif payload == "yaota8266":
-                launch(self.reset, ("yaotaota",))
+                asyncio.create_task(self.reset("yaotaota"))
         else:
             # node property callbacks
             nt = topic.split(SLASH)
@@ -265,7 +267,7 @@ class HomieDevice:
         if EXT_STATS in self._extensions:
             await self.publish("$stats/interval", str(self.stats_interval))
             # Start stats coro
-            launch(self.publish_stats, ())
+            asyncio.create_task(self.publish_stats())
 
     @await_ready_state
     async def publish_stats(self):
@@ -294,8 +296,7 @@ class HomieDevice:
         if RTC().memory() == b"webrepl":
             RTC().memory(b"")
         else:
-            loop = get_event_loop()
-            loop.run_until_complete(self.run())
+            asyncio.run(self.run())
 
     async def reset(self, reason):
         if reason != "reset":

@@ -2,11 +2,12 @@ import time
 
 from ds18x20 import DS18X20
 from homie.node import HomieNode
+from homie.device import HomieDevice, await_ready_state
 from homie.property import HomieNodeProperty
 from homie.constants import FLOAT
 from machine import Pin
 from onewire import OneWire
-from uasyncio import get_event_loop, sleep_ms
+from uasyncio import create_task, sleep_ms
 
 
 class DS18B20(HomieNode):
@@ -32,18 +33,18 @@ class DS18B20(HomieNode):
         )
         self.add_property(self.temp_property)
 
-        loop = get_event_loop()
-        loop.create_task(self.update_data())
+        create_task(self.update_data())
 
+    @await_ready_state
     async def update_data(self):
         delay = self.interval * 1000
 
         while True:
-            self.temperature = self.read_temp()
+            self.temperature = await self.read_temp()
             self.temp_property.data = self.temperature
             await sleep_ms(delay)
 
-    def read_temp(self, fahrenheit=True):
+    async def read_temp(self, fahrenheit=True):
         """
         Reads temperature from a single DS18X20
         :param fahrenheit: Whether or not to return value in Fahrenheit
@@ -52,11 +53,11 @@ class DS18B20(HomieNode):
         :rtype: float
         """
         self.ds18b20.convert_temp()
-        time.sleep_ms(750)
+        await sleep_ms(750)
         temp = self.ds18b20.read_temp(self.addr)
         if fahrenheit:
             ntemp = temp
-            print("Temp: " + str(self.c_to_f(ntemp)))
+            self.device.dprint("Temp: " + str(self.c_to_f(ntemp)))
             return self.c_to_f(ntemp)
         return temp
 

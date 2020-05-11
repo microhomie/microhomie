@@ -1,5 +1,4 @@
-from asyn import launch
-from uasyncio import sleep_ms
+import uasyncio as asyncio
 
 from homie.constants import FALSE, PUBLISH_DELAY, SET, SLASH, TRUE
 from homie.device import await_ready_state
@@ -73,7 +72,7 @@ class HomieNode:
         """
         # unsubscribe from retained topic
         if retained:
-            launch(self.device.unsubscribe, (topic,))
+            asyncio.create_task(self.device.unsubscribe(topic))
 
         t = topic.split(SLASH)
         pid = t.pop()  # property id

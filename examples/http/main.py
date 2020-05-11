@@ -1,9 +1,11 @@
+import uasyncio as asyncio
+
 import settings
 import urequests
-from homie.device import HomieDevice
+
+from homie.device import HomieDevice, await_ready_state
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
-from uasyncio import get_event_loop, sleep_ms
 
 
 class HTTP(HomieNode):
@@ -21,9 +23,9 @@ class HTTP(HomieNode):
         )
         self.add_property(self.response_property)
 
-        loop = get_event_loop()
-        loop.create_task(self.update_data())
+        asyncio.create_task(self.update_data())
 
+    @await_ready_state
     async def update_data(self):
         delay = self.interval * 1000
 
@@ -32,7 +34,7 @@ class HTTP(HomieNode):
             self.response_property.data = r.text
             r.close()
 
-            await sleep_ms(delay)
+            await asyncio.sleep_ms(delay)
 
 
 def main():

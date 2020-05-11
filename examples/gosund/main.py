@@ -3,7 +3,7 @@ import settings
 
 from time import sleep_ms
 from machine import Pin
-from aswitch import Pushbutton
+from primitives.pushbutton import Pushbutton
 
 from homie.node import HomieNode
 from homie.device import HomieDevice

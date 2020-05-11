@@ -36,7 +36,16 @@ freeze(
 )
 
 # Libs
-freeze("./lib", ("mqtt_as.py", "asyn.py", "aswitch.py", "inisetup.py"))
+freeze("./lib", (
+    "inisetup.py",
+    "mqtt_as.py",
+    "primitives/__init__.py",
+    "primitives/delay_ms.py",
+    "primitives/message.py",
+    "primitives/pushbutton.py",
+    "primitives/switch.py",
+    )
+)
 
 # uasyncio
-freeze("./lib", ("uasyncio/__init__.py", "uasyncio/core.py",))
+include("$(MPY_DIR)/extmod/uasyncio/manifest.py")
