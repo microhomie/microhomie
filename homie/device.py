@@ -141,7 +141,7 @@ class HomieDevice:
             await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
 
         # Micropython extension
-        if EXT_MPY in self.extension:
+        if EXT_MPY in self._extensions:
             await subscribe(self.format_topic(T_MPY))
 
         # node topics
