@@ -15,14 +15,16 @@ WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
 
 # Multiple WiFi credentials
-# If a ssid near your device matchs a wifi crentials in the dictionary,
+# If a ssid near your device matchs a wifi credentials in the dictionary,
 # WIFI_SSID and WIFI_PASSWORD will be overwitten with the corresponding
-# ssid,password.
-WIFI_CREDENTIALS = {
-    "ssid 1": "password 1",
-    "ssid 2": "password 2",
-    # ...
-}
+# ssid,password. Set to False to disable multible wifis and use WIFI_SSID and
+# WIFI_PASSWORD to access a WiFi nearby.
+#
+# WIFI_CREDENTIALS = {
+#     "ssid 1": "password 1",
+#     "ssid 2": "password 2",
+#     # ...
+# }
 
 
 ###
