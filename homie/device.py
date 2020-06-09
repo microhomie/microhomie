@@ -63,6 +63,7 @@ class HomieDevice:
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._first_start = True
         self._bc_enabled = getattr(settings, "BROADCAST", True)
+        self._wifi = getattr(settings, "WIFI_CREDENTIALS", False)
 
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
 
@@ -79,6 +80,7 @@ class HomieDevice:
         # Device base topic
         self.dtopic = "{}/{}".format(self.btopic, device_id)
 
+        # mqtt_as client
         self.mqtt = MQTTClient(
             client_id=device_id,
             server=settings.MQTT_BROKER,
@@ -283,6 +285,8 @@ class HomieDevice:
     async def run(self):
         while True:
             try:
+                if self._wifi:
+                    await self.setup_wifi()
                 await self.mqtt.connect()
                 while True:
                     await sleep_ms(MAIN_DELAY)
@@ -316,3 +320,16 @@ class HomieDevice:
     def dprint(self, *args):
         if self.debug:
             print(*args)
+
+    async def setup_wifi(self):
+        from homie.network import get_wifi_credentials
+        while True:
+            wifi_cfg = get_wifi_credentials(self._wifi)
+            if wifi_cfg is None:
+                self.dprint("No WiFi found. Rescanning...".format(wifi_cfg[0]))
+                await sleep_ms(MAIN_DELAY)
+            else:
+                self.dprint("Connect to SSID: {}".format(wifi_cfg[0]))
+                self.mqtt._ssid = wifi_cfg[0]
+                self.mqtt._wifi_pw = wifi_cfg[1]
+                return

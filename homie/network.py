@@ -2,7 +2,7 @@ from mqtt_as import LINUX
 
 
 if LINUX is False:
-    from network import WLAN, AP_IF
+    from network import WLAN, AP_IF, STA_IF
     from ubinascii import hexlify
 
 
@@ -32,3 +32,15 @@ def get_local_mac():
         return hexlify(WLAN(0).config("mac"), ":")
     except NameError:
         return b"00:00:00:00:00:00"
+
+
+def get_wifi_credentials(wifi):
+    wlan = WLAN(STA_IF)
+    ssids = wlan.scan()
+
+    for s in ssids:
+        ssid = s[0].decode()
+        if ssid in wifi:
+            return (ssid, wifi[ssid])
+
+    return None
