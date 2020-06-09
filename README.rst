@@ -23,7 +23,7 @@ MicroPython changes
 -------------------
 
 * **btree** support disabled to save some space
-* AccessPoint SSID changed to `Microhomie-MAC` with the secret `microhomiE`
+* AccessPoint SSID changed to ``Microhomie-MAC`` with the secret ``microhomiE``
 * inisetup.py writes a custom boot.py
 
 
@@ -36,7 +36,7 @@ Download the `latest image <https://github.com/microhomie/microhomie/releases>`_
 
     esptool --port PORT --baud 460800 write_flash --flash_size=detect --verify -fm dio 0x0 microhomie-esp8266-VERSION.bin
 
-Make your changes in `settings.example.py` and copy this file as `settings.py` to your device. You can now test our example nodes from `examples/`, just copy the `main.py` to your device. Start with the `examples/led` node to turn on and off the on-board LED.
+Make your changes in ``settings.example.py`` and copy this file as ``settings.py`` to your device. You can now test our example nodes from ``examples/``, just copy the ``main.py`` to your device. Start with the ``examples/led`` node to turn on and off the on-board LED.
 
 
 Build image
