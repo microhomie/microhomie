@@ -127,12 +127,9 @@ class AmbientLight(HomieNode):
 
 def main():
     homie = HomieDevice(settings)
-
-    homie.add_node(
-        AmbientLight()
-    )
-
+    homie.add_node(AmbientLight())
     homie.run_forever()
 
 
-main()
+if __name__ == "__main__":
+    main()

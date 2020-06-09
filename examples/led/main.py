@@ -18,6 +18,8 @@ class LED(HomieNode):
         super().__init__(id="led", name=name, type="LED")
         self.pin = pin
         self.led = Pin(pin, Pin.OUT, value=0)
+
+        # Boot button on some dev boards
         self.btn = Pushbutton(Pin(0, Pin.IN, Pin.PULL_UP))
         self.btn.press_func(self.toggle_led)
 
