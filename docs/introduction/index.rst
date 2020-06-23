@@ -3,7 +3,7 @@
 .. toctree::
     :maxdepth: 1
 
-Get startet
+Get Started
 ###########
 
 First steps to understand Microhomie and get to know it.
