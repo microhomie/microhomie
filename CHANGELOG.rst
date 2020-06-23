@@ -2,8 +2,8 @@
 Changelog
 =========
 
-2.4.0-dev
----------
+2.4.0
+-----
 
 * Remove update asyncio coroutine. Property data attributes are now published imidiently on change.
 * Add available Homie Extensions to constants. Updated ``settings.example.py`` with an example.
