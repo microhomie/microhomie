@@ -42,13 +42,13 @@ Make your changes in `settings.example.py` and copy this file as `settings.py` t
 Build image
 -----------
 
-To build your own Microhomie image run:
+To build your own Microhomie image, run:
 
 .. code-block:: shell
 
     make bootstrap
     make
-    make delpoy PORT=/dev/ttyUSBX
+    make deploy PORT=/dev/ttyUSBX
 
 
 Known issues
