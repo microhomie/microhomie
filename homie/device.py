@@ -201,7 +201,7 @@ class HomieDevice:
                 asyncio.create_task(self.reset("reset"))
             elif payload == "webrepl":
                 asyncio.create_task(self.reset("webrepl"))
-            elif payload == "yaota8266":
+            elif payload == "yaota8266" and platform == "esp8266":
                 asyncio.create_task(self.reset("yaotaota"))
         # All other topics
         else:
