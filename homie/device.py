@@ -196,7 +196,7 @@ class HomieDevice:
             for n in _n:
                 n.broadcast_callback(topic, payload, retained)
         # Micropython extension
-        elif topic.endswith(T_MPY):
+        elif topic.endswith(T_MPY) and EXT_MPY in self._extensions:
             if payload == "reset":
                 asyncio.create_task(self.reset("reset"))
             elif payload == "webrepl":
