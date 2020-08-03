@@ -90,7 +90,7 @@ class BaseProperty:
             await self.node.device.subscribe(_t)
 
     def restore_handler(self, topic, payload, retained):
-        """ Gets called when the property should restore the from mqtt """
+        """ Gets called when the property should be restored from mqtt """
         # Retained messages are not allowed on /set topics
         if topic.endswith(T_SET):
             return
@@ -101,6 +101,7 @@ class BaseProperty:
 
         if payload != self._value:
             self._value = payload
+            self._update = False
             self.message_handler(topic, payload, False)
 
     def message_handler(self, topic, payload, retained):

@@ -30,6 +30,7 @@ from mqtt_as import LINUX, MQTTClient
 from uasyncio import sleep_ms
 from ubinascii import hexlify
 from utime import time
+from primitives import launch
 from primitives.message import Message
 
 
@@ -106,12 +107,20 @@ class HomieDevice:
 
     def add_node(self, node):
         node.device = self
-        node.set_topic()
-        # set topic for node properties
+        node.set_topic()  # set topic for node properties
         _p = node.properties
         for p in _p:
             p.set_topic()
         self.nodes.append(node)
+
+    def all_properties(self, func, tup_args):
+        """ Run method on all registered property objects """
+        _n = self.nodes
+        for n in _n:
+            _p = n.properties
+            for p in _p:
+                func = getattr(p, func)
+                launch(func, tup_args)
 
     async def subscribe(self, topic):
         self.dprint("MQTT SUBSCRIBE: {}".format(topic))
@@ -135,11 +144,7 @@ class HomieDevice:
             await self.subscribe("{}/{}".format(self.dtopic, T_MPY))
 
         # Subscribe to node property topics
-        _n = self.nodes
-        for n in _n:
-            _p = n.properties
-            for p in _p:
-                await p.subscribe()
+        self.all_properties("subscribe", ())
 
         # on first connection:
         # * publish device and node properties
@@ -165,6 +170,9 @@ class HomieDevice:
 
             # Do not run this if clause again on wifi/broker reconnect
             self.first_start = False
+
+            # Publish data from all properties on first start
+            self.all_properties("publish", ())
 
         # Announce that the device is ready
         await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_READY)
