@@ -64,6 +64,8 @@ class HomieDevice:
         self.debug = getattr(settings, "DEBUG", False)
 
         self._state = STATE_INIT
+        self._version = __version__
+        self._fw_name = "Microhomie"
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._bc_enabled = getattr(settings, "BROADCAST", True)
 
@@ -76,15 +78,15 @@ class HomieDevice:
         self.nodes = []
 
         # Generate unique id if settings has no DEVICE_ID
-        device_id = getattr(settings, "DEVICE_ID", get_unique_id())
+        self.device_id = getattr(settings, "DEVICE_ID", get_unique_id())
 
         # Base topic
         self.btopic = getattr(settings, "MQTT_BASE_TOPIC", "homie")
         # Device base topic
-        self.dtopic = "{}/{}".format(self.btopic, device_id)
+        self.dtopic = "{}/{}".format(self.btopic, self.device_id)
 
         self.mqtt = MQTTClient(
-            client_id=device_id,
+            client_id=self.device_id,
             server=settings.MQTT_BROKER,
             port=getattr(settings, "MQTT_PORT", 1883),
             user=getattr(settings, "MQTT_USERNAME", None),
@@ -226,7 +228,7 @@ class HomieDevice:
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
     async def publish_properties(self):
-        """publish device and node properties"""
+        """ Publish device and node properties """
         _t = self.dtopic
         publish = self.publish
 
@@ -249,8 +251,8 @@ class HomieDevice:
         if EXT_FW in self._extensions:
             await publish("{}/$localip".format(_t), get_local_ip())
             await publish("{}/$mac".format(_t), get_local_mac())
-            await publish("{}/$fw/name".format(_t), "Microhomie")
-            await publish("{}/$fw/version".format(_t), __version__)
+            await publish("{}/$fw/name".format(_t), self._fw_name)
+            await publish("{}/$fw/version".format(_t), self._version)
         if EXT_STATS in self._extensions:
             await self.publish("{}/$stats/interval".format(_t), str(self.stats_interval))
             # Start stats coro

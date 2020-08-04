@@ -19,8 +19,6 @@ class BaseProperty:
         on_message=None,
     ):
         self._value = default
-        self._topic = None
-        self._retained = False
 
         self.id = id
         self.name = name
@@ -32,6 +30,7 @@ class BaseProperty:
         self.restore = restore
         self.on_message = on_message
 
+        self.topic = None
         self.node = None
 
     # Keep for backward compatibility
@@ -50,19 +49,13 @@ class BaseProperty:
 
     @value.setter
     def value(self, value):
-        last = self._value
-        self._value = value
-
-        # Autopublish if value changed
-        if value != last:
+        """ Set value if changed and publish to mqtt """
+        if value != self._value:
+            self._value = value
             self.publish()
 
-    @property
-    def topic(self):
-        return self._topic
-
     def set_topic(self):
-        self._topic = "{}/{}/{}".format(
+        self.topic = "{}/{}/{}".format(
             self.node.device.dtopic,
             self.node.id,
             self.id
@@ -80,14 +73,14 @@ class BaseProperty:
     async def subscribe(self):
         # Restore from topic with retained message on device start
         if self.restore and self.node.device.first_start is True:
-            self.node.device.callback_topics[self._topic] = self.restore_handler
-            await self.node.device.subscribe(self._topic)
+            self.node.device.callback_topics[self.topic] = self.restore_handler
+            await self.node.device.subscribe(self.topic)
 
         # Subscribe to settable (/set) topics
         if self.settable:
-            _t = "{}/set".format(self._topic)
-            self.node.device.callback_topics[_t] = self.message_handler
-            await self.node.device.subscribe(_t)
+            topic = "{}/set".format(self.topic)
+            self.node.device.callback_topics[topic] = self.message_handler
+            await self.node.device.subscribe(topic)
 
     def restore_handler(self, topic, payload, retained):
         """ Gets called when the property should be restored from mqtt """
@@ -96,12 +89,11 @@ class BaseProperty:
             return
 
         # Unsubscribe from topic and remove the callback handler
-        asyncio.create_task(self.node.device.unsubscribe(self.topic))
-        del self.node.device.callback_topics[self.topic]
+        asyncio.create_task(self.node.device.unsubscribe(topic))
+        del self.node.device.callback_topics[topic]
 
         if payload != self._value:
             self._value = payload
-            self._update = False
             self.message_handler(topic, payload, False)
 
     def message_handler(self, topic, payload, retained):
@@ -118,7 +110,7 @@ class BaseProperty:
                 self.on_message(topic, payload, retained)
 
     async def publish_properties(self):
-        _t = self._topic
+        _t = self.topic
         publish = self.node.device.publish
 
         await publish("{}/$name".format(_t), self.name)
