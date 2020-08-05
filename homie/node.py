@@ -42,6 +42,6 @@ class BaseNode:
         for p in properties:
             await p.publish_properties()
 
-    def broadcast_callback(self, topic, payload, retained):
-        """Gets called when the broadcast topic receives a message"""
-        pass
+
+# Keep for backward compatibility
+HomieNode = BaseNode

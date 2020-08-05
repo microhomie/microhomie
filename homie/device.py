@@ -67,7 +67,7 @@ class HomieDevice:
         self._version = __version__
         self._fw_name = "Microhomie"
         self._extensions = getattr(settings, "EXTENSIONS", [])
-        self._bc_enabled = getattr(settings, "BROADCAST", True)
+        self._bc_enabled = getattr(settings, "BROADCAST", False)
 
         self.first_start = True
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
@@ -139,7 +139,7 @@ class HomieDevice:
 
         # Subscribe to Homie broadcast topic
         if self._bc_enabled:
-            await self.mqtt.subscribe("{}/{}/#".format(self.btopic, T_BC), QOS)
+            await self.subscribe("{}/{}/#".format(self.btopic, T_BC))
 
         # Subscribe to the Micropython extension topic
         if EXT_MPY in self._extensions:
@@ -194,9 +194,7 @@ class HomieDevice:
 
         # broadcast topic
         if T_BC in topic:
-            _n = self.nodes
-            for n in _n:
-                n.broadcast_callback(topic, payload, retained)
+            self.broadcast_callback(topic, payload, retained)
         # Micropython extension
         elif topic.endswith(T_MPY) and EXT_MPY in self._extensions:
             if payload == "reset":
@@ -226,6 +224,10 @@ class HomieDevice:
             topic = "{}/{}".format(topic, level)
         self.dprint("MQTT BROADCAST: {} --> {}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
+
+    def broadcast_callback(self, topic, payload, retained):
+        """ Gets called when the broadcast topic receives a message """
+        pass
 
     async def publish_properties(self):
         """ Publish device and node properties """
