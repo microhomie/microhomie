@@ -209,6 +209,9 @@ class HomieDevice:
                 self.callback_topics[topic](topic, payload, retained)
 
     async def publish(self, topic, payload, retain=True):
+        if isinstance(payload, int):
+            payload = str(payload).encode()
+
         if isinstance(payload, str):
             payload = payload.encode()
 
