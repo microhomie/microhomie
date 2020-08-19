@@ -121,8 +121,8 @@ class HomieDevice:
         for n in _n:
             _p = n.properties
             for p in _p:
-                func = getattr(p, func)
-                launch(func, tup_args)
+                _f = getattr(p, func)
+                launch(_f, tup_args)
 
     async def subscribe(self, topic):
         self.dprint("MQTT SUBSCRIBE: {}".format(topic))

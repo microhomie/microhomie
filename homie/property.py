@@ -77,7 +77,7 @@ class BaseProperty:
             await self.node.device.subscribe(self.topic)
 
         # Subscribe to settable (/set) topics
-        if self.settable:
+        if self.settable is True:
             topic = "{}/set".format(self.topic)
             self.node.device.callback_topics[topic] = self.message_handler
             await self.node.device.subscribe(topic)
