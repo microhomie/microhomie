@@ -6,7 +6,7 @@ Microhomie
 
 Microhomie is a MicroPython framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT. Main target for Microhomie is the ESP8266 device and has been well tested and used on ESP32.
 
-*Upcomming `version 3.0.0 <https://github.com/microhomie/microhomie/tree/develop>`_ has support for the new MicroPython asyncio V3 implementation.*
+Upcomming `Version 3.0.0 <https://github.com/microhomie/microhomie/tree/develop>`_ has support for the new MicroPython asyncio V3 implementation.
 
 Microhomie v2 implements `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_.
 
