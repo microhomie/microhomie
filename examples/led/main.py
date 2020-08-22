@@ -1,7 +1,7 @@
 import settings
 
 from machine import Pin
-from aswitch import Pushbutton
+from primitives.pushbutton import Pushbutton
 
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
@@ -9,7 +9,7 @@ from homie.node import HomieNode
 from homie.property import HomieNodeProperty
 
 
-# reversed values for the esp8266 boards onboard led
+# Reversed values for the esp8266 boards onboard led
 ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
 
 
@@ -23,7 +23,7 @@ class LED(HomieNode):
         self.btn = Pushbutton(Pin(0, Pin.IN, Pin.PULL_UP))
         self.btn.press_func(self.toggle_led)
 
-        self.power_property = HomieNodeProperty(
+        self.p_power = HomieNodeProperty(
             id="power",
             name="LED Power",
             settable=True,
@@ -31,20 +31,20 @@ class LED(HomieNode):
             default=TRUE,
             on_message=self.on_power_msg,
         )
-
-        self.add_property(self.power_property)
+        self.add_property(self.p_power)
 
     def on_power_msg(self, topic, payload, retained):
         self.led(ONOFF[payload])
-        self.power_property.data = ONOFF[self.led()]
+        self.p_power.data = payload
 
     def toggle_led(self):
-        if self.power_property.data != TRUE:
-            self.led(0)
-            self.power_property.data = TRUE
-        else:
+        print(self.p_power.value)
+        if self.p_power.value == TRUE:
             self.led(1)
-            self.power_property.data = FALSE
+            self.p_power.value = FALSE
+        else:
+            self.led(0)
+            self.p_power.value = TRUE
 
 
 def main():

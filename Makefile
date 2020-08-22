@@ -1,10 +1,11 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-MICROPYVERSION := 1.12
-VERSION ?= 2.4.0-beta1
+MICROPYVERSION := master
+VERSION ?= 3.0.0-dev
 PORT ?= /dev/ttyUSB0
 
 export MICROPY_PY_BTREE ?= 0
+export MICROPY_VFS_FAT ?= 0
 export FROZEN_MANIFEST ?= ../../../manifest.py
 
 
@@ -12,12 +13,16 @@ all: firmware
 ota: firmware-ota
 
 requirements:
-	mkdir -p lib/uasyncio
-	curl -s -o lib/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
-	curl -s -o lib/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
-	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/21459720051ed33da1358dad9ddfec1a43fa2482/mqtt_as.py
-	curl -s -o lib/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
-	curl -s -o lib/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
+	mkdir -p lib
+	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as.py
+
+	# asyncio v3 primitives from Peter Hinch
+	mkdir -p lib/primitives
+	curl -s -o lib/primitives/__init__.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/__init__.py
+	curl -s -o lib/primitives/delay_ms.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/delay_ms.py
+	curl -s -o lib/primitives/pushbutton.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/pushbutton.py
+	curl -s -o lib/primitives/message.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/message.py
+	curl -s -o lib/primitives/switch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/switch.py
 
 firmware:
 	cd micropython/ports/esp8266; make clean-modules && make
@@ -67,7 +72,6 @@ micropython:
 	cd micropython; git checkout v$(MICROPYVERSION)
 	cd micropython; make -C mpy-cross
 	cd micropython/ports/unix; make axtls; make
-	cd micropython; git apply ../micropython.patch
 
 yaota:
 	-git clone --recursive https://github.com/jedie/yaota8266.git

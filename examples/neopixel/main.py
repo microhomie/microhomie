@@ -33,48 +33,42 @@ def convert_str_to_rgb(rgb_str):
 
 
 class AmbientLight(HomieNode):
-    def __init__(self, pin=5, leds=3):
-        super().__init__(
-            id="light", name="Ambient Light", type="WS2812B"
-        )
+    def __init__(self, pin, leds):
+        super().__init__(id="light", name="Ambient Light", type="WS2812B")
+        self._np = neopixel.NeoPixel(Pin(pin), leds)
         self._brightness = 53
 
-        self.np = neopixel.NeoPixel(Pin(pin), leds)
-
-        self.power_property = HomieNodeProperty(
+        self.p_power = BaseProperty(
             id="power",
-            name="Light power",
+            name="Power",
             settable=True,
-            retained=True,
-            restore=True,
             datatype=BOOLEAN,
             default=FALSE,
+            on_message=self.on_power_msg,
         )
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.p_power)
 
-        self.color_property = HomieNodeProperty(
+        self.p_color = BaseProperty(
             id="color",
             name="RGB Color",
             settable=True,
-            retained=True,
-            restore=True,
             datatype=COLOR,
             default=DEFAULT,
             format=RGB,
+            on_message=self.on_color_msg,
         )
-        self.add_property(self.color_property, self.on_color_msg)
+        self.add_property(self.p_color)
 
-        self.brightness_property = HomieNodeProperty(
+        self.p_brightness = BaseProperty(
             id="brightness",
-            name="LED brightness",
+            name="Brightness",
             settable=True,
-            retained=True,
-            restore=True,
             datatype=ENUM,
             format="1,2,3,4,5,6,7,8",
             default=4,
+            on_message=self.on_brightness_msg,
         )
-        self.add_property(self.brightness_property, self.on_brightness_msg)
+        self.add_property(self.p_brightness)
 
     @property
     def brightness(self):
@@ -85,49 +79,52 @@ class AmbientLight(HomieNode):
         v = min(max(val, 0), 8)
         self._brightness = int(4 + 3.1 * (v + 1) ** 2)
 
-        if self.power_property.data == TRUE:
-            rgb = convert_str_to_rgb(self.color_property.data)
+        if self.p_power.value == TRUE:
+            rgb = str_to_rgb(self.p_color.value)
             self.on(rgb=rgb)
 
     def on(self, rgb):
         b = self._brightness
-        color = (
-            int(b * rgb[0] / 255),
-            int(b * rgb[1] / 255),
-            int(b * rgb[2] / 255)
-        )
-        all_on(self.np, color=color)
+        color = (int(b * rgb[0] / 255), int(b * rgb[1] / 255), int(b * rgb[2] / 255))
+        all_on(self._np, color=color)
 
     def on_power_msg(self, topic, payload, retained):
         if payload == TRUE:
-            rgb = convert_str_to_rgb(self.color_property.data)
+            rgb = str_to_rgb(self.p_color.value)
             self.on(rgb=rgb)
         elif payload == FALSE:
-            all_off(self.np)
+            all_off(self._np)
         else:
             return
 
-        self.power_property.data = payload
+        self.p_power.value = payload
 
     def on_color_msg(self, topic, payload, retained):
-        rgb = convert_str_to_rgb(payload)
+        rgb = str_to_rgb(payload)
         if rgb is not None:
-            self.color_property.data = payload
-            if self.power_property.data == TRUE:
+            self.p_color.value = payload
+            if self.p_power.value == TRUE:
                 self.on(rgb=rgb)
 
     def on_brightness_msg(self, topic, payload, retained):
         try:
             b = min(max(int(payload), 1), 8)
             self.brightness = b
-            self.brightness_property.data = payload
+            self.p_brightness.value = payload
         except ValueError:
             pass
 
 
 def main():
     homie = HomieDevice(settings)
-    homie.add_node(AmbientLight())
+
+    homie.add_node(
+        AmbientLight(
+            pin=4,
+            leds=3
+        )
+    )
+
     homie.run_forever()
 
 

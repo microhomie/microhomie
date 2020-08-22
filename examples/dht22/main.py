@@ -1,11 +1,12 @@
 import dht
 import settings
-from homie.device import HomieDevice
+import uasyncio as asyncio
+
+from homie.device import HomieDevice, await_ready_state
 from homie.node import HomieNode
 from homie.property import HomieNodeProperty
 from homie.constants import FLOAT
 from machine import Pin
-from uasyncio import get_event_loop, sleep_ms
 
 
 class DHT22(HomieNode):
@@ -32,9 +33,9 @@ class DHT22(HomieNode):
         )
         self.add_property(self.hum_property)
 
-        loop = get_event_loop()
-        loop.create_task(self.update_data())
+        asyncio.create_task(self.update_data())
 
+    @await_ready_state
     async def update_data(self):
         dht22 = self.dht22
         delay = self.interval * 1000
@@ -44,7 +45,7 @@ class DHT22(HomieNode):
             self.temp_property.data = dht22.temperature()
             self.hum_property.data = dht22.humidity()
 
-            await sleep_ms(delay)
+            await asyncio.sleep_ms(delay)
 
 
 def main():

@@ -1,4 +1,3 @@
-import asyn
 import settings
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
@@ -6,7 +5,7 @@ from homie.node import HomieNode
 from homie.property import HomieNodeProperty
 from machine import Pin
 from micropython import const
-from uasyncio import get_event_loop, sleep_ms
+from uasyncio import create_task, sleep_ms
 
 
 _SENSOR = "sensor"
@@ -17,9 +16,9 @@ class PIR(HomieNode):
     def __init__(self, name="Motion sensor", pin=4):
         super().__init__(id="pir", name=name, type="PIR")
         self.pir = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
-        self.active = True
+        self.task = None
 
-        self.active_property = HomieNodeProperty(
+        self.active = HomieNodeProperty(
             id="active",
             name="PIR Status",
             settable=True,
@@ -27,24 +26,20 @@ class PIR(HomieNode):
             restore=True,
             default=TRUE,
         )
-        self.add_property(self.active_property, self.on_active_msg)
+        self.add_property(self.active, self.on_active_msg)
 
     def on_active_msg(self, topic, payload, retained):
         if payload == FALSE:
-            if self.active:
-                asyn.launch(asyn.NamedTask.cancel, (_SENSOR,))
-                self.active = False
+            if self.task is not None:
+                self.task.cancel()
+                self.task = None
         elif payload == TRUE:
-            if not self.active:
-                self.active = True
-                loop = get_event_loop()
-                loop.create_task(
-                    asyn.NamedTask(_SENSOR, self.pir_sensor)()
-                )
+            if self.task is None:
+                self.task = create_task(self.pir_sensor())
         else:
             return
 
-        self.active_property.data = payload
+        self.active.data = payload
 
     async def pir_sensor(self):
         pir = self.pir
