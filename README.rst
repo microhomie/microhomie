@@ -6,7 +6,7 @@ Microhomie
 
 Microhomie is a MicroPython framework for `Homie <https://github.com/homieiot/convention>`_, a lightweight MQTT convention for the IoT. Main target for Microhomie is the ESP8266 device and has been well tested and used on ESP32.
 
-*This branch is for the upcomming MicroPython version with the new asyncio V3 and LFS2*
+*This development version is for the upcomming MicroPython release with the new asyncio V3 and LFS2*
 
 Microhomie v2 implements `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_.
 
@@ -68,5 +68,4 @@ Included libraries
 ------------------
 
 * `mqtt_as.py <https://github.com/peterhinch/micropython-mqtt>`_ by Peter Hinch but we use the `patched version <https://github.com/kevinkk525/micropython-mqtt>`_ from Kevin Köck. Kevins version has support for a keyword based configuration and unsubscribe.
-* asyn.py ('micro' synchronisation primitives for uasyncio) and aswitch.py (Switch and pushbutton classes for asyncio) from Peter Hinch `micropython-async <https://github.com/peterhinch/micropython-async>`_ repository.
-* uasyncio and uasyncio.core from the MicroPython library `repository <https://github.com/micropython/micropython-lib>`_
+* asyncio V3 primitives from Peter Hinch `micropython-async <https://github.com/peterhinch/micropython-async>`_ repository.
