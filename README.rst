@@ -8,11 +8,13 @@ Microhomie is a MicroPython framework for `Homie <https://github.com/homieiot/co
 
 *This development version (3.0.0-dev) is for the upcomming MicroPython release with the new asyncio V3 and LFS2*
 
+Read Peter Hinch's `V3 update guide <https://github.com/peterhinch/micropython-async/blob/master/v3/README.md>`_ to update your coroutines.
+
 Microhomie v2 implements `Homie v4.0.0 <https://github.com/homieiot/convention/releases/tag/v4.0.0>`_.
 
 Read the `Microhomie documentation <https://microhomie.readthedocs.io>`_ to get started.
 
-If you want to make your own node, learn from our examples until we have a "howto build nodes" section in the documentation or join the #microhomie channel on the `MicroPython Slack community <https://slack-micropython.herokuapp.com/>`_ and chat with us.
+Learn from our examples until we have a "howto build nodes" section in the documentation or join the #microhomie channel on the `MicroPython Slack community <https://slack-micropython.herokuapp.com/>`_ and chat with us.
 
 Binaries can be verified with `minisign <https://jedisct1.github.io/minisign/>`_ and the following public key:
 
