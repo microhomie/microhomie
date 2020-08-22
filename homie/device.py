@@ -68,6 +68,7 @@ class HomieDevice:
         self._fw_name = "Microhomie"
         self._extensions = getattr(settings, "EXTENSIONS", [])
         self._bc_enabled = getattr(settings, "BROADCAST", False)
+        self._wifi = getattr(settings, "WIFI_CREDENTIALS", False)
 
         self.first_start = True
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
@@ -292,8 +293,6 @@ class HomieDevice:
             except OSError:
                 print("ERROR: can not connect to MQTT")
                 await sleep_ms(5000)
-            except Exception:
-                print("Exception! Fix this line!")
 
     def run_forever(self):
         if RTC().memory() == b"webrepl":
