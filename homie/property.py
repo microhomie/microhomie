@@ -112,24 +112,26 @@ class BaseProperty:
             self.value = payload
 
     async def publish_properties(self):
-        _t = self.topic
+        topic = self.topic
         publish = self.node.device.publish
 
-        await publish("{}/$name".format(_t), self.name)
-        await publish("{}/$datatype".format(_t), self.datatype)
+        await publish("{}/$name".format(topic), self.name)
+        await publish("{}/$datatype".format(topic), self.datatype)
 
         if self.format is not None:
-            await publish("{}/$format".format(_t), self.format)
+            await publish("{}/$format".format(topic), self.format)
 
         if self.settable is True:
-            await publish("{}/$settable".format(_t), TRUE)
+            await publish("{}/$settable".format(topic), TRUE)
 
         if self.retained is False:
-            await publish("{}/$retained".format(_t), FALSE)
+            await publish("{}/$retained".format(topic), FALSE)
 
         if self.unit is not None:
-            await publish("{}/$unit".format(_t), self.unit)
+            await publish("{}/$unit".format(topic), self.unit)
 
+
+HomieProperty = BaseProperty
 
 # Keep for backward compatibility
 HomieNodeProperty = BaseProperty
