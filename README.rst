@@ -43,10 +43,72 @@ Download the `latest image <https://github.com/microhomie/microhomie/releases>`_
 Make your changes in ``settings.example.py`` and copy this file as ``settings.py`` to your device. You can now test our example nodes from ``examples/``, just copy the ``main.py`` to your device. Start with the ``examples/led`` node to turn on and off the on-board LED.
 
 
-Build image
------------
+Example
+-------
 
-To build your own Microhomie image, run:
+This is a basic example to power the on-board LED from an ESP8266 development board:
+
+.. code-block:: python
+
+    import settings
+
+    from machine import Pin
+
+    from homie.node import HomieNode
+    from homie.device import HomieDevice
+    from homie.property import HomieProperty
+    from homie.constants import BOOLEAN, FALSE, TRUE
+
+
+    # Reversed values map for the esp8266 boards on-board LED
+    ONOFF = {FALSE: 1, TRUE: 0}
+
+
+    # Initialize the pin for the onboard LED
+    LED = Pin(2, Pin.OUT, value=1)
+
+
+    # The on_message handler to power the led
+    def toggle_led(topic, payload, retained):
+        LED(ONOFF[payload])
+
+
+    def main():
+        # Initialize the Homie device
+        device = HomieDevice(settings)
+
+        # Initialize the Homie node for the on-board LED
+        led_node = HomieNode(id="led", name="On-board LED", type="LED",)
+
+        # Initialize the Homie property to power on/off the led
+        led_power = HomieProperty(
+            id="power",
+            name="Power",
+            settable=True,
+            datatype=BOOLEAN,
+            default=FALSE,
+            on_message=toggle_led,
+        )
+
+        # Add the power property to the node
+        led_node.add_property(led_power)
+
+        # Add the led node to the device
+        device.add_node(led_node)
+
+        # Run
+        device.run_forever()
+
+
+    if __name__ == "__main__":
+        main()
+
+
+
+Build esp8266 image
+-------------------
+
+To build your own Microhomie image for the ESP8266 device, run:
 
 .. code-block:: shell
 
