@@ -92,22 +92,24 @@ class BaseProperty:
         asyncio.create_task(self.node.device.unsubscribe(topic))
         del self.node.device.callback_topics[topic]
 
-        if payload != self._value:
-            self._value = payload
-            self.message_handler(topic, payload, False)
+        if payload_is_valid(self, payload):
+            if payload != self._value:
+                if self.on_message:
+                    self.on_message(topic, payload, retained)
+
+                self._value = payload
 
     def message_handler(self, topic, payload, retained):
         """ Gets called when the property receive a message on /set topic """
-        if payload_is_valid(self, payload):
-            # No reatained messages allowed on /set topics
-            if retained:
-                return
+        # No reatained messages allowed on /set topics
+        if retained:
+            return
 
-            # Update the value if no on_message method is set, else call on_message
-            if self.on_message is None:
-                self.value = payload
-            else:
+        if payload_is_valid(self, payload):
+            if self.on_message:
                 self.on_message(topic, payload, retained)
+
+            self.value = payload
 
     async def publish_properties(self):
         _t = self.topic
