@@ -97,8 +97,6 @@ class AmbientLight(HomieNode):
         else:
             return
 
-        self.p_power.value = payload
-
     def on_color_msg(self, topic, payload, retained):
         rgb = str_to_rgb(payload)
         if rgb is not None:
@@ -110,7 +108,6 @@ class AmbientLight(HomieNode):
         try:
             b = min(max(int(payload), 1), 8)
             self.brightness = b
-            self.p_brightness.value = payload
         except ValueError:
             pass
 

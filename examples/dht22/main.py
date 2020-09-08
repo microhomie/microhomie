@@ -15,23 +15,23 @@ class DHT22(HomieNode):
         self.dht22 = dht.DHT22(Pin(pin, Pin.IN, pull))
         self.interval = interval
 
-        self.temp_property = HomieNodeProperty(
+        self.p_temp = HomieNodeProperty(
             id="temperature",
             name="Temperature",
             datatype=FLOAT,
             format="-40:80",
             unit="°C",
         )
-        self.add_property(self.temp_property)
+        self.add_property(self.p_temp)
 
-        self.hum_property = HomieNodeProperty(
+        self.p_humid = HomieNodeProperty(
             id="humidity",
             name="Humidity",
             datatype=FLOAT,
             format="0:100",
             unit="%",
         )
-        self.add_property(self.hum_property)
+        self.add_property(self.p_humid)
 
         asyncio.create_task(self.update_data())
 
@@ -42,8 +42,8 @@ class DHT22(HomieNode):
 
         while True:
             dht22.measure()
-            self.temp_property.data = dht22.temperature()
-            self.hum_property.data = dht22.humidity()
+            self.p_temp.data = dht22.temperature()
+            self.p_humid.data = dht22.humidity()
 
             await asyncio.sleep_ms(delay)
 
