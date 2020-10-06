@@ -117,6 +117,7 @@ Build esp8266 image
 
 To build your own Microhomie image for the ESP8266 device, run:
 
+
 .. code-block:: shell
 
     make bootstrap
