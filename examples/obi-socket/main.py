@@ -1,11 +1,11 @@
-from time import sleep_ms
-
 import settings
-from aswitch import Pushbutton
+import uasyncio as asyncio
+
+from primitives.pushbutton import Pushbutton
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
 from homie.node import HomieNode
-from homie.property import HomieNodeProperty
+from homie.property import HomieProperty
 from machine import Pin
 
 
@@ -27,7 +27,7 @@ class SmartSocket(HomieNode):
         self.r_on = Pin(12, Pin.OUT)
         self.r_off = Pin(5, Pin.OUT)
 
-        self.power_property = HomieNodeProperty(
+        self.p_power = HomieProperty(
             id="power",
             name="Relay",
             settable=True,
@@ -35,24 +35,23 @@ class SmartSocket(HomieNode):
             datatype=BOOLEAN,
             default=FALSE,
             restore=True,
+            on_message=self.on_power_msg,
         )
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.p_power)
 
         self.button = Pushbutton(Pin(14, Pin.IN, Pin.PULL_UP))
         self.button.release_func(self.toggle, ())
         self.button.long_func(reset, (self.led,))
 
-    def off(self):
+    async def off(self):
         self.r_off(0)
-        sleep_ms(100)
+        await asyncio.sleep_ms(100)
         self.r_on(1)
-        self.power_property.data = FALSE
 
-    def on(self):
+    async def on(self):
         self.r_on(0)
-        sleep_ms(100)
+        await asyncio.sleep_ms(100)
         self.r_off(1)
-        self.power_property.data = TRUE
 
     def on_power_msg(self, topic, payload, retained):
         if payload == FALSE:
@@ -60,11 +59,13 @@ class SmartSocket(HomieNode):
         elif payload == TRUE:
             self.on()
 
-    def toggle(self):
-        if self.power_property.data == TRUE:
-            self.off()
+    async def toggle(self):
+        if self.p_power.value == TRUE:
+            await self.off()
+            self.p_power.value = FALSE
         else:
-            self.on()
+            await self.on()
+            self.p_power.value = TRUE
 
 
 def main():

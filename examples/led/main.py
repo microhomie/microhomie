@@ -38,8 +38,10 @@ class LED(HomieNode):
     def toggle_led(self):
         if self.p_power.value == TRUE:
             self.led(1)
+            self.p_power.value = False
         else:
             self.led(0)
+            self.p_power.value = True
 
 
 def main():

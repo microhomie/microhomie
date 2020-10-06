@@ -6,7 +6,7 @@ from primitives.switch import Switch
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
 from homie.node import HomieNode
-from homie.property import HomieNodeProperty
+from homie.property import HomieProperty
 
 
 class ShellyRelay(HomieNode):
@@ -15,25 +15,25 @@ class ShellyRelay(HomieNode):
         self.relay = Pin(rpin, Pin.OUT, value=0)
         self.switch = Switch(Pin(swpin, Pin.IN))
 
-        self.power_property = HomieNodeProperty(
+        self.p_power = HomieProperty(
             id=id,
             name="Power",
             settable=True,
             datatype=BOOLEAN,
             default=FALSE,
         )
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.p_power, self.on_power_msg)
 
         self.switch.open_func(self.toggle, ())
         self.switch.close_func(self.toggle, ())
 
     def off(self):
         self.relay(0)
-        self.power_property.data = FALSE
+        self.p_power.value = FALSE
 
     def on(self):
         self.relay(1)
-        self.power_property.data = TRUE
+        self.p_power.value = TRUE
 
     def on_power_msg(self, topic, payload, retained):
         if payload == FALSE:

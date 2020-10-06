@@ -5,7 +5,7 @@ from machine import Pin
 
 from homie.node import HomieNode
 from homie.device import HomieDevice
-from homie.property import HomieNodeProperty
+from homie.property import HomieProperty
 from homie.constants import TRUE, FALSE, BOOLEAN, COLOR, RGB, ENUM
 
 
@@ -38,7 +38,7 @@ class AmbientLight(HomieNode):
         self._np = neopixel.NeoPixel(Pin(pin), leds)
         self._brightness = 53
 
-        self.p_power = BaseProperty(
+        self.p_power = HomieProperty(
             id="power",
             name="Power",
             settable=True,
@@ -48,7 +48,7 @@ class AmbientLight(HomieNode):
         )
         self.add_property(self.p_power)
 
-        self.p_color = BaseProperty(
+        self.p_color = HomieProperty(
             id="color",
             name="RGB Color",
             settable=True,
@@ -59,7 +59,7 @@ class AmbientLight(HomieNode):
         )
         self.add_property(self.p_color)
 
-        self.p_brightness = BaseProperty(
+        self.p_brightness = HomieProperty(
             id="brightness",
             name="Brightness",
             settable=True,
@@ -80,7 +80,7 @@ class AmbientLight(HomieNode):
         self._brightness = int(4 + 3.1 * (v + 1) ** 2)
 
         if self.p_power.value == TRUE:
-            rgb = str_to_rgb(self.p_color.value)
+            rgb = convert_str_to_rgb(self.p_color.value)
             self.on(rgb=rgb)
 
     def on(self, rgb):
@@ -90,7 +90,7 @@ class AmbientLight(HomieNode):
 
     def on_power_msg(self, topic, payload, retained):
         if payload == TRUE:
-            rgb = str_to_rgb(self.p_color.value)
+            rgb = convert_str_to_rgb(self.p_color.value)
             self.on(rgb=rgb)
         elif payload == FALSE:
             all_off(self._np)
@@ -98,9 +98,8 @@ class AmbientLight(HomieNode):
             return
 
     def on_color_msg(self, topic, payload, retained):
-        rgb = str_to_rgb(payload)
+        rgb = convert_str_to_rgb(payload)
         if rgb is not None:
-            self.p_color.value = payload
             if self.p_power.value == TRUE:
                 self.on(rgb=rgb)
 

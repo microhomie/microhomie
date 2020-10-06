@@ -4,7 +4,7 @@ import uasyncio as asyncio
 
 from homie.device import HomieDevice, await_ready_state
 from homie.node import HomieNode
-from homie.property import HomieNodeProperty
+from homie.property import HomieProperty
 from homie.constants import FLOAT
 from machine import Pin
 
@@ -15,7 +15,7 @@ class DHT22(HomieNode):
         self.dht22 = dht.DHT22(Pin(pin, Pin.IN, pull))
         self.interval = interval
 
-        self.p_temp = HomieNodeProperty(
+        self.p_temp = HomieProperty(
             id="temperature",
             name="Temperature",
             datatype=FLOAT,
@@ -24,7 +24,7 @@ class DHT22(HomieNode):
         )
         self.add_property(self.p_temp)
 
-        self.p_humid = HomieNodeProperty(
+        self.p_humid = HomieProperty(
             id="humidity",
             name="Humidity",
             datatype=FLOAT,

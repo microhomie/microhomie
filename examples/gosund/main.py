@@ -7,7 +7,7 @@ from primitives.pushbutton import Pushbutton
 
 from homie.node import HomieNode
 from homie.device import HomieDevice
-from homie.property import HomieNodeProperty
+from homie.property import HomieProperty
 from homie.constants import TRUE, FALSE, BOOLEAN
 
 
@@ -31,14 +31,15 @@ class SmartSocket(HomieNode):
         self.led_r = Pin(13, Pin.OUT, value=1)  # Red LED
         self.relay = Pin(14, Pin.OUT)
 
-        self.power_property = HomieNodeProperty(
+        self.p_power = HomieProperty(
             id="power",
             name="Power",
             settable=True,
             datatype=BOOLEAN,
             default=FALSE,
+            on_message=self.on_power_msg,
         )
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.p_power)
 
         self.button = Pushbutton(Pin(3, Pin.IN))
         self.button.release_func(self.toggle, ())
@@ -48,13 +49,11 @@ class SmartSocket(HomieNode):
         self.relay(0)
         self.led_b(0)
         self.led_r(1)
-        self.power_property.data = FALSE
 
     def on(self):
         self.relay(1)
         self.led_b(1)
         self.led_r(0)
-        self.power_property.data = TRUE
 
     def on_power_msg(self, topic, payload, retained):
         if payload == FALSE:
@@ -63,10 +62,12 @@ class SmartSocket(HomieNode):
             self.on()
 
     def toggle(self):
-        if self.power_property.data == TRUE:
+        if self.p_power.data == TRUE:
             self.off()
+            self.p_power.value = FALSE
         else:
             self.on()
+            self.p_power.data = TRUE
 
 
 def main():
