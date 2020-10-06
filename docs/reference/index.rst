@@ -10,6 +10,7 @@ Technical reference
    device
    node
    property
-   utils
+   network
+   validator
    constants
    settings
