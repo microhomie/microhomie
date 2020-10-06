@@ -2,19 +2,20 @@
 Changelog
 =========
 
-3.0.0-alpha1
-------------
+3.0.0
+-----
 
 * Add support for the new MicroPython uasyncio V3 implementation
 * Updated mqtt_as.py version for uasyncio v3
 * New uasyncio V3 primitives from Peter Hinch
-* Remove update asyncio coroutine. Property data attributes are now published imidiently on change.
-* Add available Homie Extensions to constants. Updated ``settings.example.py`` with an example.
-* Subscribe to the Homie broadcast topic is now optional and enabled by default.
+* Remove update asyncio coroutine. Property data attributes are now published immediately on value assignment
+* Add available Homie Extensions to constants. Updated ``settings.example.py`` with an example
+* Subscribe to the Homie broadcast topic is now optional and enabled by default
 * The ``utils`` module was refactored to ``homie.network``. This will break ``boot.py`` on update. Replace ``homie.utils`` with ``homie.network`` in ``boot.py`` and other files where you use the ``utils`` module.
 * Add validation for datatype integer
 * Add the possibility to store multiple WiFi credentials
 * Refactored classes
+* New filesystem LFS2. Disabled vfat to safe space.
 
 Read Peter's `V3 update guide <https://github.com/peterhinch/micropython-async/blob/master/v3/README.md>`_ to update your coroutines to the new uasyncio v3.
 
