@@ -63,17 +63,20 @@ and copy ``lib`` and ``homie`` from your host to the device. ``homie`` should be
     ├── aswitch.py
     ├── asyn.py
     ├── homie
+    │   ├── __init__.py
     │   ├── constants.py
     │   ├── device.py
-    │   ├── __init__.py
+    │   ├── network.py
     │   ├── node.py
     │   ├── property.py
-    │   └── utils.py
-    ├── mqtt_as.py
-    └── uasyncio
-        ├── core.py
-        └── __init__.py
-
+    │   └── validator.py
+    ├── primitives
+    │   ├── __init__.py
+    │   ├── delay_ms.py
+    │   ├── message.py
+    │   ├── pushbutton.py
+    │   └── switch.py
+    └── mqtt_as.py
 
 For example we have an `mpfshell <https://github.com/wendlers/mpfshell>`_ script ``esp32_install.mpf`` to automate the deployment:
 

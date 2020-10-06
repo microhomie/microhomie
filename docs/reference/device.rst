@@ -15,9 +15,13 @@ Consider to read the Homie convention for details.
 Decorator
 =========
 
+.. function:: get_unique_id()
+
+    Returns a device unique id.
+
 .. function:: await_ready_state(func)
 
-    Is an async decorator to block async coros as long as the device has published all device topics and announced itself as ready.
+    Is a async decorator to block coroutines as long as the device has published all device topics and announced itself as ready.
 
     Decorate methods with this if the method should wait until the device is ready.
 
@@ -62,13 +66,14 @@ Methods
 
         - ``node`` is the HomieNode object.
 
-.. method:: HomieDevice.format_topic(self, topic)
+.. method:: HomieDevice.all_properties(self, func, tup_args)
 
-    This method returns a string with the given topic and the precedent topic from the device.
+    Run a property class function on all registered property objects
 
     The arguments are:
 
-        - ``topic`` is the sub topic i.e. from a node or property that should be precedent with the device topic.
+        - ``func`` is the homie.property.HomieProperty function which should run
+        - ``tup_args`` function args as a tuple
 
 .. method:: HomieDevice.subscribe(self, topic)
 
@@ -87,23 +92,15 @@ Methods
 
         - ``topic`` is the topic that should be unsubscribed.
 
-.. method:: HomieDevice.add_node_cb(self, node)
-
-    Async method to add a node callback method to a dictionary.
-
-    The arguments are:
-
-        - ``node`` is a HomieNode object.
-
 .. method:: HomieDevice.connection_handler(self, client)
 
-    Internal async method that gets called when the mqtt connection is established. This method subscribes to all the topics, handle data restore and finaly register the coroutines to send data.
+    Internal async method that gets called when the mqtt connection is established. This method subscribes to all the topics.
 
     The arguments are:
 
         - ``client`` is the mqtt_as client object.
 
-.. method:: HomieDevice.sub_cb(self, topic, payload, retained)
+.. method:: HomieDevice.sub_cb(self, topic, payload, retained=True)
 
     This method is the base callback method for arriving messages. Every message arrives on a subscribed topic calls this method.
 
@@ -115,7 +112,7 @@ Methods
 
         - ``topic`` is the topic the message has arrived on.
         - ``payload`` is a binary string with the message payload.
-        - ``retained`` indicates if the messages is retained on the broker.
+        - ``retained`` indicates if the messages is retained on the broker. For Homie this is per default ``True`´.
 
 .. method:: HomieDevice.publish(self, topic, payload, retained=True)
 
@@ -136,10 +133,19 @@ Methods
         - ``payload`` the payload to send.
         - ``level`` is the broadcast level for the payload. Default is no level.
 
+.. method:: HomieDevice.broadcast_callback(self, topic, payload, retained)
+
+    Gets called when the broadcast topic receives a message. Implement
+
+    The arguments are:
+
+        - ``topic`` the sub-topic the payload should be published to.
+        - ``payload`` is the payload.
+        - ``retained`` indicates if the message should be retained on the broker. Convention default is True.
+
 .. method:: HomieDevice.publish_properties(self)
 
     This async method publish the device properties as defined in the Homie convention.
-
 
 .. method:: HomieDevice.publish_stats(self)
 
@@ -172,4 +178,6 @@ Methods
 
     This method will print to stdout if DEBUG is enabled.
 
+.. method:: HomieDevice.setup_wifi(self)
 
+    Method that try to connect to a wifi nearby if multible wifi credentials are present in ``settings.py``.

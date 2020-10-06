@@ -18,3 +18,4 @@ settings.py
 /docs/_build
 /micropython
 /esp-open-sdk
+/bin

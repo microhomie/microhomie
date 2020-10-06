@@ -26,7 +26,15 @@ Wifi settings
     The password for the wifi to connect with. Value must be string.
 
 
-MQTT settings
+Multiple WiFi credentials
+-------------------------
+
+.. data:: WIFI_CREDENTIALS
+
+    Microhomie can connect to a knwon wifi nearby. For this feature the ``WIFI_CREDENTIALS`` dictionary can contain multible wifi credentials in the format ``"ssid": "secret"``.
+
+
+MQTT broker
 -------------
 
 .. data:: MQTT_BROKER
@@ -34,10 +42,11 @@ MQTT settings
     The MQTT broker IP address or hostname. Value must be string.
 
 
-Optional
-========
+Optional settings
+=================
 
 Optional settings have a default value an can be overwritten in the settings file.
+
 
 Debug
 -----
@@ -45,6 +54,7 @@ Debug
 .. data:: DEBUG
 
     Set DEBUG to ``True`` to enable debug log output and to disable the WDT. Default ist ``False``.
+
 
 MQTT settings
 -------------
@@ -77,7 +87,8 @@ MQTT settings
 
 .. data:: MQTT_BASE_TOPIC
 
-    The base topic for the homie device. Default is ``b"homie"``. Value must be string.
+    The base topic for the homie device. Default is ``"homie"``. Value must be string.
+
 
 Device settings
 ---------------
@@ -96,19 +107,26 @@ Device settings
 
     Time in seconds the stats coro publish updates. Default is 60 seconds.
 
+.. data:: BROADCAST
+
+    Subscribe to broadcast topic is enabled by default. To disable broadcast messages set BROADCAST to ``False``.
+
+
 Extensions
 ----------
 
 .. data:: EXTENSIONS
 
-    Default is a empty list() for no extensions. Microhomie currently supports two legacy extensions. Add the extensions to the list to activate them. Items in the list() must be string.
+    Default is a empty list() for no extensions. Microhomie currently supports the two legacy extensions and a microhomie extension. Add the extensions to the list to activate them. Items in the list() must be string.
 
-    * org.homie.legacy-firmware:0.1.1:[4.x]
-    * org.homie.legacy-stats:0.1.1:[4.x]
+    * ``constants.EXT_MPY`` for org.microhomie.mpy:0.1.0:[4.x]
+    * ``constants.EXT_FW`` for org.homie.legacy-firmware:0.1.1:[4.x]
+    * ``constants.EXT_STATS`` for org.homie.legacy-stats:0.1.1:[4.x]
 
     Example::
 
         EXTENSIONS = [
-            b"org.homie.legacy-firmware:0.1.1:[4.x]",
-            b"org.homie.legacy-stats:0.1.1:[4.x]",
+            EXT_MPY,
+            EXT_FW,
+            EXT_STATS,
         ]

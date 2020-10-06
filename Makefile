@@ -1,10 +1,11 @@
 export PATH := $(PWD)/esp-open-sdk/xtensa-lx106-elf/bin:$(PWD)/micropython/tools:$(PWD)/micropython/ports/unix:$(HOME)/go/bin:$(PATH)
 
-MICROPYVERSION := 1.12
-VERSION ?= 2.3.1
+MICROPYVERSION := 1.13
+VERSION ?= 3.0.0
 PORT ?= /dev/ttyUSB0
 
 export MICROPY_PY_BTREE ?= 0
+export MICROPY_VFS_FAT ?= 0
 export FROZEN_MANIFEST ?= ../../../manifest.py
 
 
@@ -12,18 +13,24 @@ all: firmware
 ota: firmware-ota
 
 requirements:
-	mkdir -p lib/uasyncio
-	curl -s -o lib/uasyncio/__init__.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio/uasyncio/__init__.py
-	curl -s -o lib/uasyncio/core.py https://raw.githubusercontent.com/micropython/micropython-lib/master/uasyncio.core/uasyncio/core.py
-	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/21459720051ed33da1358dad9ddfec1a43fa2482/mqtt_as.py
-	curl -s -o lib/asyn.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/asyn.py
-	curl -s -o lib/aswitch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/aswitch.py
+	mkdir -p lib
+	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as.py
+
+	# asyncio v3 primitives from Peter Hinch
+	mkdir -p lib/primitives
+	curl -s -o lib/primitives/__init__.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/__init__.py
+	curl -s -o lib/primitives/delay_ms.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/delay_ms.py
+	curl -s -o lib/primitives/pushbutton.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/pushbutton.py
+	curl -s -o lib/primitives/message.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/message.py
+	curl -s -o lib/primitives/switch.py https://raw.githubusercontent.com/peterhinch/micropython-async/master/v3/primitives/switch.py
 
 firmware:
-	cd micropython/ports/esp8266; make clean-modules && make
+	make -C micropython/ports/esp8266 clean-modules
+	make -C micropython/ports/esp8266
 
 firmware-ota:
-	cd micropython/ports/esp8266; make clean-modules && make ota
+	make -C micropython/ports/esp8266 clean-modules
+	make -C micropython/ports/esp8266 ota
 
 copy-firmware:
 	cp micropython/ports/esp8266/build-GENERIC/firmware-combined.bin ./releases/microhomie-esp8266-v$(VERSION).bin
@@ -33,7 +40,7 @@ copy-firmware:
 release: clean firmware firmware-ota sign-ota copy-firmware
 
 clean:
-	cd micropython/ports/esp8266; make clean
+	make -C micropython/ports/esp8266 clean
 
 deploy: erase flash
 
@@ -60,23 +67,25 @@ sign-ota:
 
 espopensdk:
 	-git clone --recursive https://github.com/pfalcon/esp-open-sdk.git
-	cd esp-open-sdk; make
+	make -C esp-open-sdk
 
 micropython:
-	-git clone --recursive https://github.com/micropython/micropython.git
+	-git clone https://github.com/micropython/micropython.git
 	cd micropython; git checkout v$(MICROPYVERSION)
-	cd micropython; make -C mpy-cross
-	cd micropython/ports/unix; make axtls; make
-	cd micropython; git apply ../micropython.patch
+	make -C micropython mpy-cross
+	make -C micropython/ports/unix
+
+	make -C micropython/ports/esp8266 submodules
+	# cd micropython/ports/esp32; make submodules
 
 yaota:
 	-git clone --recursive https://github.com/jedie/yaota8266.git
 	cd yaota8266; git checkout develop
-	cd yaota8266; make rsa-keys;
+	make -C yaota8266 rsa-keys
 	cd yaota8266; cp config.h.example config.h
 
 yaota-build:
-	cd yaota8266; make build
+	make -C yaota8266 build
 
 bootstrap: espopensdk micropython requirements
 

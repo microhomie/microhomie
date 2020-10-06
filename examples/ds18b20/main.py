@@ -1,12 +1,14 @@
 import time
+import uasyncio ad asyncio
 
 from ds18x20 import DS18X20
 from homie.node import HomieNode
-from homie.property import HomieNodeProperty
+from homie.device import HomieDevice, await_ready_state
+from homie.property import HomieProperty
 from homie.constants import FLOAT
+
 from machine import Pin
 from onewire import OneWire
-from uasyncio import get_event_loop, sleep_ms
 
 
 class DS18B20(HomieNode):
@@ -18,32 +20,29 @@ class DS18B20(HomieNode):
             raise Exception("no DS18B20 found at bus on pin %d" % pin)
         # save what should be the only address found
         self.addr = addrs.pop()
-
-        self.temperature = 0
-
         self.interval = interval
 
-        self.temp_property = HomieNodeProperty(
+        self.p_temp = HomieProperty(
             id="temperature",
             name="Temperature",
             datatype=FLOAT,
             format="-40:80",
             unit="°F",
+            default=0,
         )
-        self.add_property(self.temp_property)
+        self.add_property(self.p_temp)
 
-        loop = get_event_loop()
-        loop.create_task(self.update_data())
+        asyncio.create_task(self.update_data())
 
+    @await_ready_state
     async def update_data(self):
         delay = self.interval * 1000
 
         while True:
-            self.temperature = self.read_temp()
-            self.temp_property.data = self.temperature
-            await sleep_ms(delay)
+            self.p_temp.value = await self.read_temp()
+            await asyncio.sleep_ms(delay)
 
-    def read_temp(self, fahrenheit=True):
+    async def read_temp(self, fahrenheit=True):
         """
         Reads temperature from a single DS18X20
         :param fahrenheit: Whether or not to return value in Fahrenheit
@@ -52,11 +51,11 @@ class DS18B20(HomieNode):
         :rtype: float
         """
         self.ds18b20.convert_temp()
-        time.sleep_ms(750)
+        await asyncio.sleep_ms(750)
         temp = self.ds18b20.read_temp(self.addr)
         if fahrenheit:
             ntemp = temp
-            print("Temp: " + str(self.c_to_f(ntemp)))
+            self.device.dprint("Temp: " + str(self.c_to_f(ntemp)))
             return self.c_to_f(ntemp)
         return temp
 

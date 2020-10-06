@@ -1,47 +1,47 @@
 import settings
 
 from machine import Pin
-from aswitch import Pushbutton
+from primitives.pushbutton import Pushbutton
 
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
 from homie.node import HomieNode
-from homie.property import HomieNodeProperty
-
-
-# reversed values for the esp8266 boards onboard led
-ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
+from homie.property import HomieProperty
 
 
 class LED(HomieNode):
-    def __init__(self, name="Onboard LED", pin=2):
+
+    # Reversed values for the esp8266 boards onboard led
+    ONOFF = {FALSE: 1, TRUE: 0}
+
+    def __init__(self, name="Onboard LED", pin=0):
         super().__init__(id="led", name=name, type="LED")
-        self.pin = pin
-        self.led = Pin(pin, Pin.OUT, value=0)
-        self.btn = Pushbutton(Pin(0, Pin.IN, Pin.PULL_UP))
+        self.led = Pin(pin, Pin.OUT, value=1)
+
+        # Boot button on some dev boards
+        self.btn = Pushbutton(Pin(pin, Pin.IN, Pin.PULL_UP))
         self.btn.press_func(self.toggle_led)
 
-        self.power_property = HomieNodeProperty(
+        self.p_power = HomieProperty(
             id="power",
             name="LED Power",
             settable=True,
             datatype=BOOLEAN,
-            default=TRUE,
+            default=FALSE,
+            on_message=self.on_power_msg,
         )
-
-        self.add_property(self.power_property, self.on_power_msg)
+        self.add_property(self.p_power)
 
     def on_power_msg(self, topic, payload, retained):
-        self.led(ONOFF[payload])
-        self.power_property.data = ONOFF[self.led()]
+        self.led(self.ONOFF[payload])
 
     def toggle_led(self):
-        if self.power_property.data != TRUE:
-            self.led(0)
-            self.power_property.data = TRUE
-        else:
+        if self.p_power.value == TRUE:
             self.led(1)
-            self.power_property.data = FALSE
+            self.p_power.value = False
+        else:
+            self.led(0)
+            self.p_power.value = True
 
 
 def main():

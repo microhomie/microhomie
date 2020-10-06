@@ -5,7 +5,6 @@ QOS = const(1)
 MAIN_DELAY = const(1000)
 STATS_DELAY = const(60000)
 WDT_DELAY = const(100)
-DEVICE_STATE = "$state"
 
 # Device states
 STATE_INIT = "init"
@@ -26,10 +25,8 @@ COLOR = "color"
 RGB = "rgb"
 HSV = "hsv"
 
-# Node
-PUBLISH_DELAY = const(20)
-
 # (Sub)Topics
+DEVICE_STATE = "$state"
 T_BC = "$broadcast"
 T_MPY = "$mpy"
 T_SET = "/set"
@@ -46,3 +43,8 @@ TRUE = "true"
 FALSE = "false"
 LOCKED = "locked"
 UNLOCKED = "unlocked"
+
+# Build-in extension strings
+EXT_MPY = "org.microhomie.mpy:0.1.0:[4.x]"
+EXT_FW = "org.homie.legacy-firmware:0.1.1:[4.x]"
+EXT_STATS = "org.homie.legacy-stats:0.1.1:[4.x]"

@@ -12,6 +12,19 @@ WIFI_SSID = "YOUR_WIFI_SSID"
 WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
 
+# Multiple WiFi credentials
+# If a ssid near your device matchs a wifi credentials in the dictionary,
+# WIFI_SSID and WIFI_PASSWORD will be overwitten with the corresponding
+# ssid,password. Set to False to disable multible wifis and use WIFI_SSID and
+# WIFI_PASSWORD to access a WiFi nearby.
+#
+# WIFI_CREDENTIALS = {
+#     "ssid 1": "password 1",
+#     "ssid 2": "password 2",
+#     # ...
+# }
+
+
 ###
 # MQTT settings
 ###
@@ -57,10 +70,17 @@ MQTT_BROKER = "10.0.0.1"
 # Time in seconds the device updates device properties
 # DEVICE_STATS_INTERVAL = 60
 
-# Legacy extensions, for now have support for the two legacy extensions.
-# No extensions will be loaded per default
-# EXTENSIONS = []
+# Subscribe to broadcast topic is enabled by default. To disable broadcast
+# messages set BROADCAST to False
+# BROADCAST = True
+
+# Enable build-in extensions
+from homie.constants import EXT_MPY
+EXTENSIONS = [EXT_MPY]
+
+# from homie.constants import EXT_MPY, EXT_FW, EXT_STATS
 # EXTENSIONS = [
-#    "org.homie.legacy-firmware:0.1.1:[4.x]",
-#    "org.homie.legacy-stats:0.1.1:[4.x]",
+#    EXT_MPY,
+#    EXT_FW,
+#    EXT_STATS,
 # ]

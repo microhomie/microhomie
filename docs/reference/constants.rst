@@ -79,17 +79,36 @@ Device states
 .. data:: STATE_WEBREPL
 
 
-Node
-====
-
-.. data:: PUBLISH_DELAY
-
-    This defines the delay for the main publish coro. Set to ``20``.
-
-
 (Sub-) Tobics
 =============
 
+.. data:: DEVICE_STATE
+
+    Device state topic ``$state``
+
 .. data:: T_BC
+
+    Homie broadcast topic ``$broadcast``
+
 .. data:: T_MPY
+
+    Microhomie extension topic ``$mpy``
+
 .. data:: T_SET
+
+    ``/set`` topic
+
+Extensions
+==========
+
+.. data:: EXT_MPY
+
+    ``org.microhomie.mpy:0.1.0:[4.x]``
+
+.. data:: EXT_FW
+
+    ``org.homie.legacy-firmware:0.1.1:[4.x]``
+
+.. data:: EXT_STATS
+
+    ``org.homie.legacy-stats:0.1.1:[4.x]``

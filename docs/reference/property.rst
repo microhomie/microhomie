@@ -10,19 +10,18 @@
 This module provides an interface to the Homie Node Property definition.
 
 
-class HomieNodeProperty()
-=========================
+class HomieProperty()
+=====================
 
 A property object is used to define a homie node property. A property object
 must be attached to a node object.
 
 Usage Model::
 
-    from homie.constants import ENUM, FALSE
+    from homie.property import HomieProperty
+    from homie.constants import BOOLEAN, FALSE, TRUE
 
-    from homie.property import HomieNodeProperty
-
-    power_property = HomieNodeProperty(
+    power_property = HomieProperty(
         id="power",
         name="Power",
         settable=True,
@@ -38,7 +37,7 @@ Constructor
 
     The arguments id, name, settable, retained, unit, datatype and format are arguments from the Homie convention definition for `property attributes <https://homieiot.github.io/specification/#property-attributes>`_ with the same defaults.
 
-    The arguments default and restore are Microhomie specific.
+    The arguments default, restore, on_message are Microhomie specific.
 
     The arguments are:
 
@@ -58,22 +57,53 @@ Constructor
 
       - ``default`` set the default message payload. Default is None.
       - ``restore`` restore property payload from mqtt retained message. Default is True.
+      - ``on_message`` callback method when the property receives new data.
 
 
 Properties
 ==========
 
-.. data:: HomieNodeProperty.data
+.. data:: HomieProperty.value
 
-  This is where the property data/payload is stored. There is a coro which will publish data from this property if the data was changed or if ``self.update`` is ``True``.
+  This is where the property data/payload is stored. The value will be auto published if it changes.
 
 
 Methods
 =======
 
-.. method:: HomieNodeProperty.msg_handler(self, topic, payload, retained)
+.. method:: HomieProperty.set_topic(self)
 
-    This method handles incoming payload for the property. Per default this method validates the payload and updates the object data with the new payload.
+  This method generate the homie proeprty topic and will be called when the node is added to the device.
+
+
+.. method:: HomieProperty.publish(self)
+
+  This method publishes the current property value to mqtt.
+
+
+.. method:: HomieProperty.subscribe(self)
+
+  Subscribe to the property topics.
+
+
+.. method:: HomieProperty.restore_handler(self, topic, payload, retained)
+
+    Gets called when the property should be restored from mqtt.
+
+    After called, this method removes the restore_handler callback and un-subscribe from the topic. When the restored value is valid it will be assigned to the ``value`` attribute without publishing the change to mqtt.
+
+    The arguments are:
+
+    - ``topic`` the message topic.
+    - ``payload`` the message payload.
+    - ``retained`` specifies if the payload is retained.
+
+
+.. method:: HomieProperty.message_handler(self, topic, payload, retained)
+
+    Retained messages are not allowed on this topic, if retained message the function will return early.
+
+    This method handles incoming payload for the property. Per default this method validates the payload and updates the object value with the new payload.
 
     To overwrite the default handler set a `on_message` handler when adding the property to the node. See HomieNode.add_property().
 
@@ -82,6 +112,11 @@ Methods
     - ``topic`` the message topic.
     - ``payload`` the message payload.
     - ``retained`` specifies if the payload is retained.
+
+
+.. method:: HomieProperty.publish_properties(self)
+
+    This method publishes all homie property attributes to mqtt on device init.
 
 
 Useful constants

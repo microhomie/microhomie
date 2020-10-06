@@ -6,7 +6,7 @@
 .. module:: homie.utils
    :synopsis: Module for helpers
 
-This module provides helper functions.
+This module provides helper functions for networking.
 
 
 .. function:: enable_ap()
@@ -16,21 +16,26 @@ This module provides helper functions.
     SSID = Microhomie-<MAC>
     Secret = microhomiE
 
+
 .. function:: disable_ap()
+
 
     Function to disable the device Wifi Access Point. For the ESP8266 Microhomie firmwares this function will be excecuted on boot.
 
-.. function:: get_unique_id()
-
-    Return a unique device id as string.
 
 .. function:: get_local_ip()
 
     Return the device IP address, if possible.
 
+
 .. function:: get_local_mac()
 
     Return the device MAC address, if possible.
+
+
+.. function:: get_wifi_credentials(wifi)
+
+    This function tries to find and a know wifi defined in ``settings.py`` and returns the credentials.
 
 .. function:: payload_is_valid()
 

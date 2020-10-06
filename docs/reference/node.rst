@@ -21,7 +21,7 @@ Usage Model::
 
     from homie.node import HomieNode
     from homie.constants import FALSE; TRUE, BOOLEAN
-    from homie.property import HomieNodeProperty
+    from homie.property import HomieProperty
 
     # reversed values for the esp8266 boards onboard led
     ONOFF = {FALSE: 1, TRUE: 0, 1: FALSE, 0: TRUE}
@@ -34,18 +34,17 @@ Usage Model::
             self.led = Pin(2, Pin.OUT, value=0)
 
             # add a homie node property
-            self.power_property = HomieNodeProperty(
+            self.p_power = HomieProperty(
                 id="power",
                 name="LED power",
                 settable=True,
                 datatype=BOOLEAN,
-                default=TRUE
+                default=TRUE,
             )
             self.add_property(self.power_property, self.on_power_msg)
 
         def on_power_message(self, topic, payload, retained):
             self.led(ONOFF[payload]
-            self.power_property.data = ONOFF[self.led()]
 
 Properties
 ==========
@@ -53,6 +52,11 @@ Properties
 .. data:: HomieNode.device
 
     This property will be set to the device object, when a node is registered to the device. With this the methods in the device object can be called from the node object.
+
+.. data:: HomieNode.properties
+
+    Array that contains all the properties associated to the node.
+
 
 Constructor
 ===========
@@ -69,6 +73,10 @@ Constructor
 Methods
 =======
 
+.. method:: HomieNode.set_topic(self)
+
+    Set the node base topic. This method will be called from the HomieDevice class on device setup.
+
 .. method:: HomieNode.add_property(self, p, cb=None)
 
     This method adds HomieNodeProperty objects to the node object. The arguments are:
@@ -81,17 +89,3 @@ Methods
     This method gets called from the device object on device start and publish all properties registered with the node to MQTT.
 
     This is an async method.
-
-.. method:: HomieNode.publish_data(self)
-
-    This method will be called from the device object async co-routine for publishing data.
-
-    This is an async method.
-
-.. method:: HomieNode.callback(self, topic, payload, retained)
-
-    This method gets called when a payload arrive for a property registered with the node.
-
-.. method:: HomieNode.broadcast_callback(self, topic, payload, retained)
-
-    This method gets called on any homie broadcast message and should be implemented in the sub-class if the broadcast messages should be handled by the node.
