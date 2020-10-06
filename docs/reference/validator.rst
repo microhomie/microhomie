@@ -1,4 +1,4 @@
-.. _reference_homie_utils:
+.. _reference_homie_validator:
 
 :mod:`homie.utils` --- Homie Utils
 ##################################

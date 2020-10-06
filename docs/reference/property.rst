@@ -1,7 +1,7 @@
 .. _reference_homie_property:
 
-:mod:`homie.property` --- Homie Node Property
-#############################################
+:mod:`homie.property` --- Homie Property
+#########################################
 
 .. module:: homie.property
    :synopsis: Object for Homie Node Properties
