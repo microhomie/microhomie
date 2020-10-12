@@ -325,7 +325,7 @@ class HomieDevice:
         while True:
             wifi_cfg = get_wifi_credentials(self._wifi)
             if wifi_cfg is None:
-                self.dprint("No WiFi found. Rescanning...".format(wifi_cfg[0]))
+                self.dprint("No WiFi found. Rescanning...")
                 await sleep_ms(MAIN_DELAY)
             else:
                 self.dprint("Connect to SSID: {}".format(wifi_cfg[0]))
