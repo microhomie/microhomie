@@ -160,23 +160,21 @@ class HomieDevice:
             # Unsubscribe from retained topics that received no retained message
             for t in self.callback_topics:
                 if not t.endswith(T_SET):
-                    await self.unsubscribe(t)
+                    asyncio.create_task(self.unsubscribe(t))
                     del self.callback_topics[t]
 
             # Activate watchdog timer
             if not LINUX and not self.debug:
                 asyncio.create_task(self.wdt())
 
-            # Start all async tasks decorated with await_ready_state
-            _MESSAGE.set()
-            await sleep_ms(MAIN_DELAY)
-            _MESSAGE.clear()
+            # Publish data from all properties on first start
+            self.all_properties("publish", ())
 
             # Do not run this if clause again on wifi/broker reconnect
             self.first_start = False
 
-            # Publish data from all properties on first start
-            self.all_properties("publish", ())
+            # Start all async tasks decorated with await_ready_state
+            _MESSAGE.set()
 
         # Announce that the device is ready
         await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_READY)
@@ -251,7 +249,7 @@ class HomieDevice:
         # node properties
         _n = self.nodes
         for n in _n:
-            await n.publish_properties()
+            asyncio.create_task(n.publish_properties())
 
         # extensions
         await publish("{}/$extensions".format(_t), ",".join(self._extensions))
@@ -277,8 +275,8 @@ class HomieDevice:
         publish = self.publish
         while True:
             uptime = time() - _st
-            await publish(_tup, str(uptime))
-            await publish(_tfh, str(mem_free()))
+            asyncio.create_task(publish(_tup, str(uptime)))
+            asyncio.create_task(publish(_tfh, str(mem_free())))
             await sleep_ms(_d)
 
     async def run(self):

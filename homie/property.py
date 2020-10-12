@@ -74,13 +74,13 @@ class BaseProperty:
         # Restore from topic with retained message on device start
         if self.restore and self.node.device.first_start is True:
             self.node.device.callback_topics[self.topic] = self.restore_handler
-            await self.node.device.subscribe(self.topic)
+            asyncio.create_task(self.node.device.subscribe(self.topic))
 
         # Subscribe to settable (/set) topics
         if self.settable is True:
             topic = "{}/set".format(self.topic)
             self.node.device.callback_topics[topic] = self.message_handler
-            await self.node.device.subscribe(topic)
+            asyncio.create_task(self.node.device.subscribe(topic))
 
     def restore_handler(self, topic, payload, retained):
         """ Gets called when the property should be restored from mqtt """

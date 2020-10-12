@@ -40,7 +40,7 @@ class BaseNode:
 
         # Publish registerd properties
         for p in properties:
-            await p.publish_properties()
+            asyncio.create_task(p.publish_properties())
 
 
 # Keep for backward compatibility
