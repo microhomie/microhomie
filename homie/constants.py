@@ -46,3 +46,8 @@ TRUE = "true"
 FALSE = "false"
 LOCKED = "locked"
 UNLOCKED = "unlocked"
+
+# Build-in extension strings
+EXT_MPY = "org.microhomie.mpy:0.1.0:[4.x]"
+EXT_FW = "org.homie.legacy-firmware:0.1.1:[4.x]"
+EXT_STATS = "org.homie.legacy-stats:0.1.1:[4.x]"

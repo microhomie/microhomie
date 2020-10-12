@@ -30,18 +30,19 @@ VERSION = (0, 5, 0)
 _DEFAULT_MS = const(20)
 _SOCKET_POLL_DELAY = const(5)  # 100ms added greatly to publish latency
 
-# Legitimate errors while waiting on a socket. See uasyncio __init__.py open_connection().
-if platform == 'esp32' or platform == 'esp32_LoBo':
-    # https://forum.micropython.org/viewtopic.php?f=16&t=3608&p=20942#p20942
-    BUSY_ERRORS = [EINPROGRESS, ETIMEDOUT, 118, 119]  # Add in weird ESP32 errors
-else:
-    BUSY_ERRORS = [EINPROGRESS, ETIMEDOUT]
-
 ESP8266 = platform == 'esp8266'
 ESP32 = platform == 'esp32'
 PYBOARD = platform == 'pyboard'
 LOBO = platform == 'esp32_LoBo'
-LINUX = platform == "linux"
+LINUX = platform == 'linux'
+PYCOM = platform == 'WiPy' or platform == 'LoPy' or platform == 'SiPy' or platform == 'GPy' or platform == 'FiPy'
+
+# Legitimate errors while waiting on a socket. See uasyncio __init__.py open_connection().
+if ESP32 or LOBO or PYCOM:
+    # https://forum.micropython.org/viewtopic.php?f=16&t=3608&p=20942#p20942
+    BUSY_ERRORS = [EINPROGRESS, ETIMEDOUT, 118, 119]  # Add in weird ESP32 errors
+else:
+    BUSY_ERRORS = [EINPROGRESS, ETIMEDOUT]
 
 if LINUX is False:
     import network
@@ -139,6 +140,8 @@ class MQTT_base:
         self._sock = None
         if LINUX is True:
             self._sta_isconnected = True
+        elif PYCOM:
+            self._sta_if = network.WLAN(mode=network.WLAN.STA)
         else:
             self._sta_if = network.WLAN(network.STA_IF)
             self._sta_if.active(True)
@@ -540,12 +543,15 @@ class MQTTClient(MQTT_base):
                 while s.status() == network.STAT_CONNECTING:  # Break out on fail or success. Check once per sec.
                     await asyncio.sleep(1)
         else:
-            s.active(True)
-            s.connect(self._ssid, self._wifi_pw)
+            if PYCOM:
+                s.connect(self._ssid, auth=(network.WLAN.WPA2, self._wifi_pw))
+            else:
+                s.active(True)
+                s.connect(self._ssid, self._wifi_pw)
             if PYBOARD:  # Doesn't yet have STAT_CONNECTING constant
                 while s.status() in (1, 2):
                     await asyncio.sleep(1)
-            elif LOBO:
+            elif LOBO or PYCOM:
                 i = 0
                 while not s.isconnected():
                     await asyncio.sleep(1)

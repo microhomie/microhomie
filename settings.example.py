@@ -59,8 +59,4 @@ MQTT_BROKER = "10.0.0.1"
 
 # Legacy extensions, for now have support for the two legacy extensions.
 # No extensions will be loaded per default
-# EXTENSIONS = []
-# EXTENSIONS = [
-#    b"org.homie.legacy-firmware:0.1.1:[4.x]",
-#    b"org.homie.legacy-stats:0.1.1:[4.x]",
-# ]
+EXTENSIONS = [EXT_MPY, EXT_FW, EXT_STATS]

@@ -2,6 +2,11 @@
 Changelog
 =========
 
+2.5.0
+-----
+
+* Add support for Pycom devices
+
 2.3.1
 -----
 
