@@ -1,4 +1,4 @@
-.. _reference_homie_utils:
+.. _reference_homie_network:
 
 :mod:`homie.utils` --- Homie Utils
 ##################################
