@@ -62,6 +62,9 @@ class BaseProperty:
         )
 
     def publish(self):
+        if self._value is None:
+            return
+
         asyncio.create_task(
             self.node.device.publish(
                 self.topic,
