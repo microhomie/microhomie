@@ -17,6 +17,7 @@ class BaseProperty:
         default=None,
         restore=True,
         on_message=None,
+        pub_on_upd=True,
     ):
         self._value = default
 
@@ -29,6 +30,7 @@ class BaseProperty:
         self.format = format
         self.restore = restore
         self.on_message = on_message
+        self.pub_on_upd = pub_on_upd
 
         self.topic = None
         self.node = None
@@ -49,9 +51,11 @@ class BaseProperty:
 
     @value.setter
     def value(self, value):
-        """ Set value if changed and publish to mqtt """
+        """Assign new value if changed or self.pub_on_upd is True and publish to mqtt"""
         if value != self._value:
             self._value = value
+            self.publish()
+        elif self.pub_on_upd:
             self.publish()
 
     def set_topic(self):
