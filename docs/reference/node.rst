@@ -46,6 +46,7 @@ Usage Model::
         def on_power_message(self, topic, payload, retained):
             self.led(ONOFF[payload]
 
+
 Properties
 ==========
 
