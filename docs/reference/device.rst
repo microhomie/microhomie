@@ -55,6 +55,7 @@ Constructor
 
         - ``settings`` is the settings module from the settings.py file.
 
+
 Methods
 =======
 

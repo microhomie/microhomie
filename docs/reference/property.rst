@@ -58,6 +58,7 @@ Constructor
       - ``default`` set the default message payload. Default is None.
       - ``restore`` restore property payload from mqtt retained message. Default is True.
       - ``on_message`` callback method when the property receives new data.
+      - ``pub_on_upd`` publish or not publish when the proptery value changes, default is to publish on each value assignment.
 
 
 Properties
@@ -65,7 +66,7 @@ Properties
 
 .. data:: HomieProperty.value
 
-  This is where the property data/payload is stored. The value will be auto published if it changes.
+  This is where the property data/payload is stored. The value will be auto published if assigned and ``self.pub_on_upd`` is ``True``. Set ``self.pub_on_upd`` to ``False`` to only publish the value when the value changes.
 
 
 Methods
@@ -73,12 +74,12 @@ Methods
 
 .. method:: HomieProperty.set_topic(self)
 
-  This method generate the homie proeprty topic and will be called when the node is added to the device.
+  This method generate the homie property topic and will be called when the node is added to the device.
 
 
 .. method:: HomieProperty.publish(self)
 
-  This method publishes the current property value to mqtt.
+  This method publishes the current property value to mqtt. ``None`` values will not be published.
 
 
 .. method:: HomieProperty.subscribe(self)

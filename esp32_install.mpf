@@ -1,14 +1,18 @@
 md lib
+
 cd lib
+
 md homie
-md primitives
 cd homie
 lcd homie
 mput .
+
 cd ..
-lcd ../lib
-lcd primitives
+md primitives
+cd primitives
+lcd ../lib/primitives
 mput .
 lcd ..
 cd ..
+
 put mqtt_as.py
