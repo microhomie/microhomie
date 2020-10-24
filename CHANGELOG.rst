@@ -2,6 +2,19 @@
 Changelog
 =========
 
+3.0.2
+-----
+
+* Do not publish property value if value is ``None``
+* Always publish an assigned value even if it not changes. To disable this behaviour and only publish an update when the value changed set HomieProperty(pub_on_upd=True)
+
+
+3.0.1
+-----
+
+* Bugfix: Too many arguments for format string in setup_wifi
+
+
 3.0.0
 -----
 
