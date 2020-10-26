@@ -37,6 +37,7 @@ from primitives.message import Message
 def get_unique_id():
     if LINUX is False:
         from machine import unique_id
+
         return hexlify(unique_id()).decode()
     else:
         raise NotImplementedError(
@@ -46,6 +47,8 @@ def get_unique_id():
 
 # Decorator to block async tasks until the device is in "ready" state
 _MESSAGE = Message()
+
+
 def await_ready_state(func):
     def new_gen(*args, **kwargs):
         # fmt: off
@@ -117,15 +120,6 @@ class HomieDevice:
             p.set_topic()
         self.nodes.append(node)
 
-    def all_properties(self, func, tup_args):
-        """ Run method on all registered property objects """
-        _n = self.nodes
-        for n in _n:
-            _p = n.properties
-            for p in _p:
-                _f = getattr(p, func)
-                launch(_f, tup_args)
-
     async def subscribe(self, topic):
         self.dprint("MQTT SUBSCRIBE: {}".format(topic))
         await self.mqtt.subscribe(topic, QOS)
@@ -136,8 +130,28 @@ class HomieDevice:
 
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
+        tasks = []
         if not self.first_start:
             await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_RECOVER)
+
+        # on first connection:
+        # * publish device and node properties
+        # * enable WDT
+        # * run all coros
+        if self.first_start:
+            tasks.append(asyncio.wait_for(self.publish_properties(), 5))
+
+            # Activate watchdog timer
+            if not LINUX and not self.debug:
+                asyncio.create_task(self.wdt())
+
+        # Subscribe to all properties and publish if at first start
+        _n = self.nodes
+        for n in _n:
+            _p = n.properties
+            for p in _p:
+                # Subscribe to node property topics
+                tasks.append(asyncio.wait_for(p.subscribe(), 5))
 
         # Subscribe to Homie broadcast topic
         if self._bc_enabled:
@@ -147,34 +161,28 @@ class HomieDevice:
         if EXT_MPY in self._extensions:
             await self.subscribe("{}/{}".format(self.dtopic, T_MPY))
 
-        # Subscribe to node property topics
-        self.all_properties("subscribe", ())
+        # Wait for all tasks to end
+        await asyncio.gather(*tasks, return_exceptions=False)
 
-        # on first connection:
-        # * publish device and node properties
-        # * enable WDT
-        # * run all coros
-        if self.first_start is True:
-            await self.publish_properties()
+        if self.first_start:
+            # Subscribe to all properties and publish on first start
+            _n = self.nodes
+            for n in _n:
+                _p = n.properties
+                for p in _p:
+                    tasks.append(asyncio.wait_for(p.publish(), 5))
 
             # Unsubscribe from retained topics that received no retained message
             for t in self.callback_topics:
                 if not t.endswith(T_SET):
-                    asyncio.create_task(self.unsubscribe(t))
+                    await self.unsubscribe(t)
                     del self.callback_topics[t]
-
-            # Activate watchdog timer
-            if not LINUX and not self.debug:
-                asyncio.create_task(self.wdt())
-
-            # Publish data from all properties on first start
-            self.all_properties("publish", ())
-
-            # Do not run this if clause again on wifi/broker reconnect
-            self.first_start = False
 
             # Start all async tasks decorated with await_ready_state
             _MESSAGE.set()
+
+            # Do not run this if clause again i.e. on wifi/broker reconnect
+            self.first_start = False
 
         # Announce that the device is ready
         await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_READY)
@@ -184,9 +192,7 @@ class HomieDevice:
         topic = topic.decode()
         payload = payload.decode()
 
-        self.dprint(
-            "MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained)
-        )
+        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained))
 
         # Only non-retained messages are allowed on /set topics
         if retained and topic.endswith(T_SET):
@@ -216,7 +222,7 @@ class HomieDevice:
             payload = payload.encode()
 
         self.dprint("MQTT PUBLISH: {} --> {}".format(topic, payload))
-        await self.mqtt.publish(topic, payload, retain, QOS)
+        asyncio.create_task(self.mqtt.publish(topic, payload, retain, QOS))
 
     async def broadcast(self, payload, level=None):
         if isinstance(payload, int):
@@ -239,17 +245,15 @@ class HomieDevice:
 
         # device properties
         await publish("{}/$homie".format(_t), "4.0.0")
-        await publish("{}/$name".format(_t), self.device_name)
         await publish("{}/{}".format(_t, DEVICE_STATE), STATE_INIT)
+        await publish("{}/$name".format(_t), self.device_name)
         await publish("{}/$implementation".format(_t), bytes(platform, UTF8))
-        await publish(
-            "{}/$nodes".format(_t), ",".join([n.id for n in self.nodes])
-        )
+        await publish("{}/$nodes".format(_t), ",".join([n.id for n in self.nodes]))
 
         # node properties
         _n = self.nodes
         for n in _n:
-            asyncio.create_task(n.publish_properties())
+            await n.publish_properties()
 
         # extensions
         await publish("{}/$extensions".format(_t), ",".join(self._extensions))
@@ -259,7 +263,9 @@ class HomieDevice:
             await publish("{}/$fw/name".format(_t), self._fw_name)
             await publish("{}/$fw/version".format(_t), self._version)
         if EXT_STATS in self._extensions:
-            await self.publish("{}/$stats/interval".format(_t), str(self.stats_interval))
+            await self.publish(
+                "{}/$stats/interval".format(_t), str(self.stats_interval)
+            )
             # Start stats coro
             asyncio.create_task(self.publish_stats())
 
@@ -275,8 +281,8 @@ class HomieDevice:
         publish = self.publish
         while True:
             uptime = time() - _st
-            asyncio.create_task(publish(_tup, str(uptime)))
-            asyncio.create_task(publish(_tfh, str(mem_free())))
+            await publish(_tup, str(uptime))
+            await publish(_tfh, str(mem_free()))
             await sleep_ms(_d)
 
     async def run(self):
@@ -309,6 +315,8 @@ class HomieDevice:
     async def wdt(self):
         from machine import WDT
 
+        self.dprint("WATCHDOG: enabled")
+
         wdt = WDT()
         while True:
             wdt.feed()
@@ -320,6 +328,7 @@ class HomieDevice:
 
     async def setup_wifi(self):
         from homie.network import get_wifi_credentials
+
         while True:
             wifi_cfg = get_wifi_credentials(self._wifi)
             if wifi_cfg is None:

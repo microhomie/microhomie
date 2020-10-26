@@ -54,40 +54,30 @@ class BaseProperty:
         """Assign new value if changed or self.pub_on_upd is True and publish to mqtt"""
         if value != self._value:
             self._value = value
-            self.publish()
+            asyncio.create_task(self.publish())
         elif self.pub_on_upd:
-            self.publish()
+            asyncio.create_task(self.publish())
 
     def set_topic(self):
-        self.topic = "{}/{}/{}".format(
-            self.node.device.dtopic,
-            self.node.id,
-            self.id
-        )
+        self.topic = "{}/{}/{}".format(self.node.device.dtopic, self.node.id, self.id)
 
-    def publish(self):
+    async def publish(self):
         if self._value is None:
             return
 
-        asyncio.create_task(
-            self.node.device.publish(
-                self.topic,
-                self.value,
-                self.retained
-            )
-        )
+        await self.node.device.publish(self.topic, self.value, self.retained)
 
     async def subscribe(self):
         # Restore from topic with retained message on device start
-        if self.restore and self.node.device.first_start is True:
+        if self.restore and self.node.device.first_start:
             self.node.device.callback_topics[self.topic] = self.restore_handler
-            asyncio.create_task(self.node.device.subscribe(self.topic))
+            await self.node.device.subscribe(self.topic)
 
         # Subscribe to settable (/set) topics
-        if self.settable is True:
+        if self.settable:
             topic = "{}/set".format(self.topic)
             self.node.device.callback_topics[topic] = self.message_handler
-            asyncio.create_task(self.node.device.subscribe(topic))
+            await self.node.device.subscribe(topic)
 
     def restore_handler(self, topic, payload, retained):
         """ Gets called when the property should be restored from mqtt """
@@ -96,8 +86,8 @@ class BaseProperty:
             return
 
         # Unsubscribe from topic and remove the callback handler
-        asyncio.create_task(self.node.device.unsubscribe(topic))
         del self.node.device.callback_topics[topic]
+        asyncio.create_task(self.node.device.unsubscribe(topic))
 
         if payload_is_valid(self, payload):
             if payload != self._value:
