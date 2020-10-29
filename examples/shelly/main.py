@@ -2,6 +2,7 @@ import settings
 
 from machine import Pin
 from primitives.switch import Switch
+from micropython import const
 
 from homie.constants import FALSE, TRUE, BOOLEAN
 from homie.device import HomieDevice
@@ -9,57 +10,60 @@ from homie.node import HomieNode
 from homie.property import HomieProperty
 
 
+_ON = const(1)
+_OFF = const(0)
+
+
 class ShellyRelay(HomieNode):
-    def __init__(self, id, rpin, swpin, name="Light Switch", type="Shelly"):
+    def __init__(self, id="relay", rpin=4, swpin=5, name="Light Switch", type="Shelly"):
         super().__init__(id=id, name=name, type=type)
         self.relay = Pin(rpin, Pin.OUT, value=0)
         self.switch = Switch(Pin(swpin, Pin.IN))
 
         self.p_power = HomieProperty(
-            id=id,
+            id="power",
             name="Power",
             settable=True,
             datatype=BOOLEAN,
             default=FALSE,
+            on_message=self.on_power_msg,
         )
-        self.add_property(self.p_power, self.on_power_msg)
+        self.add_property(self.p_power)
 
         self.switch.open_func(self.toggle, ())
         self.switch.close_func(self.toggle, ())
 
-    def off(self):
-        self.relay(0)
-        self.p_power.value = FALSE
-
-    def on(self):
-        self.relay(1)
-        self.p_power.value = TRUE
-
     def on_power_msg(self, topic, payload, retained):
         if payload == FALSE:
-            self.off()
+            self.relay(_OFF)
         elif payload == TRUE:
-            self.on()
+            self.relay(_ON)
 
     def toggle(self):
-        if self.power_property.data == TRUE:
-            self.off()
-        else:
-            self.on()
+        if self.power_property.value == TRUE:
+            self.relay(_OFF)
+            self.p_power.value = FALSE
+        elif self.power_property.value == FALSE:
+            self.relay(_ON)
+            self.p_power.value = TRUE
 
 
 def main():
-    relay1 = ShellyRelay(
-        "relay1", rpin=4, swpin=5, name="Light Switch 1", type="Shelly 2.5"
-    )
-    relay2 = ShellyRelay(
-        "relay2", rpin=15, swpin=13, name="Light Switch 2", type="Shelly 2.5"
-    )
-
+    # Make a homie device
     homie = HomieDevice(settings)
-    homie.add_node(relay1)
-    homie.add_node(relay2)
 
+    # Shelly 1 example
+    relay = ShellyRelay()
+    homie.add_node(relay)
+
+    # Shelly 2.5 example
+    # relay_1 = ShellyRelay("relay_1", rpin=4, swpin=5, name="Indoor", type="Shelly 2.5")
+    # homie.add_node(relay_1)
+
+    # relay_2 = ShellyRelay("relay_2", rpin=4, swpin=5, name="Outdoor", type="Shelly 2.5")
+    # homie.add_node(relay_2)
+
+    # Startup device
     homie.run_forever()
 
 
