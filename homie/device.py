@@ -66,7 +66,7 @@ class HomieDevice:
     def __init__(self, settings):
         self.debug = getattr(settings, "DEBUG", False)
 
-        self._state = STATE_INIT
+        self._state = STATE_INIT  # Homie device state
         self._version = __version__
         self._fw_name = "Microhomie"
         self._extensions = getattr(settings, "EXTENSIONS", [])
@@ -112,6 +112,18 @@ class HomieDevice:
             wifi_pw=getattr(settings, "WIFI_PASSWORD", None),
         )
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, v):
+        """Set the device state to value and publish to mqtt"""
+        self._state = v
+        asyncio.create_task(
+            self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), v)
+        )
+
     def add_node(self, node):
         node.device = self
         node.set_topic()  # set topic for node properties
@@ -132,7 +144,7 @@ class HomieDevice:
         """subscribe to all registered device and node topics"""
         tasks = []
         if not self.first_start:
-            await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_RECOVER)
+            self.state = STATE_RECOVER
 
         # on first connection:
         # * publish device and node properties
@@ -170,7 +182,7 @@ class HomieDevice:
             for n in _n:
                 _p = n.properties
                 for p in _p:
-                    tasks.append(asyncio.wait_for(p.publish(), 5))
+                    asyncio.create_task(p.publish())
 
             # Unsubscribe from retained topics that received no retained message
             for t in self.callback_topics:
@@ -185,7 +197,7 @@ class HomieDevice:
             self.first_start = False
 
         # Announce that the device is ready
-        await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_READY)
+        self.state = STATE_READY
 
     def subs_cb(self, topic, payload, retained):
         """ The main callback for all subscribed topics """
