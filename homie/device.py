@@ -224,7 +224,9 @@ class HomieDevice:
         # All other topics
         else:
             if topic in self.callback_topics:
-                self.callback_topics[topic](topic, payload, retained)
+                asyncio.create_task(
+                    self.callback_topics[topic](topic, payload, retained)
+                )
 
     async def publish(self, topic, payload, retain=True):
         if isinstance(payload, int):
