@@ -155,17 +155,17 @@ class HomieDevice:
 
         # Subscribe to Homie broadcast topic
         if self._bc_enabled:
-            await self.subscribe("{}/{}/#".format(self.btopic, T_BC))
+            asyncio.create_task(self.subscribe("{}/{}/#".format(self.btopic, T_BC)))
 
         # Subscribe to the Micropython extension topic
         if EXT_MPY in self._extensions:
-            await self.subscribe("{}/{}".format(self.dtopic, T_MPY))
+            asyncio.create_task(self.subscribe("{}/{}".format(self.dtopic, T_MPY)))
 
         # Wait for all tasks to end
         await asyncio.gather(*tasks, return_exceptions=False)
 
         if self.first_start:
-            # Subscribe to all properties and publish on first start
+            # Publish all registered properties on first start
             _n = self.nodes
             for n in _n:
                 _p = n.properties
@@ -175,7 +175,7 @@ class HomieDevice:
             # Unsubscribe from retained topics that received no retained message
             for t in self.callback_topics:
                 if not t.endswith(T_SET):
-                    await self.unsubscribe(t)
+                    asyncio.create_task(self.unsubscribe(t))
                     del self.callback_topics[t]
 
             # Start all async tasks decorated with await_ready_state
@@ -222,7 +222,7 @@ class HomieDevice:
             payload = payload.encode()
 
         self.dprint("MQTT PUBLISH: {} --> {}".format(topic, payload))
-        asyncio.create_task(self.mqtt.publish(topic, payload, retain, QOS))
+        await(self.mqtt.publish(topic, payload, retain, QOS))
 
     async def broadcast(self, payload, level=None):
         if isinstance(payload, int):
@@ -241,14 +241,15 @@ class HomieDevice:
     async def publish_properties(self):
         """ Publish device and node properties """
         _t = self.dtopic
+        task = asyncio.create_task
         publish = self.publish
 
         # device properties
-        await publish("{}/$homie".format(_t), "4.0.0")
-        await publish("{}/{}".format(_t, DEVICE_STATE), STATE_INIT)
-        await publish("{}/$name".format(_t), self.device_name)
-        await publish("{}/$implementation".format(_t), bytes(platform, UTF8))
-        await publish("{}/$nodes".format(_t), ",".join([n.id for n in self.nodes]))
+        task(publish("{}/$homie".format(_t), "4.0.0"))
+        task(publish("{}/{}".format(_t, DEVICE_STATE), self._state))
+        task(publish("{}/$name".format(_t), self.device_name))
+        task(publish("{}/$implementation".format(_t), bytes(platform, UTF8)))
+        task(publish("{}/$nodes".format(_t), ",".join([n.id for n in self.nodes])))
 
         # node properties
         _n = self.nodes
@@ -256,16 +257,16 @@ class HomieDevice:
             await n.publish_properties()
 
         # extensions
-        await publish("{}/$extensions".format(_t), ",".join(self._extensions))
+        task(publish("{}/$extensions".format(_t), ",".join(self._extensions)))
         if EXT_FW in self._extensions:
-            await publish("{}/$localip".format(_t), get_local_ip())
-            await publish("{}/$mac".format(_t), get_local_mac())
-            await publish("{}/$fw/name".format(_t), self._fw_name)
-            await publish("{}/$fw/version".format(_t), self._version)
+            task(publish("{}/$localip".format(_t), get_local_ip()))
+            task(publish("{}/$mac".format(_t), get_local_mac()))
+            task(publish("{}/$fw/name".format(_t), self._fw_name))
+            task(publish("{}/$fw/version".format(_t), self._version))
         if EXT_STATS in self._extensions:
-            await self.publish(
+            task(self.publish(
                 "{}/$stats/interval".format(_t), str(self.stats_interval)
-            )
+            ))
             # Start stats coro
             asyncio.create_task(self.publish_stats())
 
@@ -277,12 +278,12 @@ class HomieDevice:
         _st = time()  # start time
         _tup = "{}/$stats/uptime".format(self.dtopic)  # Uptime topic
         _tfh = "{}/$stats/freeheap".format(self.dtopic)  # Freeheap topic
-
         publish = self.publish
+
         while True:
             uptime = time() - _st
-            await publish(_tup, str(uptime))
-            await publish(_tfh, str(mem_free()))
+            asyncio.create_task(publish(_tup, str(uptime)))
+            asyncio.create_task(publish(_tfh, str(mem_free())))
             await sleep_ms(_d)
 
     async def run(self):
@@ -307,7 +308,7 @@ class HomieDevice:
     async def reset(self, reason):
         if reason != "reset":
             RTC().memory(reason)
-        await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), reason)
+        self.state = reason  # Announce reset state
         await self.mqtt.disconnect()
         await sleep_ms(500)
         reset()

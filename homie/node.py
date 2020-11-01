@@ -25,22 +25,23 @@ class BaseNode:
 
     async def publish_properties(self):
         """General properties of this node"""
+        task = asyncio.create_task
         publish = self.device.publish
 
         # Publish name and type
-        await publish("{}/$name".format(self.topic), self.name)
-        await publish("{}/$type".format(self.topic), self.type)
+        task(publish("{}/$name".format(self.topic), self.name))
+        task(publish("{}/$type".format(self.topic), self.type))
 
         # Publish properties registerd with the node
         properties = self.properties
-        await publish(
+        task(publish(
             "{}/$properties".format(self.topic),
             ",".join([p.id for p in properties]),
-        )
+        ))
 
         # Publish registerd properties
         for p in properties:
-            asyncio.create_task(p.publish_properties())
+            task(p.publish_properties())
 
 
 # Keep for backward compatibility

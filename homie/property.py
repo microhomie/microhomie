@@ -79,7 +79,7 @@ class BaseProperty:
             self.node.device.callback_topics[topic] = self.message_handler
             await self.node.device.subscribe(topic)
 
-    def restore_handler(self, topic, payload, retained):
+    async def restore_handler(self, topic, payload, retained):
         """ Gets called when the property should be restored from mqtt """
         # Retained messages are not allowed on /set topics
         if topic.endswith(T_SET):
@@ -96,7 +96,7 @@ class BaseProperty:
 
                 self._value = payload
 
-    def message_handler(self, topic, payload, retained):
+    async def message_handler(self, topic, payload, retained):
         """ Gets called when the property receive a message on /set topic """
         # No reatained messages allowed on /set topics
         if retained:
@@ -109,23 +109,24 @@ class BaseProperty:
             self.value = payload
 
     async def publish_properties(self):
+        task = asyncio.create_task
         topic = self.topic
         publish = self.node.device.publish
 
-        await publish("{}/$name".format(topic), self.name)
-        await publish("{}/$datatype".format(topic), self.datatype)
+        task(publish("{}/$name".format(topic), self.name))
+        task(publish("{}/$datatype".format(topic), self.datatype))
 
         if self.format is not None:
-            await publish("{}/$format".format(topic), self.format)
+            task(publish("{}/$format".format(topic), self.format))
 
         if self.settable is True:
-            await publish("{}/$settable".format(topic), TRUE)
+            task(publish("{}/$settable".format(topic), TRUE))
 
         if self.retained is False:
-            await publish("{}/$retained".format(topic), FALSE)
+            task(publish("{}/$retained".format(topic), FALSE))
 
         if self.unit is not None:
-            await publish("{}/$unit".format(topic), self.unit)
+            task(publish("{}/$unit".format(topic), self.unit))
 
 
 HomieProperty = BaseProperty
