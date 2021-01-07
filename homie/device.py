@@ -1,3 +1,4 @@
+import logging
 import uasyncio as asyncio
 
 from gc import collect, mem_free
@@ -61,8 +62,7 @@ class HomieDevice:
     """MicroPython implementation of the Homie MQTT convention for IoT."""
 
     def __init__(self, settings):
-        self.debug = getattr(settings, "DEBUG", False)
-
+        self._log = logging.getLogger(__name__)
         self._state = STATE_INIT
         self._version = __version__
         self._fw_name = "Microhomie"
@@ -127,11 +127,11 @@ class HomieDevice:
                 launch(_f, tup_args)
 
     async def subscribe(self, topic):
-        self.dprint("MQTT SUBSCRIBE: {}".format(topic))
+        self._log.debug("Subscribe topic={}".format(topic))
         await self.mqtt.subscribe(topic, QOS)
 
     async def unsubscribe(self, topic):
-        self.dprint("MQTT UNSUBSCRIBE: {}".format(topic))
+        self._log.debug("Unsubscribe topic={}".format(topic))
         await self.mqtt.unsubscribe(topic)
 
     async def connection_handler(self, client):
@@ -164,7 +164,7 @@ class HomieDevice:
                     del self.callback_topics[t]
 
             # Activate watchdog timer
-            if not LINUX and not self.debug:
+            if not LINUX and logging._level != logging.DEBUG:
                 asyncio.create_task(self.wdt())
 
             # Start all async tasks decorated with await_ready_state
@@ -186,8 +186,8 @@ class HomieDevice:
         topic = topic.decode()
         payload = payload.decode()
 
-        self.dprint(
-            "MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained)
+        self._log.debug(
+            "Received message topic={}, payload={}, retained={}".format(topic, payload, retained)
         )
 
         # Only non-retained messages are allowed on /set topics
@@ -217,7 +217,7 @@ class HomieDevice:
         if isinstance(payload, str):
             payload = payload.encode()
 
-        self.dprint("MQTT PUBLISH: {} --> {}".format(topic, payload))
+        self._log.debug("Publish topic=%s payload=%s retain=", topic, payload.decode(), retain)
         await self.mqtt.publish(topic, payload, retain, QOS)
 
     async def broadcast(self, payload, level=None):
@@ -227,7 +227,7 @@ class HomieDevice:
         topic = "{}/{}".format(self.btopic, T_BC)
         if level is not None:
             topic = "{}/{}".format(topic, level)
-        self.dprint("MQTT BROADCAST: {} --> {}".format(topic, payload))
+        self._log.info("Broadcast topic={} payload={}".format(topic, payload))
         await self.mqtt.publish(topic, payload, retain=False, qos=QOS)
 
     def broadcast_callback(self, topic, payload, retained):
@@ -291,7 +291,7 @@ class HomieDevice:
                     collect()
                     await sleep_ms(MAIN_DELAY)
             except OSError:
-                print("ERROR: can not connect to MQTT")
+                self._log.error("OSError: Can not connect to MQTT")
                 await sleep_ms(5000)
 
     def run_forever(self):
@@ -301,6 +301,7 @@ class HomieDevice:
             asyncio.run(self.run())
 
     async def reset(self, reason):
+        self._log.info("Reset device with reason: {}".format(reason))
         if reason != "reset":
             RTC().memory(reason)
         await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), reason)
@@ -316,19 +317,15 @@ class HomieDevice:
             wdt.feed()
             await sleep_ms(WDT_DELAY)
 
-    def dprint(self, *args):
-        if self.debug:
-            print(*args)
-
     async def setup_wifi(self):
         from homie.network import get_wifi_credentials
         while True:
             wifi_cfg = get_wifi_credentials(self._wifi)
             if wifi_cfg is None:
-                self.dprint("No WiFi found. Rescanning...")
+                self._log.error("No WiFi found. Rescanning...")
                 await sleep_ms(MAIN_DELAY)
             else:
-                self.dprint("Connect to SSID: {}".format(wifi_cfg[0]))
+                self._log.info("Connect to SSID: {}".format(wifi_cfg[0]))
                 self.mqtt._ssid = wifi_cfg[0]
                 self.mqtt._wifi_pw = wifi_cfg[1]
                 return

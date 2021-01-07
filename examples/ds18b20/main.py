@@ -1,5 +1,8 @@
-import time
-import uasyncio ad asyncio
+import logging
+_log = logging.getLogger(__name__)
+
+import settings
+import uasyncio as asyncio
 
 from ds18x20 import DS18X20
 from homie.node import HomieNode

@@ -14,6 +14,11 @@ ota: firmware-ota
 
 requirements:
 	mkdir -p lib
+
+	# Logging module from the standard lib
+	curl -s -o lib/logging.py https://raw.githubusercontent.com/micropython/micropython-lib/master/logging/logging.py
+
+	# MQTT async from Kevin Köck
 	curl -s -o lib/mqtt_as.py https://raw.githubusercontent.com/kevinkk525/micropython-mqtt/master/mqtt_as.py
 
 	# asyncio v3 primitives from Peter Hinch

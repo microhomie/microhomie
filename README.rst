@@ -139,5 +139,6 @@ Known issues
 Included libraries
 ------------------
 
+* From micropython-lib: logging
 * `mqtt_as.py <https://github.com/peterhinch/micropython-mqtt>`_ by Peter Hinch but we use the `patched version <https://github.com/kevinkk525/micropython-mqtt>`_ from Kevin Köck. Kevins version has support for a keyword based configuration and unsubscribe.
-* asyncio V3 primitives from Peter Hinch `micropython-async <https://github.com/peterhinch/micropython-async/tree/master/v3>`_ repository.
+* asyncio V3 primitives (delay_ms.py, message.py, pushbutton.py, switch.py) from Peter Hinch `micropython-async <https://github.com/peterhinch/micropython-async/tree/master/v3>`_ repository.

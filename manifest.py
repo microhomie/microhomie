@@ -38,6 +38,7 @@ freeze(
 # Libs
 freeze("./lib", (
     "inisetup.py",
+    "logging.py",
     "mqtt_as.py",
     "primitives/__init__.py",
     "primitives/delay_ms.py",

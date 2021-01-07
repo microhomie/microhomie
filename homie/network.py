@@ -1,3 +1,6 @@
+import logging
+_log = logging.getLogger(__name__)
+
 from mqtt_as import LINUX
 
 
@@ -10,14 +13,14 @@ def enable_ap():
     """Disables any Accesspoint"""
     wlan = WLAN(AP_IF)
     wlan.active(True)
-    print("NETWORK: Access Point enabled.")
+    _log.info("Access Point enabled.")
 
 
 def disable_ap():
     """Disables any Accesspoint"""
     wlan = WLAN(AP_IF)
     wlan.active(False)
-    print("NETWORK: Access Point disabled.")
+    _log.info("Access Point disabled.")
 
 
 def get_local_ip():
