@@ -104,11 +104,7 @@ class AmbientLight(HomieNode):
                 self.on(rgb=rgb)
 
     def on_brightness_msg(self, topic, payload, retained):
-        try:
-            b = min(max(int(payload), 1), 8)
-            self.brightness = b
-        except ValueError:
-            pass
+        self.brightness = payload
 
 
 def main():

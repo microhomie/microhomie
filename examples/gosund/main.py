@@ -62,12 +62,12 @@ class SmartSocket(HomieNode):
             self.on()
 
     def toggle(self):
-        if self.p_power.data == TRUE:
+        if self.p_power.value == TRUE:
             self.off()
             self.p_power.value = FALSE
         else:
             self.on()
-            self.p_power.data = TRUE
+            self.p_power.value = TRUE
 
 
 def main():
