@@ -26,7 +26,7 @@ from homie.constants import (
     EXT_STATS,
 )
 from machine import RTC, reset
-from mqtt_as import LINUX, MQTTClient
+from mqtt_as import LINUX, MQTTClient, eliza
 from uasyncio import sleep_ms
 from ubinascii import hexlify
 from utime import time
@@ -70,6 +70,7 @@ class HomieDevice:
         self._bc_enabled = getattr(settings, "BROADCAST", False)
         self._wifi = getattr(settings, "WIFI_CREDENTIALS", False)
 
+        self.state_cb = eliza  # State callback
         self.first_start = True
         self.stats_interval = getattr(settings, "DEVICE_STATS_INTERVAL", 60)
         self.device_name = getattr(settings, "DEVICE_NAME", "")
@@ -126,6 +127,13 @@ class HomieDevice:
                 _f = getattr(p, func)
                 launch(_f, tup_args)
 
+    def set_state(self, state):
+        self._state = state
+        asyncio.create_task(
+            self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), state)
+        )
+        asyncio.create_task(self.state_cb(state))
+
     async def subscribe(self, topic):
         self.dprint("MQTT SUBSCRIBE: {}".format(topic))
         await self.mqtt.subscribe(topic, QOS)
@@ -137,7 +145,7 @@ class HomieDevice:
     async def connection_handler(self, client):
         """subscribe to all registered device and node topics"""
         if not self.first_start:
-            await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_RECOVER)
+            await self.set_state(STATE_RECOVER)
 
         # Subscribe to Homie broadcast topic
         if self._bc_enabled:
@@ -179,16 +187,14 @@ class HomieDevice:
             self.all_properties("publish", ())
 
         # Announce that the device is ready
-        await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), STATE_READY)
+        self.set_state(STATE_READY)
 
     def subs_cb(self, topic, payload, retained):
         """ The main callback for all subscribed topics """
         topic = topic.decode()
         payload = payload.decode()
 
-        self.dprint(
-            "MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained)
-        )
+        self.dprint("MQTT MESSAGE: {} --> {}, {}".format(topic, payload, retained))
 
         # Only non-retained messages are allowed on /set topics
         if retained and topic.endswith(T_SET):
@@ -242,11 +248,10 @@ class HomieDevice:
         # device properties
         await publish("{}/$homie".format(_t), "4.0.0")
         await publish("{}/$name".format(_t), self.device_name)
-        await publish("{}/{}".format(_t, DEVICE_STATE), STATE_INIT)
+        self.set_state(STATE_INIT)
+        # await publish("{}/{}".format(_t, DEVICE_STATE), STATE_INIT)
         await publish("{}/$implementation".format(_t), bytes(platform, UTF8))
-        await publish(
-            "{}/$nodes".format(_t), ",".join([n.id for n in self.nodes])
-        )
+        await publish("{}/$nodes".format(_t), ",".join([n.id for n in self.nodes]))
 
         # node properties
         _n = self.nodes
@@ -261,7 +266,9 @@ class HomieDevice:
             await publish("{}/$fw/name".format(_t), self._fw_name)
             await publish("{}/$fw/version".format(_t), self._version)
         if EXT_STATS in self._extensions:
-            await self.publish("{}/$stats/interval".format(_t), str(self.stats_interval))
+            await self.publish(
+                "{}/$stats/interval".format(_t), str(self.stats_interval)
+            )
             # Start stats coro
             asyncio.create_task(self.publish_stats())
 
@@ -303,7 +310,7 @@ class HomieDevice:
     async def reset(self, reason):
         if reason != "reset":
             RTC().memory(reason)
-        await self.publish("{}/{}".format(self.dtopic, DEVICE_STATE), reason)
+        self.set_state(reason)
         await self.mqtt.disconnect()
         await sleep_ms(500)
         reset()
@@ -322,6 +329,7 @@ class HomieDevice:
 
     async def setup_wifi(self):
         from homie.network import get_wifi_credentials
+
         while True:
             wifi_cfg = get_wifi_credentials(self._wifi)
             if wifi_cfg is None:
