@@ -209,6 +209,21 @@ class HomieDevice:
         else:
             if topic in self.callback_topics:
                 self.callback_topics[topic](topic, payload, retained)
+            else:
+                t = topic.split("/")
+                if topic.endswith(T_SET):
+                    ipre = 3
+                    ipost = 2
+                else:
+                    ipre = 2
+                    ipost = 1
+
+                _ = int(t[-ipre])
+                pre = "/".join(t[:-ipre])
+                post = "/".join(t[-ipost:])
+
+                sub_topic = "{}/+/{}".format(pre, post)
+                launch(self.callback_topics[sub_topic], (topic, payload, retained))
 
     async def publish(self, topic, payload, retain=True):
         if isinstance(payload, int):

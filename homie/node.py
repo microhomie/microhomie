@@ -43,5 +43,20 @@ class BaseNode:
             await p.publish_properties()
 
 
+class ArrayNode(BaseNode):
+    def __init__(self, id, name, type, array):
+        super().__init__(id, name, type)
+        self.array = array
+
+    async def publish_properties(self):
+        asyncio.create_task(
+            self.device.publish(
+                "{}/$array".format(self.topic),
+                "{}".format(self.array),
+            )
+        )
+        await super().publish_properties()
+
+
 # Keep for backward compatibility
 HomieNode = BaseNode
