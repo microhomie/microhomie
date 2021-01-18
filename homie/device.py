@@ -35,13 +35,18 @@ from primitives.message import Message
 
 
 def get_unique_id():
-    if LINUX is False:
+    if LINUX:
+        # The MicroPython Unix port doesn't have a unique id. Set DEVICE_ID in your settings.py
+        # to make the device id unique.
+        import os
+        hostname = os.getenv("HOSTNAME")
+        if hostname:
+            return hostname
+        else:
+            return "microhomie"
+    else:
         from machine import unique_id
         return hexlify(unique_id()).decode()
-    else:
-        raise NotImplementedError(
-            "Linux doesn't have a unique id. Provide the DEVICE_ID option in your settings.py."
-        )
 
 
 # Decorator to block async tasks until the device is in "ready" state
